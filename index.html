@@ -11,9 +11,54 @@
 <style>
 :root{color-scheme:dark;--bg:#211038;--deep:#170A2A;--panel:#2b1742;--panel2:#321b4b;--orange:#D96B35;--hot:#F08B53;--white:#F5F2F7;--muted:#B8AFC4;--line:#493158;--max:1220px}
 *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:90px}body{margin:0;background:var(--bg);color:var(--white);font:400 16px/1.65 "DM Sans",sans-serif;overflow-x:hidden}a{color:inherit;text-decoration:none}button,input{font:inherit}button{cursor:pointer}img{display:block;max-width:100%}:focus-visible{outline:3px solid var(--hot);outline-offset:4px}.wrap{width:min(var(--max),calc(100% - 48px));margin:auto}.eyebrow{font-size:.75rem;letter-spacing:.15em;font-weight:700;color:var(--hot);text-transform:uppercase}.section{padding:100px 0}.section h2{font:800 clamp(2.4rem,5.2vw,4.5rem)/.99 "Manrope",sans-serif;letter-spacing:-.055em;margin:18px 0 22px;max-width:15ch}.accent{color:var(--orange)}.muted{color:var(--muted)}.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:50px;padding:0 22px;border:1px solid var(--orange);border-radius:999px;font-weight:700;transition:transform .2s,background .2s,color .2s}.btn:hover{transform:translateY(-2px)}.btn-primary{background:var(--orange);color:var(--deep)}.btn-primary:hover{background:var(--white);border-color:var(--white)}.btn-ghost{background:transparent;color:var(--white)}.btn-ghost:hover{background:var(--orange);color:var(--deep)}.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}.nav{position:sticky;top:0;z-index:20;background:rgba(23,10,42,.91);border-bottom:1px solid rgba(217,107,53,.2);backdrop-filter:blur(18px)}.nav-inner{height:76px;display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{display:flex;align-items:center;gap:11px;font:800 1rem "Manrope",sans-serif;letter-spacing:.02em}.brand-mark{display:grid;place-items:center;background:var(--orange);color:var(--deep);width:36px;height:36px;border-radius:11px 11px 11px 3px;font-size:.78rem}.brand small{display:block;color:var(--hot);font:700 .63rem "DM Sans",sans-serif;letter-spacing:.12em;margin-top:2px}.navlinks{display:flex;gap:26px;align-items:center;font-size:.9rem;color:var(--muted)}.navlinks a:hover{color:var(--hot)}.menu{display:none;border:1px solid var(--line);background:transparent;color:var(--white);border-radius:12px;padding:9px 12px}.hero{min-height:650px;display:grid;align-items:center;position:relative;overflow:hidden;background:radial-gradient(ellipse at 77% 43%,rgba(87,48,112,.55),transparent 45%),var(--bg);padding:75px 0 90px}.hero:after{content:"";position:absolute;left:-5%;right:-5%;bottom:24px;height:26px;border-top:1px solid rgba(217,107,53,.4);border-radius:50%;pointer-events:none}.hero-grid{display:grid;grid-template-columns:1.08fr .92fr;gap:60px;align-items:center}.hero h1{font:800 clamp(3.6rem,8vw,7.3rem)/.84 "Manrope",sans-serif;letter-spacing:-.085em;margin:22px 0 26px}.hero h1 .line2{display:block;color:var(--white)}.hero h1 .line3{display:block;color:var(--orange)}.hero p{font-size:1.1rem;line-height:1.75;color:var(--muted);max-width:520px}.actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}.hero-art{position:relative;min-height:420px;display:grid;place-items:center}.orbit{position:absolute;border:1px solid rgba(217,107,53,.32);border-radius:50%;aspect-ratio:1}.orbit.one{width:min(100%,420px)}.orbit.two{width:min(84%,350px)}.art-panel{width:min(84%,350px);aspect-ratio:4/4.4;position:relative;background:linear-gradient(155deg,#392151,#211038);border:1px solid #5c3a70;border-radius:46% 46% 28px 28px;overflow:hidden;display:grid;place-items:center}.art-sun{position:absolute;right:16%;top:10%;width:78px;aspect-ratio:1;border-radius:50%;background:#48275f}.walkers{width:88%;position:relative;z-index:1}.walkers path,.walkers circle{fill:none;stroke:var(--hot);stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round}.walk-caption{position:absolute;bottom:12px;right:6%;letter-spacing:.12em;color:var(--hot);font-weight:700;font-size:.72rem}.year-badge{position:absolute;left:0;top:16%;display:grid;place-items:center;width:82px;height:82px;border-radius:50%;background:var(--orange);color:var(--deep);font:800 1.2rem "Manrope",sans-serif;box-shadow:0 15px 45px #10061b55}.ticker{background:var(--orange);color:var(--deep);padding:19px 0;font:800 .8rem "Manrope",sans-serif;letter-spacing:.13em;text-transform:uppercase}.ticker-inner{display:flex;justify-content:space-between;gap:30px;align-items:center}.about{background:var(--deep)}.about-grid{display:grid;grid-template-columns:.75fr 1.25fr;gap:85px;align-items:start}.about-aside{padding-top:13px;color:var(--muted);max-width:320px}.about-copy p{max-width:680px;color:var(--muted);font-size:1.06rem}.stats{display:grid;grid-template-columns:repeat(4,1fr);border-block:1px solid var(--line);margin-top:46px}.stat{padding:27px 20px 27px 0}.stat+.stat{border-left:1px solid var(--line);padding-left:25px}.stat strong{display:block;color:var(--orange);font:800 clamp(2rem,4vw,3.4rem)/1.1 "Manrope",sans-serif;letter-spacing:-.04em}.stat span{display:block;color:var(--muted);font-size:.8rem;margin-top:8px}.gallery{background:var(--deep)}.gallery-head{display:flex;justify-content:space-between;align-items:end;gap:30px}.gallery-head p{max-width:370px;color:var(--muted);margin-bottom:28px}.filters{display:flex;gap:8px;flex-wrap:wrap;margin:22px 0 28px}.chip{border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--muted);padding:9px 16px;font-size:.85rem;min-height:42px}.chip[aria-pressed=true],.chip:hover{background:var(--orange);border-color:var(--orange);color:var(--deep);font-weight:700}.photo-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:180px;grid-auto-flow:dense;gap:12px}.photo{border:0;padding:0;position:relative;background:linear-gradient(145deg,#39234d,#1e1030);border-radius:8px;overflow:hidden;text-align:left;color:var(--white);min-width:0}.photo.wide{grid-column:span 2}.photo.tall{grid-row:span 2}.photo img{width:100%;height:100%;object-fit:cover;transition:transform .5s}.photo:hover img{transform:scale(1.04)}.photo:after{content:"";position:absolute;inset:30% 0 0;background:linear-gradient(transparent,rgba(13,5,22,.85));pointer-events:none;opacity:.9}.photo-caption{position:absolute;z-index:1;left:14px;right:14px;bottom:12px;font-weight:700;font-size:.86rem}.photo-index{position:absolute;z-index:1;right:12px;top:10px;color:var(--hot);font-size:.7rem}.empty{grid-column:1/-1;padding:40px;border:1px dashed var(--line);border-radius:12px;color:var(--muted);text-align:center}.load-row{display:flex;justify-content:center;margin-top:25px}.find{background:var(--bg)}.find-grid{display:grid;grid-template-columns:.85fr 1.15fr;gap:60px;align-items:start}.find-copy{position:sticky;top:110px}.find-copy p{color:var(--muted);max-width:430px}.privacy-note{margin-top:26px;display:flex;gap:12px;align-items:flex-start;color:var(--muted);font-size:.84rem}.privacy-note b{color:var(--hot)}.find-card{background:var(--deep);border:1px solid var(--line);border-radius:20px;padding:clamp(22px,4vw,38px)}.step{color:var(--hot);font-size:.73rem;letter-spacing:.14em;font-weight:700}.find-card h3{font:800 1.7rem/1.15 "Manrope",sans-serif;letter-spacing:-.04em;margin:12px 0}.find-card>p{color:var(--muted);font-size:.93rem}.upload-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:24px 0}.upload-option{min-height:104px;padding:16px;border:1px solid var(--line);border-radius:12px;background:var(--panel);display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:6px;color:var(--white);text-align:left}.upload-option:hover{border-color:var(--orange);background:#321b4b}.option-icon{display:grid;place-items:center;width:30px;height:30px;border-radius:9px;background:var(--orange);color:var(--deep);font-weight:800}.upload-option strong{font-size:.91rem}.upload-option small{color:var(--muted);font-size:.76rem}.consent{display:flex;gap:11px;align-items:flex-start;color:var(--muted);font-size:.82rem;margin:20px 0}.consent input{width:19px;height:19px;accent-color:var(--orange);flex:none;margin-top:3px}.cam,.preview{display:none;margin:18px 0}.cam.active,.preview.active{display:block}.cam video,.preview img{width:min(100%,360px);max-height:340px;object-fit:contain;border-radius:12px;border:1px solid var(--line);background:#0f0719}.cam video{transform:scaleX(-1)}.status{color:var(--hot);font-size:.89rem;min-height:1.5em;margin-top:15px}.results{margin-top:28px}.results[hidden]{display:none}.results h4{font:800 1.5rem "Manrope",sans-serif;margin:0 0 6px}.result-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:18px}.timeline{background:var(--deep)}.timeline-intro{display:flex;justify-content:space-between;gap:30px;align-items:end}.timeline-intro p{max-width:360px;color:var(--muted)}.timeline-list{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-top:55px;position:relative}.timeline-list:before{content:"";height:1px;position:absolute;left:0;right:0;top:8px;background:var(--line)}.mile{position:relative;padding-top:30px}.mile:before{content:"";position:absolute;top:0;left:0;width:16px;height:16px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 5px var(--deep),0 0 0 6px var(--orange)}.mile small{color:var(--hot);font-weight:700;letter-spacing:.1em}.mile h3{font:700 1rem "Manrope",sans-serif;margin:8px 0}.mile p{font-size:.82rem;color:var(--muted)}.closing{padding:100px 0;text-align:center;position:relative;overflow:hidden;background:radial-gradient(ellipse at 50% 0,rgba(96,56,117,.35),transparent 58%),var(--bg)}.closing h2{max-width:none;font-size:clamp(2.7rem,6vw,5.5rem);margin:18px 0}.closing p{color:var(--muted);max-width:600px;margin:0 auto 28px}.footer{background:var(--deep);border-top:1px solid var(--line);padding:35px 0}.footer-inner{display:flex;justify-content:space-between;align-items:center;gap:25px;flex-wrap:wrap}.footer p{margin:6px 0 0;color:var(--muted);font-size:.8rem}.footer-links{display:flex;gap:18px;flex-wrap:wrap;color:var(--muted);font-size:.82rem}.footer-links a:hover{color:var(--hot)}.lightbox{display:none;position:fixed;inset:0;z-index:80;background:rgba(9,3,16,.96);padding:70px 20px 25px;align-items:center;justify-content:center;flex-direction:column}.lightbox.open{display:flex}.lightbox img{max-width:min(1100px,88vw);max-height:75vh;object-fit:contain;border-radius:8px}.lightbox p{color:var(--muted);text-align:center}.lb-close,.lb-prev,.lb-next{position:absolute;border:1px solid var(--orange);background:var(--deep);color:var(--white);width:48px;height:48px;border-radius:50%;font-size:1.4rem}.lb-close{top:16px;right:18px}.lb-prev{left:18px;top:50%}.lb-next{right:18px;top:50%}.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:100;background:var(--orange);color:var(--deep);padding:12px 18px;border-radius:999px;font-weight:700;box-shadow:0 10px 35px #0005;display:none;max-width:calc(100% - 32px)}.toast.show{display:block}
-.hero.hero-banner{min-height:0;display:flex;justify-content:center;align-items:center;padding:0;background:var(--deep);overflow:hidden}.hero.hero-banner:after{display:none}.hero-banner-image{display:block;width:100%;max-width:1200px;height:auto;max-height:calc(100svh - 76px);object-fit:contain;object-position:center;margin:auto}
 @media(max-width:900px){.hero-grid,.about-grid,.find-grid{grid-template-columns:1fr;gap:42px}.hero{padding:65px 0}.hero-art{min-height:360px;max-width:520px;margin:auto;width:100%;order:-1}.hero h1{font-size:clamp(3.6rem,13vw,6rem)}.about-aside{max-width:520px}.find-copy{position:static}.photo-grid{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:160px}.gallery-head,.timeline-intro{display:block}.gallery-head p,.timeline-intro p{margin-top:0}.stats{grid-template-columns:repeat(2,1fr)}.stat:nth-child(3){border-left:0;padding-left:0;border-top:1px solid var(--line)}.stat:nth-child(4){border-top:1px solid var(--line)}.timeline-list{grid-template-columns:repeat(3,1fr);row-gap:28px}.timeline-list:before{display:none}}
 @media(max-width:620px){.wrap{width:calc(100% - 34px)}.nav-inner{height:68px}.navlinks{display:none;position:absolute;top:68px;left:0;right:0;flex-direction:column;align-items:stretch;gap:0;padding:12px 22px 20px;background:var(--deep);border-bottom:1px solid var(--line)}.navlinks.open{display:flex}.navlinks a{padding:12px 0}.nav .btn{display:none}.menu{display:block}.brand{font-size:.9rem}.hero{min-height:0;padding:35px 0 65px}.hero-grid{gap:20px}.hero-art{min-height:300px}.art-panel{width:min(82%,290px)}.year-badge{width:65px;height:65px;font-size:1rem;left:2%}.hero h1{font-size:clamp(3.25rem,15vw,4.6rem)}.hero p{font-size:1rem}.section{padding:70px 0}.section h2{font-size:clamp(2.45rem,11vw,3.6rem)}.ticker-inner{display:block;line-height:1.6}.ticker-inner span+span{display:none}.about-grid{gap:24px}.stat{padding:20px 12px 20px 0}.stat+.stat{padding-left:15px}.stat strong{font-size:2.2rem}.stat span{font-size:.73rem}.photo-grid{grid-auto-rows:125px;gap:8px}.photo.wide{grid-column:span 2}.photo.tall{grid-row:span 2}.photo-caption{font-size:.75rem;left:9px;right:9px;bottom:8px}.filters{flex-wrap:nowrap;overflow:auto;padding:0 0 8px}.chip{white-space:nowrap}.upload-grid{grid-template-columns:1fr 1fr}.upload-option{padding:12px}.find-card{padding:20px}.result-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.timeline-list{grid-template-columns:repeat(2,1fr);margin-top:35px}.closing{padding:75px 0}.lightbox{padding-inline:12px}.lb-prev{left:12px;top:auto;bottom:22px}.lb-next{right:12px;top:auto;bottom:22px}.lightbox img{max-width:100%;max-height:68vh}.footer-inner{align-items:flex-start}.footer-links{gap:12px}}
+
+/* Hero composto em HTML/CSS + SVG; não usa uma imagem-banner achatada. */
+.tlw-hero{min-height:0;height:auto;padding:42px 0 50px;isolation:isolate;background:radial-gradient(ellipse at 16% 45%,rgba(82,43,108,.34),transparent 36%),radial-gradient(ellipse at 84% 35%,rgba(87,48,112,.27),transparent 38%),linear-gradient(112deg,#1b0c2d 0%,#26143b 53%,#1c0b2c 100%)}
+.tlw-hero:after{content:"";display:block;position:absolute;left:0;right:0;bottom:17px;height:1px;border:0;border-radius:0;background:linear-gradient(90deg,transparent,rgba(217,107,53,.52),transparent)}
+.tlw-hero-grid{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:clamp(24px,4vw,64px);align-items:center}
+.tlw-couple{position:relative;min-width:0;display:grid;place-items:center;align-self:stretch}
+.tlw-couple:before{content:"";position:absolute;inset:7% 6% 3%;background:radial-gradient(ellipse,rgba(79,43,101,.28),transparent 68%);pointer-events:none}
+.tlw-couple-art{position:relative;display:block;width:min(100%,430px);max-height:480px;overflow:visible;filter:drop-shadow(0 10px 35px rgba(12,4,20,.16))}
+.tlw-round-year{position:absolute;left:2%;top:11%;display:grid;place-items:center;width:78px;aspect-ratio:1;border-radius:50%;background:var(--orange);color:var(--deep);font:800 1.15rem Manrope,sans-serif;box-shadow:0 12px 35px #10061b38}
+.tlw-hero-brand{min-width:0;padding:15px 0 10px}
+.tlw-wordmark{position:relative;width:max-content;max-width:100%;padding-bottom:6px}
+.tlw-word-love{display:flex;align-items:stretch;gap:8px;white-space:nowrap}
+.tlw-the{position:relative;z-index:2;align-self:flex-start;margin-top:.035em;display:grid;place-items:center;padding:.02em .16em .12em;width:1.28em;height:.94em;border-radius:.16em .16em .16em .06em;background:var(--orange);color:#190b2b;font:800 clamp(2.65rem,5.6vw,5.6rem)/.92 Manrope,sans-serif;letter-spacing:-.075em}
+.tlw-the:after{content:"";position:absolute;left:19%;bottom:-.13em;width:0;height:0;border-top:.2em solid var(--orange);border-right:.19em solid transparent}
+.tlw-love{font:800 clamp(3.35rem,7.1vw,7rem)/.92 Manrope,sans-serif;letter-spacing:-.085em;color:var(--white)}
+.tlw-word-walk{font:800 clamp(4.6rem,9.3vw,9.1rem)/.78 Manrope,sans-serif;letter-spacing:-.095em;color:var(--white);margin-left:.03em}
+.tlw-word-year{text-align:right;color:var(--orange);font:800 clamp(1.45rem,2.9vw,2.65rem)/1 Manrope,sans-serif;letter-spacing:-.055em;padding-right:.045em;margin-top:.2em}
+.tlw-hero-tagline{margin:21px 0 0;color:var(--hot);font:800 clamp(.72rem,1.25vw,.95rem)/1.5 Manrope,sans-serif;letter-spacing:.15em}
+.tlw-hero-copy{margin:10px 0 0;color:var(--muted);max-width:430px;font-size:1rem}
+.tlw-hero .actions{margin-top:23px}
+@media(max-width:900px){
+ .tlw-hero{padding:34px 0 44px}
+ .tlw-hero-grid{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:24px}
+ .tlw-couple-art{width:100%;max-width:360px}
+ .tlw-round-year{width:58px;font-size:.95rem;left:0;top:12%}
+ .tlw-love{font-size:clamp(2.75rem,7.1vw,4.2rem)}
+ .tlw-the{font-size:clamp(2.2rem,5.5vw,3.5rem)}
+ .tlw-word-walk{font-size:clamp(3.8rem,10vw,6rem)}
+ .tlw-word-year{font-size:clamp(1.3rem,3.3vw,2rem)}
+}
+@media(max-width:620px){
+ .tlw-hero{padding:20px 0 43px}
+ .tlw-hero-grid{grid-template-columns:minmax(0,1fr);gap:7px}
+ .tlw-couple{height:220px;max-width:340px;width:100%;margin:0 auto}
+ .tlw-couple-art{height:100%;width:auto;max-width:100%;max-height:250px}
+ .tlw-round-year{width:48px;top:4%;left:8%;font-size:.8rem}
+ .tlw-hero-brand{padding:5px 0 0;text-align:center}
+ .tlw-wordmark{margin:0 auto;text-align:left}
+ .tlw-love{font-size:clamp(3.1rem,14vw,5.1rem)}
+ .tlw-the{font-size:clamp(2.45rem,11vw,4rem)}
+ .tlw-word-walk{font-size:clamp(4.7rem,20vw,7rem)}
+ .tlw-word-year{font-size:clamp(1.45rem,6vw,2rem)}
+ .tlw-hero-tagline{font-size:.72rem;margin-top:17px}
+ .tlw-hero-copy{font-size:.91rem;margin-inline:auto}
+ .tlw-hero .actions{justify-content:center;margin-top:18px}
+}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
@@ -24,7 +69,62 @@
 <a class="btn btn-primary" href="#encontre">Encontre suas fotos ↗</a><button class="menu" id="menu" aria-expanded="false" aria-label="Abrir menu">☰</button>
 </div></header>
 <main id="topo">
-<section class="hero hero-banner" aria-label="The Love Walk 2026"><img class="hero-banner-image" src="/hero-banner.webp" alt="The Love Walk 2026 — A caminhada que nos une" fetchpriority="high"></section>
+<section class="hero tlw-hero" aria-labelledby="tlw-hero-title">
+  <div class="wrap tlw-hero-grid">
+    <div class="tlw-couple" aria-hidden="true">
+      <svg class="tlw-couple-art" viewBox="0 0 420 500" role="presentation">
+        <defs><linearGradient id="shirtGlow" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#F08B53" stop-opacity=".12"/><stop offset="1" stop-color="#D96B35" stop-opacity=".02"/></linearGradient></defs>
+        <circle cx="208" cy="230" r="182" fill="#39204D" fill-opacity=".42" stroke="#D96B35" stroke-opacity=".35"/>
+        <circle cx="208" cy="230" r="155" fill="none" stroke="#B8AFC4" stroke-opacity=".22"/>
+        <circle cx="328" cy="115" r="33" fill="#603A71" fill-opacity=".4"/>
+        <g fill="none" stroke="#F08B53" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+          <!-- Woman: hair, face and neck -->
+          <path d="M90 101c-4-25 11-45 32-47 21-2 38 15 38 36 0 14-5 25-14 34l-2 18"/>
+          <path d="M91 99c-10 14-10 35-2 53 5 11 12 18 20 24M101 66c-22 10-29 30-26 53 2 13-4 27-16 41-7 8-11 18-9 30"/>
+          <path d="M113 111c6 5 14 5 20 0M119 124c4 2 8 2 12 0M130 133l-1 13 20 13"/>
+          <path d="M111 147c-13 2-24 10-32 22l-18 30-17 55 24 14 26-49 13-14"/>
+          <!-- Woman's shirt -->
+          <path d="M129 147l24 11 29 14 15 38 3 48-32 5-16-49-19-22-7 83-73 0 7-62 12-40 27-25 30-8z" fill="url(#shirtGlow)"/>
+          <path d="M104 187l-16 25M155 173l-12 36M91 237l12 11 16-4"/>
+          <!-- Woman's legs and shoes -->
+          <path d="M62 263l-2 96-12 76 27 4 27-78 10-67M114 263l22 79 21 61-19 15-34-55-21-99"/>
+          <path d="M48 435l-9 13 39 2 6-8M137 402l-8 14 31 1 7-9"/>
+          <!-- Man: hair, face and neck -->
+          <path d="M184 69c0-25 19-43 43-41 23 2 36 20 35 43-1 14-7 23-16 31l-3 17"/>
+          <path d="M184 68c6-27 35-41 57-27l17 25M190 50l-8 17M210 91c7 4 14 4 20 0M217 103l1 17-18 11"/>
+          <!-- Man's torso and shirt -->
+          <path d="M200 127l-22 13-24 21-12 49 10 48 37 1 3-52 16-19 8 71 74 0-7-66-10-34-25-29-25-8z" fill="url(#shirtGlow)"/>
+          <path d="M178 143l-18 31-13 43-25 20-8-10 19-24M270 150l20 31 16 43 20 26-9 12-30-22-13-39"/>
+          <path d="M198 187l-17 23M237 188l18 15"/>
+          <!-- Man's legs and shoes -->
+          <path d="M188 258l-3 90-27 68 23 10 40-69 8-74M236 258l22 75 7 67-22 12-21-61-18-93"/>
+          <path d="M157 416l-9 15 38 4 8-10M244 400l-4 15 34 1 6-11"/>
+          <!-- Hands touching / linked -->
+          <path d="M145 204c-7 9-11 18-8 25 3 5 9 2 13-5l8-12M290 224c-6 8-12 12-18 11-5-1-5-8 2-13"/>
+          <!-- Ground and speech-bubble path decoration -->
+          <path d="M24 458h372" stroke-opacity=".5"/>
+          <path d="M35 476h67q15 0 15 14v12q0 15-15 15H82l-14 12 2-12H35q-15 0-15-15v-12q0-14 15-14z" stroke-opacity=".48"/>
+          <path d="M302 476h62q16 0 16 15v12q0 15-16 15h-7l-15 12 2-12h-42q-15 0-15-15v-12q0-15 15-15z" stroke-opacity=".48"/>
+        </g>
+        <g fill="#F08B53" font-family="DM Sans, sans-serif" font-size="8" font-weight="700" letter-spacing="1">
+          <text x="95" y="226" transform="rotate(-2 95 226)">LOVE WALK</text>
+          <text x="219" y="226" transform="rotate(-2 219 226)">LOVE WALK</text>
+        </g>
+      </svg>
+      <span class="tlw-round-year">2026</span>
+    </div>
+    <div class="tlw-hero-brand">
+      <div class="tlw-wordmark" aria-label="the Love Walk 2026">
+        <div class="tlw-word-love"><span class="tlw-the">the</span><span class="tlw-love">LOVE</span></div>
+        <div class="tlw-word-walk">walk</div>
+        <div class="tlw-word-year">2026</div>
+      </div>
+      <p class="tlw-hero-tagline" id="tlw-hero-title">A CAMINHADA QUE NOS UNE</p>
+      <p class="tlw-hero-copy">Cada passo aproxima histórias. Cada encontro deixa uma lembrança.</p>
+      <div class="actions"><a class="btn btn-primary" href="#galeria">Reviver a caminhada ↗</a><a class="btn btn-ghost" href="#sobre">Conheça o evento</a></div>
+    </div>
+  </div>
+</section>
 <div class="ticker"><div class="wrap ticker-inner"><span>Mais do que chegar ao destino, importa quem caminha com você.</span><span>THE LOVE WALK · 2026 · ♥</span></div></div>
 <section class="section about" id="sobre"><div class="wrap"><div class="about-grid"><div><div class="eyebrow">O significado do caminho</div><p class="about-aside">Uma celebração da conexão humana, dos encontros e das lembranças compartilhadas.</p></div><div class="about-copy"><h2>Muito mais que uma <span class="accent">caminhada.</span></h2><p>O The Love Walk é um convite para caminhar juntos, compartilhar histórias e transformar um simples percurso em uma experiência de conexão.</p><p>Cada passo representa a oportunidade de construir memórias, fortalecer laços e espalhar amor por onde passamos.</p></div></div>
 <div class="stats"><div class="stat"><strong id="photoCount">—</strong><span>Fotografias disponíveis</span></div><div class="stat"><strong>2026</strong><span>Uma história compartilhada</span></div><div class="stat"><strong>∞</strong><span>Memórias para guardar</span></div><div class="stat"><strong>♥</strong><span>Feito por pessoas</span></div></div></div></section>
