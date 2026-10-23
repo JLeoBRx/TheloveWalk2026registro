@@ -1,0 +1,15 @@
+.env
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+data/*
+!data/.gitkeep
+models/*.onnx
+models/*.part
+frontend/images/gallery/*
+!frontend/images/gallery/.gitkeep
+.DS_Store
+Thumbs.db
