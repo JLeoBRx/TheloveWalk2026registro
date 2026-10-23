@@ -20,6 +20,106 @@
 @media(max-width:980px){.intro-grid{grid-template-columns:1.05fr .95fr;gap:32px}.cover-art{min-height:390px}.photo-grid{grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:150px}.album-heading{display:block}.album-lead{margin-top:17px;max-width:570px}}
 @media(max-width:700px){.wrap{width:calc(100% - 34px)}.nav{min-height:68px}.nav-links{display:none;position:absolute;top:68px;left:0;right:0;flex-direction:column;align-items:stretch;gap:0;padding:8px 22px 18px;background:var(--deep);border-bottom:1px solid var(--line)}.nav-links.open{display:flex}.nav-links a{padding:11px 0}.nav-actions>.pill-button{display:none}.menu-toggle{display:block}.brand{font-size:.86rem}.intro{min-height:0;padding:56px 0 48px}.intro-grid{grid-template-columns:1fr;gap:26px}.intro h1{font-size:clamp(3.7rem,17vw,6rem);margin-top:18px}.intro-copy{font-size:1rem;margin-top:17px}.intro-actions{margin-top:22px}.cover-art{min-height:330px;max-width:370px;width:100%;margin-inline:auto}.cover-card{width:min(84%,330px);aspect-ratio:4/4.35}.cover-name{font-size:clamp(2.65rem,12vw,3.8rem);top:33%}.cover-sticker{width:73px;left:1%;bottom:7%;font-size:.95rem}.cover-sun{width:57px}.music-inner{align-items:flex-start}.music-info{gap:10px}.vinyl{width:42px;height:42px}.music-title{font-size:.85rem}.music-subtitle{font-size:.74rem}.music-inner>.pill-button{align-self:center;padding:0 14px;min-height:42px;font-size:.84rem;white-space:nowrap}.album-section{padding:64px 0 72px}.album-heading h2{font-size:clamp(2.5rem,11vw,3.7rem)}.album-meta{margin-top:21px}.filters{flex-wrap:nowrap;overflow-x:auto;padding-bottom:8px;scrollbar-width:thin}.photo-grid{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:135px;gap:8px}.photo-card.wide{grid-column:span 2}.photo-card.tall{grid-row:span 2}.photo-caption{font-size:.74rem;left:9px;right:9px;bottom:8px}.empty-state{min-height:225px;padding:24px 17px}.footer-inner{align-items:flex-start}.footer-right{gap:12px}.lightbox{padding:56px 12px 86px}.lightbox img{max-width:100%;max-height:68vh}.lightbox .prev,.lightbox .next{top:auto;bottom:19px;transform:none}.lightbox .prev{left:calc(50% - 55px)}.lightbox .next{right:calc(50% - 55px)}.music-panel{padding:18px}.music-panel h2{font-size:1.8rem}}
 @media(max-width:380px){.brand small{font-size:.55rem}.music-inner{flex-wrap:wrap}.music-inner>.pill-button{margin-left:52px}.photo-grid{grid-auto-rows:112px}.intro h1{font-size:3.4rem}}
+
+/* Mobile polish: one-column editorial intro, touch-friendly controls, and compact album grid. */
+@media(max-width:700px){
+  body{font-size:15px}
+  .wrap{width:calc(100% - 32px)}
+  .site-header .nav{min-height:66px;gap:10px}
+  .brand{gap:8px;font-size:.82rem;line-height:1.2}
+  .brand-mark{width:34px;height:34px;border-radius:10px 10px 10px 3px}
+  .brand small{font-size:.54rem;letter-spacing:.09em}
+  .nav-links{top:66px;padding:10px 20px 17px}
+  .nav-links a{font-size:.98rem;padding:13px 0}
+  .menu-toggle{min-width:44px;min-height:42px}
+  .intro{padding:38px 0 30px}
+  .intro-grid{grid-template-columns:minmax(0,1fr);gap:12px;text-align:center}
+  .intro-text{text-align:center;min-width:0}
+  .intro .eyebrow{justify-content:center;font-size:.61rem;letter-spacing:.12em;gap:8px}
+  .intro .eyebrow:before{width:18px}
+  .intro h1{font-size:clamp(3.65rem,18vw,5.4rem);line-height:.82;margin:20px 0 0;letter-spacing:-.09em}
+  .intro h1 .the-love{font-size:.37em;margin-bottom:7px;line-height:1.05}
+  .intro h1 .year-word{text-align:center;font-size:.38em;margin-top:13px}
+  .intro-copy{font-size:.97rem;line-height:1.65;max-width:390px;margin:17px auto 0}
+  .intro-actions{width:min(100%,360px);margin:21px auto 0;display:grid;grid-template-columns:minmax(0,1fr);gap:9px}
+  .intro-actions .pill-button{width:100%;min-height:47px;padding:11px 14px;font-size:.91rem}
+  .cover-art{min-height:285px;max-width:345px;margin:0 auto;width:100%}
+  .cover-card{width:min(76%,280px);aspect-ratio:4/4.25;padding:19px;border-radius:7px 7px 20px 7px;transform:rotate(1.4deg)}
+  .cover-kicker{font-size:.53rem;letter-spacing:.12em}
+  .cover-name{left:19px;right:12px;top:35%;font-size:clamp(1.9rem,8vw,2.45rem);line-height:.9;letter-spacing:-.08em}
+  .cover-bottom{left:20px;right:17px;bottom:20px}
+  .cover-bottom strong{font-size:1.4rem}
+  .cover-bottom small{font-size:.54rem;max-width:100px;letter-spacing:.09em}
+  .cover-sun{width:47px;right:12%;top:11%}
+  .cover-sticker{width:64px;left:2%;bottom:5%;font-size:.82rem}
+  .cover-spark{right:4%;top:5%;font-size:2rem}
+  .music-strip{padding:16px 0}
+  .music-inner{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;align-items:stretch}
+  .music-info{gap:11px;min-width:0}
+  .vinyl{width:42px;height:42px}
+  .music-label{font-size:.58rem;letter-spacing:.13em}
+  .music-title{font-size:.88rem;overflow-wrap:anywhere}
+  .music-subtitle{font-size:.75rem;line-height:1.45}
+  .music-inner>.pill-button{width:100%;min-height:44px;font-size:.9rem}
+  .album-section{padding:52px 0 60px}
+  .album-heading{display:block}
+  .album-heading h2{font-size:clamp(2.35rem,10.8vw,3.25rem);line-height:.98;margin-top:12px}
+  .album-lead{font-size:.91rem;line-height:1.65;margin-top:14px}
+  .album-meta{display:flex;flex-direction:column;align-items:flex-start;gap:2px;margin-top:20px;padding:12px 0;font-size:.79rem}
+  .filters{display:flex;flex-wrap:nowrap;gap:7px;overflow-x:auto;overscroll-behavior-inline:contain;margin:18px 0 20px;padding:0 0 7px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .filters::-webkit-scrollbar{display:none}
+  .filter{flex:0 0 auto;min-height:41px;padding:9px 14px;font-size:.8rem;touch-action:pan-x}
+  .photo-grid{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:clamp(112px,36vw,158px);gap:7px}
+  .photo-card{border-radius:6px;min-height:0}
+  .photo-card.wide{grid-column:span 2}
+  .photo-card.tall{grid-row:span 2}
+  .photo-card img{width:100%;height:100%;object-fit:cover}
+  .photo-caption{font-size:.7rem;line-height:1.3;left:9px;right:8px;bottom:8px}
+  .photo-number{right:8px;top:6px;font-size:.61rem}
+  .empty-state{min-height:210px;padding:24px 15px;border-radius:11px}
+  .empty-icon{width:46px;height:46px;margin-bottom:12px}
+  .empty-state h3{font-size:1.08rem;line-height:1.3}
+  .empty-state p{font-size:.85rem;line-height:1.6}
+  .load-row{margin-top:21px}
+  .load-row .pill-button{width:100%;min-height:46px}
+  .gallery-status{margin-top:14px;font-size:.77rem}
+  .site-footer{padding:22px 0 26px}
+  .footer-inner{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+  .footer-note{font-size:.74rem;line-height:1.55}
+  .footer-right{font-size:.76rem;gap:12px}
+  .lightbox{padding:58px 12px 78px}
+  .lightbox img{max-width:100%;max-height:59svh}
+  .lightbox-caption{font-size:.9rem;line-height:1.4}
+  .lightbox-count{font-size:.75rem}
+  .lightbox .close,.music-close{width:44px;height:44px;top:9px;right:9px}
+  .lightbox .prev,.lightbox .next{width:44px;height:44px;bottom:17px;top:auto;transform:none}
+  .lightbox .prev{left:calc(50% - 54px)}
+  .lightbox .next{right:calc(50% - 54px)}
+  .music-dialog{padding:12px}
+  .music-panel{padding:18px;border-radius:14px}
+  .music-panel h2{font-size:1.7rem;margin-top:12px}
+  .music-panel p{font-size:.84rem;line-height:1.55}
+  .video-frame{border-radius:8px}
+  .official-link{font-size:.78rem;line-height:1.45}
+}
+@media(max-width:390px){
+  .wrap{width:calc(100% - 26px)}
+  .brand{font-size:.77rem;gap:7px}
+  .brand-mark{width:31px;height:31px}
+  .brand small{font-size:.49rem;letter-spacing:.075em}
+  .intro{padding-top:31px}
+  .intro h1{font-size:clamp(3.25rem,17.5vw,4.5rem)}
+  .intro-copy{font-size:.91rem}
+  .cover-art{min-height:260px}
+  .cover-card{width:min(76%,258px)}
+  .cover-name{font-size:clamp(1.72rem,7.7vw,2.1rem)}
+  .album-heading h2{font-size:clamp(2.2rem,10.4vw,2.8rem)}
+  .photo-grid{grid-auto-rows:clamp(106px,34vw,132px);gap:6px}
+  .photo-caption{font-size:.65rem}
+  .music-title{font-size:.82rem}
+}
+@media(hover:none){.photo-card:hover img{transform:none;filter:none}.pill-button:hover{transform:none}}
+
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
