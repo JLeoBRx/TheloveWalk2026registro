@@ -314,4 +314,8 @@ if ROOT.joinpath("admin.html").is_file():
 elif ROOT.joinpath("frontend","admin.html").is_file():
     @app.get("/admin.html")
     def admin(): return FileResponse(ROOT/"frontend"/"admin.html")
+if ROOT.joinpath("privacy.html").is_file():
+    @app.get("/privacy.html")
+    def privacy(): return FileResponse(ROOT/"privacy.html")
+
 # Optional static assets only; image files are deliberately not exposed by directory mount.
