@@ -121,6 +121,35 @@
 @media(hover:none){.photo-card:hover img{transform:none;filter:none}.pill-button:hover{transform:none}}
 
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* Persistent playlist dock: music keeps playing while visitors browse the album. */
+.music-dialog{position:fixed;inset:auto 14px 14px auto;z-index:100;background:transparent;padding:0;display:block;pointer-events:none;max-width:calc(100vw - 20px)}
+.music-dialog[hidden]{display:none!important}
+.music-panel{pointer-events:auto;width:min(430px,calc(100vw - 24px));max-height:min(82svh,760px);overflow:auto;overscroll-behavior:contain;padding:20px;background:rgba(25,11,40,.98);border:1px solid rgba(241,138,81,.55);border-radius:17px;box-shadow:0 24px 90px rgba(0,0,0,.62);backdrop-filter:blur(20px)}
+.music-panel h2{font-size:1.45rem;line-height:1.16;margin:10px 48px 8px 0}
+.music-panel p{font-size:.81rem;line-height:1.5;margin:0 34px 13px 0}
+.video-frame{aspect-ratio:16/9;min-height:190px;background:#09030f;border-radius:9px;overflow:hidden}
+.video-frame iframe{width:100%;height:100%;min-height:190px;border:0;display:block}
+.playlist-heading{display:flex;align-items:center;justify-content:space-between;margin:15px 0 6px;color:var(--orange2);font-size:.66rem;font-weight:800;letter-spacing:.15em}
+.playlist-heading span{color:var(--muted);font-size:.62rem}
+.playlist-list{display:grid;gap:4px;max-height:160px;overflow:auto;overscroll-behavior:contain}
+.playlist-track{width:100%;display:grid;grid-template-columns:30px minmax(0,1fr) 24px;gap:8px;align-items:center;text-align:left;padding:9px 10px;border:1px solid transparent;border-radius:9px;background:rgba(255,255,255,.035);color:var(--white);font:500 .8rem/1.35 "DM Sans",sans-serif}
+.playlist-track:hover,.playlist-track.active{background:rgba(223,108,53,.12);border-color:rgba(223,108,53,.48)}
+.playlist-number{font:700 .7rem Manrope,sans-serif;color:var(--orange2);font-variant-numeric:tabular-nums}
+.playlist-track-title{overflow-wrap:anywhere}
+.playlist-mark{font-size:.72rem;text-align:center;color:var(--orange2);opacity:.4}
+.playlist-track.active .playlist-mark{opacity:1}
+.music-panel .official-link{margin-top:12px;font-size:.77rem}
+@media(max-width:700px){
+ .music-dialog{inset:auto 8px 8px 8px;max-width:none}
+ .music-panel{width:100%;max-height:76svh;padding:15px;border-radius:14px}
+ .music-panel h2{font-size:1.25rem;margin-top:8px}
+ .music-panel p{font-size:.76rem;margin-bottom:10px}
+ .video-frame,.video-frame iframe{min-height:180px}
+ .playlist-list{max-height:125px}
+ .playlist-track{padding:8px 9px;font-size:.76rem}
+ .music-panel .official-link{font-size:.74rem}
+}
 </style>
 </head>
 <body>
@@ -137,8 +166,8 @@
 <div class="intro-actions"><a class="pill-button pill-primary" href="#album">Explorar as fotografias <span aria-hidden="true">↘</span></a><button class="pill-button pill-quiet" id="playThemeTop" type="button">♫ Ouvir música tema</button></div></div>
 <div class="cover-art" aria-hidden="true"><div class="cover-sticker">2026</div><span class="cover-spark">✳</span><div class="cover-card"><span class="cover-sun"></span><div class="cover-kicker">THE LOVE WALK · REGISTRO</div><div class="cover-name"><span>Um dia.</span><span>Mil histórias.</span><span>Uma caminhada.</span></div><div class="cover-bottom"><strong>♥</strong><small>Álbum de memórias<br>edição 2026</small></div></div></div>
 </div></section>
-<section class="music-strip" id="trilha" aria-label="Música tema"><div class="wrap music-inner">
-<div class="music-info"><span class="vinyl" aria-hidden="true"></span><div><div class="music-label">Trilha sonora do álbum</div><div class="music-title">Caminhada do Amor · Banda Universos</div><div class="music-subtitle">A música tema para acompanhar estas lembranças.</div></div></div><button class="pill-button pill-quiet" id="playTheme" type="button">▶ Ouvir tema</button>
+<section class="music-strip" id="trilha" aria-label="Playlist de músicas da Banda Universos"><div class="wrap music-inner">
+<div class="music-info"><span class="vinyl" aria-hidden="true"></span><div><div class="music-label">Trilha sonora do álbum</div><div class="music-title">Playlist romântica · Banda Universos</div><div class="music-subtitle">Cinco músicas oficiais; depois de iniciar, as próximas tocam em sequência.</div></div></div><button class="pill-button pill-quiet" id="playTheme" type="button">♫ Começar playlist</button>
 </div></section>
 <section class="album-section" id="album" aria-labelledby="albumTitle"><div class="wrap">
 <div class="album-heading"><div><div class="eyebrow">Memórias em fotografias</div><h2 id="albumTitle">O álbum <span>da caminhada.</span></h2></div><p class="album-lead">Percorra os registros, escolha um momento e abra cada fotografia para vê-la em tamanho maior.</p></div>
@@ -149,7 +178,7 @@
 </div></section></main>
 <footer class="site-footer"><div class="wrap footer-inner"><div><a class="brand" href="#inicio"><span class="brand-mark">tlw</span><span>THE LOVE WALK<small>2026 · ÁLBUM DE FOTOGRAFIAS</small></span></a><p class="footer-note">Cada passo tem uma história. Fotografias publicadas conforme as autorizações aplicáveis.</p></div><div class="footer-right"><a href="#inicio">Voltar ao início ↑</a><a href="/privacy.html">Privacidade</a><span class="footer-heart">Feito para guardar memórias ♥</span></div></div></footer>
 <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Fotografia ampliada" hidden><button class="close" id="lightClose" aria-label="Fechar fotografia">×</button><button class="prev" id="lightPrev" aria-label="Fotografia anterior">‹</button><img id="lightImage" alt=""><p class="lightbox-caption" id="lightCaption"></p><div class="lightbox-count" id="lightCount"></div><button class="next" id="lightNext" aria-label="Próxima fotografia">›</button></div>
-<div class="music-dialog" id="musicDialog" role="dialog" aria-modal="true" aria-labelledby="musicDialogTitle" hidden><div class="music-panel"><button class="music-close" id="musicClose" aria-label="Fechar música">×</button><div class="eyebrow">Trilha sonora oficial</div><h2 id="musicDialogTitle">Caminhada do Amor</h2><p>Banda Universos · A música tema do álbum. Use os controles do vídeo para pausar ou continuar.</p><div class="video-frame" id="videoFrame"></div><a class="official-link" href="https://www.youtube.com/watch?v=HBCcpKBPhYM" target="_blank" rel="noopener noreferrer">Assistir no canal oficial da Banda Universos ↗</a></div></div>
+<div class="music-dialog" id="musicDialog" role="dialog" aria-modal="false" aria-labelledby="musicDialogTitle" hidden><div class="music-panel"><button class="music-close" id="musicClose" aria-label="Fechar playlist e parar a música">×</button><div class="eyebrow">Playlist oficial · reprodução contínua</div><h2 id="musicDialogTitle">A Caminhada do Amor</h2><p id="musicStatus">A playlist começa quando você toca em “Começar playlist”. Depois, as próximas faixas seguem automaticamente.</p><div class="video-frame" id="videoFrame"></div><div class="playlist-heading">NA FILA <span>5 FAIXAS</span></div><div class="playlist-list" id="playlistItems" aria-label="Escolher música"></div><a class="official-link" id="officialLink" href="https://www.youtube.com/watch?v=HBCcpKBPhYM" target="_blank" rel="noopener noreferrer">Abrir esta música no canal oficial ↗</a></div></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
 const $=s=>document.querySelector(s);
@@ -170,9 +199,48 @@ function closeLightbox(){$("#lightbox").hidden=true;$("#lightImage").removeAttri
 function moveLight(step){if(!lightList.length)return;lightIndex=(lightIndex+step+lightList.length)%lightList.length;renderLightbox()}
 $("#lightClose").addEventListener("click",closeLightbox);$("#lightPrev").addEventListener("click",()=>moveLight(-1));$("#lightNext").addEventListener("click",()=>moveLight(1));$("#lightbox").addEventListener("click",e=>{if(e.target===$("#lightbox"))closeLightbox()});
 document.addEventListener("keydown",e=>{if(!$("#lightbox").hidden){if(e.key==="Escape")closeLightbox();if(e.key==="ArrowLeft")moveLight(-1);if(e.key==="ArrowRight")moveLight(1)}if(!$("#musicDialog").hidden&&e.key==="Escape")closeMusic()});
-function openMusic(){const dialog=$("#musicDialog");if(dialog.hidden){const frame=document.createElement("iframe");frame.src="https://www.youtube-nocookie.com/embed/HBCcpKBPhYM?autoplay=1&rel=0";frame.title="Caminhada do Amor — Banda Universos";frame.allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";frame.referrerPolicy="strict-origin-when-cross-origin";frame.allowFullscreen=true;$("#videoFrame").replaceChildren(frame);dialog.hidden=false;document.body.style.overflow="hidden";$("#musicClose").focus()}}
-function closeMusic(){$("#musicDialog").hidden=true;$("#videoFrame").replaceChildren();document.body.style.overflow=""}
-$("#playTheme").addEventListener("click",openMusic);$("#playThemeTop").addEventListener("click",openMusic);$("#musicClose").addEventListener("click",closeMusic);$("#musicDialog").addEventListener("click",e=>{if(e.target===$("#musicDialog"))closeMusic()});
+const MUSIC_PLAYLIST=[
+ {title:"A Caminhada do Amor",id:"HBCcpKBPhYM"},
+ {title:"Quando Olho Pra Você",id:"m0yQOrXPVI0"},
+ {title:"I Will Love Again",id:"iYJf8z8kdJY"},
+ {title:"Love in Ruins (Amor em Ruínas)",id:"V5HjNDEBDIs"},
+ {title:"As Marcas Desse Amor",id:"dZ0kyYjetnY"}
+];
+function buildPlaylistButtons(){
+ const list=$("#playlistItems");list.replaceChildren();
+ MUSIC_PLAYLIST.forEach((track,index)=>{
+  const b=document.createElement("button");b.type="button";b.className="playlist-track";b.dataset.trackIndex=String(index);
+  const n=document.createElement("span");n.className="playlist-number";n.textContent=String(index+1).padStart(2,"0");
+  const title=document.createElement("span");title.className="playlist-track-title";title.textContent=track.title;
+  const mark=document.createElement("span");mark.className="playlist-mark";mark.textContent="▶";
+  b.append(n,title,mark);b.addEventListener("click",()=>openMusic(index));list.append(b);
+ });
+}
+function openMusic(startIndex=0){
+ const track=MUSIC_PLAYLIST[startIndex]||MUSIC_PLAYLIST[0];
+ const after=MUSIC_PLAYLIST.slice(startIndex+1).concat(MUSIC_PLAYLIST.slice(0,startIndex));
+ const params=new URLSearchParams({autoplay:"1",controls:"1",rel:"0",playsinline:"1",playlist:after.map(item=>item.id).join(",")});
+ const frame=document.createElement("iframe");
+ frame.src="https://www.youtube-nocookie.com/embed/"+track.id+"?"+params.toString();
+ frame.title=track.title+" — Banda Universos";
+ frame.allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+ frame.referrerPolicy="strict-origin-when-cross-origin";frame.allowFullscreen=true;
+ $("#videoFrame").replaceChildren(frame);
+ $("#musicDialogTitle").textContent=track.title;
+ $("#musicStatus").textContent="Tocando: "+track.title+". Ao terminar, a próxima música da playlist será reproduzida automaticamente.";
+ $("#officialLink").href="https://www.youtube.com/watch?v="+track.id;
+ $("#playlistItems").querySelectorAll("[data-track-index]").forEach(button=>{
+  const selected=Number(button.dataset.trackIndex)===startIndex;
+  button.classList.toggle("active",selected);
+  button.setAttribute("aria-current",selected?"true":"false");
+ });
+ $("#musicDialog").hidden=false;
+}
+function closeMusic(){$("#musicDialog").hidden=true;$("#videoFrame").replaceChildren()}
+buildPlaylistButtons();
+$("#playTheme").addEventListener("click",()=>openMusic(0));
+$("#playThemeTop").addEventListener("click",()=>openMusic(0));
+$("#musicClose").addEventListener("click",closeMusic);
 loadGallery(true);
 </script>
 </body></html>
