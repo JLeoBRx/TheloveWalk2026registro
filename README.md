@@ -1,5 +1,7 @@
 # The Love Walk 2026 — Álbum de Fotografias
 
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https%3A%2F%2Fgithub.com%2FJLeoBRx%2FTheloveWalk2026registro)
+
 Site-álbum do The Love Walk 2026, com introdução editorial, trilha sonora da Banda Universos, galeria por categorias, miniaturas e visualização ampliada. O site não oferece reconhecimento facial nem processa dados biométricos.
 
 ## Publicar no Render
