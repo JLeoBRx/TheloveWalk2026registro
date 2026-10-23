@@ -301,11 +301,11 @@ def thumb(photo_id:str):
     if THUMB_DIR not in path.parents or not path.is_file(): raise HTTPException(404,detail="thumbnail_not_found")
     return FileResponse(path,media_type="image/webp",headers={"Cache-Control":"public, max-age=604800","X-Content-Type-Options":"nosniff"})
 
-@app.get("/hero-banner.webp")
-def hero_banner():
-    path = ROOT / "hero-banner.webp"
+@app.get("/hero-art.webp")
+def hero_art():
+    path = ROOT / "hero-art.webp"
     if not path.is_file():
-        raise HTTPException(404, detail="hero_banner_not_found")
+        raise HTTPException(404, detail="hero_art_not_found")
     return FileResponse(path, media_type="image/webp", headers={"Cache-Control": "public, max-age=86400", "X-Content-Type-Options": "nosniff"})
 
 # The public frontend is mounted last so it cannot shadow API paths.
