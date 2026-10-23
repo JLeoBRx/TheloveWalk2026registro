@@ -20,7 +20,7 @@
 .tlw-hero-grid{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:clamp(24px,4vw,64px);align-items:center}
 .tlw-couple{position:relative;min-width:0;display:grid;place-items:center;align-self:stretch}
 .tlw-couple:before{content:"";position:absolute;inset:7% 6% 3%;background:radial-gradient(ellipse,rgba(79,43,101,.28),transparent 68%);pointer-events:none}
-.tlw-couple-art{position:relative;display:block;width:min(100%,430px);max-height:480px;overflow:visible;filter:drop-shadow(0 10px 35px rgba(12,4,20,.16))}
+.tlw-couple-image{position:relative;display:block;width:min(100%,430px);height:auto;max-height:480px;object-fit:contain;overflow:visible;filter:drop-shadow(0 10px 35px rgba(12,4,20,.16))}
 .tlw-round-year{position:absolute;left:2%;top:11%;display:grid;place-items:center;width:78px;aspect-ratio:1;border-radius:50%;background:var(--orange);color:var(--deep);font:800 1.15rem Manrope,sans-serif;box-shadow:0 12px 35px #10061b38}
 .tlw-hero-brand{min-width:0;padding:15px 0 10px}
 .tlw-hero h1.tlw-brand-heading{font:inherit;letter-spacing:normal;margin:0}
@@ -37,7 +37,7 @@
 @media(max-width:900px){
  .tlw-hero{padding:34px 0 44px}
  .tlw-hero-grid{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:24px}
- .tlw-couple-art{width:100%;max-width:360px}
+ .tlw-couple-image{width:100%;max-width:360px}
  .tlw-round-year{width:58px;font-size:.95rem;left:0;top:12%}
  .tlw-word-love{gap:10px}
  .tlw-love{font-size:clamp(2.75rem,7.1vw,4.2rem)}
@@ -48,8 +48,8 @@
 @media(max-width:620px){
  .tlw-hero{padding:20px 0 43px}
  .tlw-hero-grid{grid-template-columns:minmax(0,1fr);gap:7px}
- .tlw-couple{height:220px;max-width:340px;width:100%;margin:0 auto}
- .tlw-couple-art{height:100%;width:auto;max-width:100%;max-height:250px}
+ .tlw-couple{height:auto;aspect-ratio:1/1.04;max-width:340px;width:100%;margin:0 auto}
+ .tlw-couple-image{height:auto;width:100%;max-width:340px;max-height:none}
  .tlw-round-year{width:48px;top:4%;left:8%;font-size:.8rem}
  .tlw-hero-brand{padding:5px 0 0;text-align:center}
  .tlw-wordmark{margin:0 auto;text-align:left}
@@ -74,48 +74,7 @@
 <main id="topo">
 <section class="hero tlw-hero" aria-labelledby="tlw-hero-title">
   <div class="wrap tlw-hero-grid">
-    <div class="tlw-couple" aria-hidden="true">
-      <svg class="tlw-couple-art" viewBox="0 0 420 500" role="presentation">
-        <defs><linearGradient id="shirtGlow" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#F08B53" stop-opacity=".12"/><stop offset="1" stop-color="#D96B35" stop-opacity=".02"/></linearGradient></defs>
-        <circle cx="208" cy="230" r="182" fill="#39204D" fill-opacity=".42" stroke="#D96B35" stroke-opacity=".35"/>
-        <circle cx="208" cy="230" r="155" fill="none" stroke="#B8AFC4" stroke-opacity=".22"/>
-        <circle cx="328" cy="115" r="33" fill="#603A71" fill-opacity=".4"/>
-        <g fill="none" stroke="#F08B53" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
-          <!-- Woman: hair, face and neck -->
-          <path d="M90 101c-4-25 11-45 32-47 21-2 38 15 38 36 0 14-5 25-14 34l-2 18"/>
-          <path d="M91 99c-10 14-10 35-2 53 5 11 12 18 20 24M101 66c-22 10-29 30-26 53 2 13-4 27-16 41-7 8-11 18-9 30"/>
-          <path d="M113 111c6 5 14 5 20 0M119 124c4 2 8 2 12 0M130 133l-1 13 20 13"/>
-          <path d="M111 147c-13 2-24 10-32 22l-18 30-17 55 24 14 26-49 13-14"/>
-          <!-- Woman's shirt -->
-          <path d="M129 147l24 11 29 14 15 38 3 48-32 5-16-49-19-22-7 83-73 0 7-62 12-40 27-25 30-8z" fill="url(#shirtGlow)"/>
-          <path d="M104 187l-16 25M155 173l-12 36M91 237l12 11 16-4"/>
-          <!-- Woman's legs and shoes -->
-          <path d="M62 263l-2 96-12 76 27 4 27-78 10-67M114 263l22 79 21 61-19 15-34-55-21-99"/>
-          <path d="M48 435l-9 13 39 2 6-8M137 402l-8 14 31 1 7-9"/>
-          <!-- Man: hair, face and neck -->
-          <path d="M184 69c0-25 19-43 43-41 23 2 36 20 35 43-1 14-7 23-16 31l-3 17"/>
-          <path d="M184 68c6-27 35-41 57-27l17 25M190 50l-8 17M210 91c7 4 14 4 20 0M217 103l1 17-18 11"/>
-          <!-- Man's torso and shirt -->
-          <path d="M200 127l-22 13-24 21-12 49 10 48 37 1 3-52 16-19 8 71 74 0-7-66-10-34-25-29-25-8z" fill="url(#shirtGlow)"/>
-          <path d="M178 143l-18 31-13 43-25 20-8-10 19-24M270 150l20 31 16 43 20 26-9 12-30-22-13-39"/>
-          <path d="M198 187l-17 23M237 188l18 15"/>
-          <!-- Man's legs and shoes -->
-          <path d="M188 258l-3 90-27 68 23 10 40-69 8-74M236 258l22 75 7 67-22 12-21-61-18-93"/>
-          <path d="M157 416l-9 15 38 4 8-10M244 400l-4 15 34 1 6-11"/>
-          <!-- Hands touching / linked -->
-          <path d="M145 204c-7 9-11 18-8 25 3 5 9 2 13-5l8-12M290 224c-6 8-12 12-18 11-5-1-5-8 2-13"/>
-          <!-- Ground and speech-bubble path decoration -->
-          <path d="M24 458h372" stroke-opacity=".5"/>
-          <path d="M35 476h67q15 0 15 14v12q0 15-15 15H82l-14 12 2-12H35q-15 0-15-15v-12q0-14 15-14z" stroke-opacity=".48"/>
-          <path d="M302 476h62q16 0 16 15v12q0 15-16 15h-7l-15 12 2-12h-42q-15 0-15-15v-12q0-15 15-15z" stroke-opacity=".48"/>
-        </g>
-        <g fill="#F08B53" font-family="DM Sans, sans-serif" font-size="8" font-weight="700" letter-spacing="1">
-          <text x="95" y="226" transform="rotate(-2 95 226)">LOVE WALK</text>
-          <text x="219" y="226" transform="rotate(-2 219 226)">LOVE WALK</text>
-        </g>
-      </svg>
-      <span class="tlw-round-year">2026</span>
-    </div>
+    <div class="tlw-couple" aria-hidden="true"><img class="tlw-couple-image" src="/hero-art.webp" alt="" fetchpriority="high"></div>
     <div class="tlw-hero-brand">
       <div class="tlw-wordmark" aria-label="the Love Walk 2026">
         <h1 class="tlw-brand-heading" id="tlw-hero-title">
