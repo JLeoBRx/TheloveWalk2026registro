@@ -1,0 +1,20 @@
+# Nunca copie segredos, índices biométricos ou fotos pessoais para uma imagem Docker.
+.env
+.env.*
+!.env.example
+.git
+.gitignore
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+data/*
+!data/.gitkeep
+frontend/images/gallery/*
+!frontend/images/gallery/.gitkeep
+models/*.onnx
+models/*.part
+.DS_Store
+Thumbs.db
