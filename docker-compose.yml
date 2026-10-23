@@ -1,0 +1,11 @@
+services:
+  the-love-walk:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./frontend/images/gallery:/app/frontend/images/gallery
+      - ./data:/app/data
+    # Em produção, use HTTPS via proxy reverso e restrinja o acesso à área administrativa.
