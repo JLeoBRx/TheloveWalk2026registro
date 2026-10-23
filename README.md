@@ -1,19 +1,32 @@
 # The Love Walk 2026 — Álbum de Fotografias
 
-Site-álbum do The Love Walk 2026, com introdução editorial, trilha sonora oficial da Banda Universos, galeria organizada por subpastas, miniaturas e visualização ampliada. O site não oferece reconhecimento facial nem armazena dados biométricos.
+Site-álbum do The Love Walk 2026, com introdução editorial, trilha sonora da Banda Universos, galeria por categorias, miniaturas e visualização ampliada. O site não oferece reconhecimento facial nem processa dados biométricos.
+
+## Publicar no Render
+
+O repositório inclui um Blueprint em `render.yaml`. Para criar o serviço público:
+
+1. Abra o [Render Blueprint](https://dashboard.render.com/blueprints/new?repo=https%3A%2F%2Fgithub.com%2FJLeoBRx%2FTheloveWalk2026registro) e entre na sua conta Render, caso solicitado.
+2. Confira o serviço `the-love-walk-2026-album` e selecione **Apply** para criar e publicar. O Blueprint usa o plano Free.
+3. Aguarde a compilação e o deploy. O Render mostrará o endereço público `*.onrender.com`; abra esse endereço para conferir o álbum.
+4. O serviço gera um token administrativo automaticamente. Guarde-o com segurança no painel Environment do serviço. Nunca publique esse segredo no GitHub nem o envie em mensagens.
+
+O deploy automático está ativado: alterações novas na branch `main` iniciam novos deploys. O plano Free pode suspender o serviço após inatividade e a primeira visita seguinte pode demorar para responder.
+
+**Importante sobre as fotografias:** este deploy inicial publica o álbum e a trilha sonora, mesmo enquanto a coleção está vazia. O sistema atual usa arquivos no disco do servidor; o plano Free não fornece armazenamento persistente para receber e conservar fotografias entre deploys/reinicializações. Como o acervo ainda não foi recebido, isso não impede publicar agora. Antes de colocar as fotos reais, configure um armazenamento persistente apropriado ou armazenamento de objetos e teste backups e exclusão de arquivos.
 
 ## Executar localmente
 
 Requisitos: Python 3.11+ e navegador moderno.
 
-No PowerShell, na pasta do projeto, execute:
+No PowerShell, na pasta do projeto:
 
     py -m venv .venv
     .\.venv\Scripts\Activate.ps1
     python -m pip install --upgrade pip
     pip install -r requirements.txt
 
-Se o ambiente virtual já existe, use-o em vez de recriá-lo. Configure o arquivo .env com um token administrativo forte. Gere um token com:
+Se o ambiente virtual já existe, use-o em vez de recriá-lo. Configure o arquivo `.env` com um token administrativo forte. Gere um token com:
 
     .\.venv\Scripts\python.exe -c "import secrets; print(secrets.token_urlsafe(40))"
 
@@ -27,30 +40,28 @@ Não publique nem compartilhe esse token. Inicie o servidor:
 
 ## Adicionar fotografias
 
-1. Copie apenas fotografias que você tem autorização para publicar para a pasta frontend/images/gallery/.
-2. Para criar filtros no álbum, organize as fotos em subpastas, por exemplo: A concentração/, A caminhada/, Amigos e comunidade/ e Encerramento/.
-3. Abra o painel /admin.html, informe o token, marque a confirmação de autorização e clique em Sincronizar álbum.
-4. Atualize a página inicial. As subpastas viram categorias automaticamente.
+1. Copie fotografias autorizadas para `frontend/images/gallery/`.
+2. Para criar filtros, organize-as em subpastas, por exemplo: `A concentração/`, `A caminhada/`, `Amigos e comunidade/` e `Encerramento/`.
+3. Abra `/admin.html), informe o token, confirme as autorizações e clique em **Sincronizar álbum**.
+4. Atualize a página inicial. As subpastas tornam-se categorias automaticamente.
 5. Formatos aceitos: JPG, PNG e WebP.
 
-O sistema cria miniaturas leves em data/thumbnails e mantém os originais na pasta da galeria. A página carrega as fotografias em páginas para não tentar abrir centenas de imagens de uma só vez.
+O sistema cria miniaturas em `data/thumbnails` e mantém os originais na pasta da galeria. A página carrega as fotografias por páginas para suportar coleções grandes.
 
 ## Música tema
 
-O site incorpora, depois do clique do visitante, o vídeo oficial “A Caminhada do Amor” da Banda Universos no YouTube. O projeto não copia nem hospeda o arquivo musical. O navegador pode exigir uma interação do visitante para iniciar a reprodução.
+O site incorpora, após o clique do visitante, o vídeo oficial “A Caminhada do Amor” da Banda Universos no YouTube. O projeto não copia nem hospeda o arquivo musical; o navegador pode exigir uma interação para iniciar o áudio.
 
 Vídeo oficial: https://www.youtube.com/watch?v=HBCcpKBPhYM
 
 ## Endpoints
 
-- GET /api/health: status, contagem de fotografias e configuração administrativa.
-- GET /api/gallery?page=1&page_size=28&category=...: galeria paginada.
-- GET /api/photos?offset=0&limit=36&category=...: consulta alternativa.
-- POST /api/admin/index: requer o cabeçalho X-Admin-Token e JSON {"confirm_gallery_scan":true}.
-- DELETE /api/admin/photos/{photo_id}: remove uma foto do índice do álbum; o arquivo original é mantido.
+- `GET /api/health`: estado do serviço e contagem de fotografias.
+- `GET /api/gallery?page=1&page_size=28&category=...`: galeria paginada.
+- `GET /api/photos?offset=0&limit=36&category=...`: consulta alternativa.
+- `POST /api/admin/index`: requer `X-Admin-Token` e JSON `{"confirm_gallery_scan":true}`.
+- `DELETE /api/admin/photos/{photo_id}`: remove uma foto do índice; o original fica preservado.
 
-## Antes de publicar
+## Antes de divulgar
 
-O endereço local 127.0.0.1 só abre no seu computador. Para publicar, hospede o site e a API em uma infraestrutura com HTTPS e armazenamento persistente para frontend/images/gallery/ e data/. Proteja o token administrativo, mantenha backups e confira as autorizações de publicação. Complete e revise o aviso de privacidade com os dados do responsável pelo álbum.
-
-O player usa um vídeo hospedado no canal oficial da Banda Universos. A disponibilidade e as regras de incorporação dependem do YouTube e do titular do conteúdo.
+Confira as autorizações para publicação das fotos e complete o aviso de privacidade com os dados do responsável. O álbum não usa reconhecimento facial. A disponibilidade da música incorporada segue as regras do YouTube e do titular dos direitos.
