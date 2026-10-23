@@ -50,11 +50,17 @@ Não publique nem compartilhe esse token. Inicie o servidor:
 
 O sistema cria miniaturas em `data/thumbnails` e mantém os originais na pasta da galeria. A página carrega as fotografias por páginas para suportar coleções grandes.
 
-## Música tema
+## Playlist musical
 
-O site incorpora, após o clique do visitante, o vídeo oficial “A Caminhada do Amor” da Banda Universos no YouTube. O projeto não copia nem hospeda o arquivo musical; o navegador pode exigir uma interação para iniciar o áudio.
+O álbum inclui uma playlist de vídeos oficiais da Banda Universos, incorporados pelo YouTube (o projeto não baixa nem hospeda os arquivos musicais). Faixas selecionadas:
 
-Vídeo oficial: https://www.youtube.com/watch?v=HBCcpKBPhYM
+- A Caminhada do Amor — https://www.youtube.com/watch?v=HBCcpKBPhYM
+- Quando Olho Pra Você — https://www.youtube.com/watch?v=m0yQOrXPVI0
+- I Will Love Again — https://www.youtube.com/watch?v=iYJf8z8kdJY
+- Love in Ruins (Amor em Ruínas) — https://www.youtube.com/watch?v=V5HjNDEBDIs
+- As Marcas Desse Amor — https://www.youtube.com/watch?v=dZ0kyYjetnY
+
+O visitante precisa iniciar a playlist com um clique; a partir daí, o player passa para a próxima faixa automaticamente. Navegadores normalmente bloqueiam áudio com som sem interação prévia. Os vídeos e os direitos musicais continuam sob controle do YouTube e dos titulares correspondentes.
 
 ## Endpoints
 
