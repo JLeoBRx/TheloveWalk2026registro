@@ -23,6 +23,7 @@
 .tlw-couple-art{position:relative;display:block;width:min(100%,430px);max-height:480px;overflow:visible;filter:drop-shadow(0 10px 35px rgba(12,4,20,.16))}
 .tlw-round-year{position:absolute;left:2%;top:11%;display:grid;place-items:center;width:78px;aspect-ratio:1;border-radius:50%;background:var(--orange);color:var(--deep);font:800 1.15rem Manrope,sans-serif;box-shadow:0 12px 35px #10061b38}
 .tlw-hero-brand{min-width:0;padding:15px 0 10px}
+.tlw-hero h1.tlw-wordmark{font:inherit;letter-spacing:normal;margin:0}
 .tlw-wordmark{position:relative;width:max-content;max-width:100%;padding-bottom:6px}
 .tlw-word-love{display:flex;align-items:stretch;gap:8px;white-space:nowrap}
 .tlw-the{position:relative;z-index:2;align-self:flex-start;margin-top:.035em;display:grid;place-items:center;padding:.02em .16em .12em;width:1.28em;height:.94em;border-radius:.16em .16em .16em .06em;background:var(--orange);color:#190b2b;font:800 clamp(2.65rem,5.6vw,5.6rem)/.92 Manrope,sans-serif;letter-spacing:-.075em}
@@ -114,12 +115,12 @@
       <span class="tlw-round-year">2026</span>
     </div>
     <div class="tlw-hero-brand">
-      <div class="tlw-wordmark" aria-label="the Love Walk 2026">
+      <h1 class="tlw-wordmark" id="tlw-hero-title" aria-label="the Love Walk 2026">
         <div class="tlw-word-love"><span class="tlw-the">the</span><span class="tlw-love">LOVE</span></div>
         <div class="tlw-word-walk">walk</div>
         <div class="tlw-word-year">2026</div>
-      </div>
-      <p class="tlw-hero-tagline" id="tlw-hero-title">A CAMINHADA QUE NOS UNE</p>
+      </h1>
+      <p class="tlw-hero-tagline">A CAMINHADA QUE NOS UNE</p>
       <p class="tlw-hero-copy">Cada passo aproxima histórias. Cada encontro deixa uma lembrança.</p>
       <div class="actions"><a class="btn btn-primary" href="#galeria">Reviver a caminhada ↗</a><a class="btn btn-ghost" href="#sobre">Conheça o evento</a></div>
     </div>
