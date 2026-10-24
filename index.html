@@ -182,7 +182,7 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
 const $=s=>document.querySelector(s);
-let page=1,pageSize=28,category="",total=0,photos=[],lightIndex=0,lightList=[],categories=[];
+let page=1,pageSize=28,category="",total=0,photos=[],lightIndex=0,lightList=[],categories=[],galleryRequest=0,loadingMore=false;
 const grid=$("#galleryGrid");
 function showToast(message){const t=$("#toast");t.textContent=message;t.classList.add("show");window.setTimeout(()=>t.classList.remove("show"),2800)}
 $("#menuToggle").addEventListener("click",()=>{const n=$("#navLinks"),open=n.classList.toggle("open");$("#menuToggle").setAttribute("aria-expanded",String(open))});
@@ -194,9 +194,102 @@ function layoutPhotoGrid(){const style=getComputedStyle(grid),rowHeight=parseFlo
 let layoutFrame=0;function schedulePhotoLayout(){if(layoutFrame)cancelAnimationFrame(layoutFrame);layoutFrame=requestAnimationFrame(()=>{layoutFrame=0;layoutPhotoGrid()})}
 window.addEventListener("resize",schedulePhotoLayout,{passive:true});
 function emptyState(title,message){const d=document.createElement("div");d.className="empty-state";const icon=document.createElement("div");icon.className="empty-icon";icon.textContent="▧";const h=document.createElement("h3");h.textContent=title;const p=document.createElement("p");p.textContent=message;d.append(icon,h,p);return d}
-async function loadGallery(reset){if(reset){page=1;photos=[];grid.replaceChildren();$("#loadMore").hidden=true;$("#loadMore").disabled=false;$("#loadMore").textContent="Carregar mais fotografias ↓"}$("#galleryStatus").textContent="Buscando as fotografias…";$("#albumStatusTop").textContent="Atualizando álbum…";try{const qs=new URLSearchParams({page:String(page),page_size:String(pageSize)});if(category)qs.set("category",category);const response=await fetch("/api/gallery?"+qs);if(!response.ok)throw new Error("API indisponível");const data=await response.json();total=Number(data.total??data.count??0);categories=Array.isArray(data.categories)?data.categories:[];const incoming=Array.isArray(data.results)?data.results:[];if(reset){photos=incoming;grid.replaceChildren();if(!photos.length)grid.append(emptyState("As lembranças estão a caminho","Este álbum está pronto. Quando as fotografias autorizadas forem adicionadas ao acervo, elas aparecerão aqui organizadas para você explorar."));else photos.forEach((p,i)=>grid.append(photoButton(p,i)))}else{const start=photos.length;photos=photos.concat(incoming);incoming.forEach((p,i)=>grid.append(photoButton(p,start+i)))}$("#photoCount").textContent=total.toLocaleString("pt-BR");$("#albumStatusTop").textContent=total===0?"A coleção está vazia por enquanto":"Coleção atualizada";updateFilters();schedulePhotoLayout();$("#galleryStatus").textContent=total===0?"Nenhuma fotografia foi adicionada ainda.":photos.length>=total?"Fim do álbum: "+photos.length+" de "+total+" fotografias exibidas.":"Exibindo "+photos.length+" de "+total+" fotografias." ;const more=$("#loadMore");more.hidden=!photos.length||incoming.length===0;if(photos.length>=total&&photos.length>0){more.hidden=false;more.disabled=true;more.textContent="Você chegou ao fim do álbum";more.setAttribute("aria-disabled","true")}else if(photos.length){more.hidden=false;more.disabled=false;more.textContent="Carregar mais fotografias ↓";more.removeAttribute("aria-disabled")}}catch(error){if(reset)grid.replaceChildren(emptyState("Não foi possível carregar o álbum","Confira se o servidor está ligado e tente atualizar a página."));$("#galleryStatus").textContent="A conexão com a galeria falhou.";$("#albumStatusTop").textContent="Servidor indisponível";$("#loadMore").hidden=true}}
+async function loadGallery(reset){
+ const requestId=reset?++galleryRequest:galleryRequest;
+ if(reset){
+  page=1;photos=[];loadingMore=false;grid.replaceChildren();
+  $("#loadMore").hidden=true;$("#loadMore").disabled=false;
+  $("#loadMore").textContent="Carregar mais fotografias ↓";
+  $("#loadMore").removeAttribute("aria-disabled");
+ }
+ $("#galleryStatus").textContent="Buscando as fotografias…";
+ $("#albumStatusTop").textContent="Atualizando álbum…";
+ try{
+  const qs=new URLSearchParams({page:String(page),page_size:String(pageSize)});
+  if(category)qs.set("category",category);
+  const response=await fetch("/api/gallery?"+qs);
+  if(!response.ok)throw new Error("API indisponível");
+  const data=await response.json();
+  if(requestId!==galleryRequest)return;
+  total=Number(data.total??data.count??0);
+  categories=Array.isArray(data.categories)?data.categories:[];
+  const incoming=Array.isArray(data.results)?data.results:[];
+  if(reset){
+   photos=incoming;
+   grid.replaceChildren();
+   if(!photos.length)grid.append(emptyState("As lembranças estão a caminho","Este álbum está pronto. Quando as fotografias autorizadas forem adicionadas ao acervo, elas aparecerão aqui organizadas para você explorar."));
+   else photos.forEach((p,i)=>grid.append(photoButton(p,i)));
+  }else{
+   const seen=new Set(photos.map(p=>String(p.id??p.url??p.src??p.filename??"")).filter(Boolean));
+   const unique=incoming.filter(p=>{const key=String(p.id??p.url??p.src??p.filename??"");if(!key)return true;if(seen.has(key))return false;seen.add(key);return true;});
+   const start=photos.length;
+   photos=photos.concat(unique);
+   unique.forEach((p,i)=>grid.append(photoButton(p,start+i)));
+  }
+  $("#photoCount").textContent=total.toLocaleString("pt-BR");
+  $("#albumStatusTop").textContent=total===0?"A coleção está vazia por enquanto":"Coleção atualizada";
+  updateFilters();schedulePhotoLayout();
+  $("#galleryStatus").textContent=total===0?"Nenhuma fotografia foi adicionada ainda.":photos.length>=total?"Fim do álbum: "+photos.length+" de "+total+" fotografias exibidas.":"Exibindo "+photos.length+" de "+total+" fotografias.";
+  const more=$("#loadMore");
+  if(!photos.length||incoming.length===0||photos.length>=total){
+   more.hidden=false;more.disabled=true;more.textContent="Você chegou ao fim do álbum";more.setAttribute("aria-disabled","true");
+  }else{
+   more.hidden=false;more.disabled=false;more.textContent="Carregar mais fotografias ↓";more.removeAttribute("aria-disabled");
+  }
+ }catch(error){
+  if(requestId!==galleryRequest)return;
+  if(reset)grid.replaceChildren(emptyState("Não foi possível carregar o álbum","Confira se o servidor está ligado e tente atualizar a página."));
+  $("#galleryStatus").textContent="A conexão com a galeria falhou.";
+  $("#albumStatusTop").textContent="Servidor indisponível";$("#loadMore").hidden=true;
+ }
+}
 $("#filters").addEventListener("click",e=>{const b=e.target.closest("[data-category]");if(!b)return;category=b.dataset.category;loadGallery(true)});
-$("#loadMore").addEventListener("click",async()=>{const b=$("#loadMore");if(b.disabled||photos.length>=total)return;b.disabled=true;const nextPage=page+1;try{const qs=new URLSearchParams({page:String(nextPage),page_size:String(pageSize)});if(category)qs.set("category",category);const response=await fetch("/api/gallery?"+qs);if(!response.ok)throw new Error("API");const data=await response.json();const incoming=Array.isArray(data.results)?data.results:[];if(!incoming.length){b.disabled=true;b.hidden=false;b.textContent="Você chegou ao fim do álbum";b.setAttribute("aria-disabled","true");$("#galleryStatus").textContent="Fim do álbum: "+photos.length+" de "+total+" fotografias exibidas.";return}page=nextPage;const start=photos.length;photos=photos.concat(incoming);incoming.forEach((p,i)=>grid.append(photoButton(p,start+i)));total=Number(data.total??total);$("#photoCount").textContent=total.toLocaleString("pt-BR");schedulePhotoLayout();if(photos.length>=total){b.disabled=true;b.hidden=false;b.textContent="Você chegou ao fim do álbum";b.setAttribute("aria-disabled","true");$("#galleryStatus").textContent="Fim do álbum: "+photos.length+" de "+total+" fotografias exibidas."}else{$("#galleryStatus").textContent="Exibindo "+photos.length+" de "+total+" fotografias."}}catch(error){showToast("Não foi possível carregar mais fotografias.");$("#galleryStatus").textContent="Falha ao carregar mais. As fotos já exibidas foram mantidas."}finally{if(!b.hasAttribute("aria-disabled")&&photos.length<total)b.disabled=false}});
+$("#loadMore").addEventListener("click",async()=>{
+ const button=$("#loadMore");
+ if(button.disabled||loadingMore||photos.length>=total)return;
+ loadingMore=true;button.disabled=true;
+ const requestId=galleryRequest,nextPage=page+1;
+ try{
+  const qs=new URLSearchParams({page:String(nextPage),page_size:String(pageSize)});
+  if(category)qs.set("category",category);
+  const response=await fetch("/api/gallery?"+qs);
+  if(!response.ok)throw new Error("API");
+  const data=await response.json();
+  if(requestId!==galleryRequest)return;
+  const incoming=Array.isArray(data.results)?data.results:[];
+  total=Number(data.total??data.count??total);
+  $("#photoCount").textContent=total.toLocaleString("pt-BR");
+  const seen=new Set(photos.map(p=>String(p.id??p.url??p.src??p.filename??"")).filter(Boolean));
+  const unique=incoming.filter(p=>{const key=String(p.id??p.url??p.src??p.filename??"");if(!key)return true;if(seen.has(key))return false;seen.add(key);return true;});
+  if(!unique.length){
+   button.disabled=true;button.hidden=false;button.textContent="Você chegou ao fim do álbum";button.setAttribute("aria-disabled","true");
+   $("#galleryStatus").textContent="Fim do álbum: "+photos.length+" de "+total+" fotografias exibidas.";
+   return;
+  }
+  page=nextPage;
+  const start=photos.length;
+  photos=photos.concat(unique);
+  unique.forEach((p,i)=>grid.append(photoButton(p,start+i)));
+  schedulePhotoLayout();
+  if(photos.length>=total){
+   button.disabled=true;button.hidden=false;button.textContent="Você chegou ao fim do álbum";button.setAttribute("aria-disabled","true");
+   $("#galleryStatus").textContent="Fim do álbum: "+photos.length+" de "+total+" fotografias exibidas.";
+  }else{
+   $("#galleryStatus").textContent="Exibindo "+photos.length+" de "+total+" fotografias.";
+   button.disabled=false;
+  }
+ }catch(error){
+  if(requestId===galleryRequest){
+   showToast("Não foi possível carregar mais fotografias.");
+   $("#galleryStatus").textContent="Falha ao carregar mais. As fotos já exibidas foram mantidas.";
+  }
+ }finally{
+  if(requestId===galleryRequest){
+   loadingMore=false;
+   if(!button.hasAttribute("aria-disabled")&&photos.length<total)button.disabled=false;
+  }
+ }
+});
 $("#downloadAll").addEventListener("click",async()=>{
  const button=$("#downloadAll");
  if(button.disabled)return;
