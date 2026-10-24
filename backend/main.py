@@ -6,6 +6,7 @@ import secrets
 import sqlite3
 import time
 from contextlib import contextmanager
+import json
 from pathlib import Path
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
@@ -22,6 +23,8 @@ THUMB_DIR = DATA_DIR / "thumbnails"
 DB_PATH = Path(os.getenv("DB_PATH", DATA_DIR / "the_love_walk.sqlite3")).resolve()
 ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "").strip()
 ADMIN_OK = len(ADMIN_TOKEN) >= 32 and "troque-por" not in ADMIN_TOKEN.lower()
+NUMBER_BOARD_TOKEN = os.getenv("NUMBER_BOARD_TOKEN", "").strip()
+NUMBER_BOARD_OK = len(NUMBER_BOARD_TOKEN) >= 32
 EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
 MAX_PIXELS = int(os.getenv("MAX_IMAGE_PIXELS", "40000000"))
 for path in (PHOTO_DIR, DATA_DIR, THUMB_DIR):
@@ -29,7 +32,7 @@ for path in (PHOTO_DIR, DATA_DIR, THUMB_DIR):
 
 app = FastAPI(title="The Love Walk 2026 Photo Album API", version="2.0.0")
 origins = [s.strip() for s in os.getenv("CORS_ORIGINS", "http://localhost:8000,http://127.0.0.1:8000").split(",") if s.strip()]
-app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=False, allow_methods=["GET","POST","DELETE","OPTIONS"], allow_headers=["Content-Type","X-Admin-Token"])
+app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=False, allow_methods=["GET","POST","DELETE","OPTIONS"], allow_headers=["Content-Type","X-Admin-Token","X-Number-Board-Token"])
 
 def connect():
     DATA_DIR.mkdir(parents=True, exist_ok=True)
@@ -62,6 +65,9 @@ def init_db():
           height INTEGER NOT NULL, indexed_at REAL NOT NULL);
         CREATE INDEX IF NOT EXISTS idx_photos_category ON photos(category);
         DROP TABLE IF EXISTS face_embeddings;
+        CREATE TABLE IF NOT EXISTS number_board(
+          category TEXT PRIMARY KEY, drawn_json TEXT NOT NULL, last_number INTEGER,
+          updated_at REAL NOT NULL, version INTEGER NOT NULL DEFAULT 1);
         """)
 init_db()
 
@@ -146,6 +152,83 @@ def health():
     with db() as c:
         count=c.execute("SELECT COUNT(*) FROM photos").fetchone()[0]
     return {"status":"ok","service":"The Love Walk 2026 Photo Album API","photos_indexed":count,"admin_configured":ADMIN_OK}
+
+def number_board_required(token: str | None = Header(default=None, alias="X-Number-Board-Token")):
+    if not NUMBER_BOARD_OK:
+        raise HTTPException(503, detail="number_board_not_configured")
+    if not token or not secrets.compare_digest(token, NUMBER_BOARD_TOKEN):
+        raise HTTPException(401, detail="number_board_unauthorized")
+
+NUMBER_BOARD_CATEGORIES = ("solteiros", "casados")
+
+@app.get("/api/number-board")
+def get_number_board():
+    """Public, read-only state used by the audience display."""
+    with db() as c:
+        rows = c.execute(
+            "SELECT category, drawn_json, last_number, updated_at, version FROM number_board"
+        ).fetchall()
+    by_category = {row["category"]: row for row in rows}
+    categories = {}
+    updated_at = 0.0
+    version = 0
+    for category in NUMBER_BOARD_CATEGORIES:
+        row = by_category.get(category)
+        if row:
+            try:
+                drawn = json.loads(row["drawn_json"])
+            except (TypeError, json.JSONDecodeError):
+                drawn = []
+            categories[category] = {"drawn": drawn, "last": row["last_number"]}
+            updated_at = max(updated_at, float(row["updated_at"]))
+            version = max(version, int(row["version"]))
+        else:
+            categories[category] = {"drawn": [], "last": None}
+    return {"categories": categories, "updated_at": updated_at, "version": version}
+
+
+@app.post("/api/number-board", dependencies=[Depends(number_board_required)])
+async def update_number_board(request: Request):
+    """Update both categories atomically. Only the organizer token can write."""
+    try:
+        body = await request.json()
+    except Exception as exc:
+        raise HTTPException(400, detail="invalid_json") from exc
+    incoming = body.get("categories") if isinstance(body, dict) else None
+    if not isinstance(incoming, dict):
+        raise HTTPException(400, detail="categories_required")
+
+    validated = {}
+    for category in NUMBER_BOARD_CATEGORIES:
+        state = incoming.get(category)
+        if not isinstance(state, dict):
+            raise HTTPException(400, detail=f"missing_category_{category}")
+        drawn = state.get("drawn")
+        last = state.get("last")
+        if not isinstance(drawn, list) or len(drawn) > 80:
+            raise HTTPException(400, detail=f"invalid_drawn_{category}")
+        if any(not isinstance(n, int) or isinstance(n, bool) or n < 1 or n > 80 for n in drawn):
+            raise HTTPException(400, detail=f"invalid_number_{category}")
+        if len(drawn) != len(set(drawn)):
+            raise HTTPException(400, detail=f"duplicate_number_{category}")
+        if last is not None and (not isinstance(last, int) or isinstance(last, bool) or last not in drawn):
+            raise HTTPException(400, detail=f"invalid_last_{category}")
+        validated[category] = (drawn, last)
+
+    now = time.time()
+    with db() as c:
+        for category, (drawn, last) in validated.items():
+            row = c.execute("SELECT version FROM number_board WHERE category=?", (category,)).fetchone()
+            version = int(row["version"]) + 1 if row else 1
+            c.execute(
+                """INSERT INTO number_board(category, drawn_json, last_number, updated_at, version)
+                   VALUES(?,?,?,?,?)
+                   ON CONFLICT(category) DO UPDATE SET drawn_json=excluded.drawn_json,
+                     last_number=excluded.last_number, updated_at=excluded.updated_at, version=excluded.version""",
+                (category, json.dumps(drawn, separators=(",", ":")), last, now, version),
+            )
+    return {"status": "updated", "updated_at": now}
+
 
 @app.get("/api/photos")
 def list_photos(offset:int=Query(0,ge=0),limit:int=Query(36,ge=1,le=1000),category:str|None=Query(None,max_length=80)):
