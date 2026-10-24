@@ -2,6 +2,9 @@
 from __future__ import annotations
 import hashlib
 import io
+import mimetypes
+import boto3
+from botocore.config import Config
 import os
 import secrets
 import sqlite3
@@ -13,7 +16,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from PIL import Image, ImageOps, UnidentifiedImageError
 import rawpy
 from starlette.concurrency import run_in_threadpool
@@ -26,6 +29,21 @@ DATA_DIR = Path(os.getenv("DATA_DIR", ROOT / "data")).resolve()
 THUMB_DIR = DATA_DIR / "thumbnails"
 RAW_PREVIEW_DIR = DATA_DIR / "raw_previews"
 DB_PATH = Path(os.getenv("DB_PATH", DATA_DIR / "the_love_walk.sqlite3")).resolve()
+R2_BUCKET = os.getenv("R2_BUCKET", "").strip()
+R2_ACCOUNT_ID = os.getenv("R2_ACCOUNT_ID", "").strip()
+R2_ACCESS_KEY_ID = os.getenv("R2_ACCESS_KEY_ID", "").strip()
+R2_SECRET_ACCESS_KEY = os.getenv("R2_SECRET_ACCESS_KEY", "").strip()
+R2_ENDPOINT_URL = os.getenv("R2_ENDPOINT_URL", "").strip().rstrip("/")
+if not R2_ENDPOINT_URL and R2_ACCOUNT_ID:
+    R2_ENDPOINT_URL = f"https://{R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+R2_PREFIX = os.getenv("R2_PREFIX", "the-love-walk-2026").strip("/")
+R2_MANIFEST_KEY = os.getenv(
+    "R2_MANIFEST_KEY",
+    f"{R2_PREFIX}/manifest.json" if R2_PREFIX else "manifest.json",
+).strip("/")
+R2_CONFIGURED = bool(R2_BUCKET and R2_ENDPOINT_URL and R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY)
+R2_MANIFEST_LOADED = False
+_R2_CLIENT = None
 ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "").strip()
 ADMIN_OK = bool(ADMIN_TOKEN) and "troque-por" not in ADMIN_TOKEN.lower()
 NUMBER_BOARD_TOKEN = os.getenv("NUMBER_BOARD_TOKEN", "").strip()
@@ -99,6 +117,96 @@ def id_for(rel: str) -> str:
 def category_for(rel: str) -> str:
     parent=Path(rel).parent.name
     return parent if parent not in {"", "."} else "A caminhada"
+
+
+def r2_client():
+    """Create the private S3-compatible Cloudflare R2 client lazily."""
+    global _R2_CLIENT
+    if not R2_CONFIGURED:
+        raise RuntimeError("R2 não configurado: faltam bucket, endpoint ou credenciais.")
+    if _R2_CLIENT is None:
+        _R2_CLIENT = boto3.client(
+            "s3",
+            endpoint_url=R2_ENDPOINT_URL,
+            aws_access_key_id=R2_ACCESS_KEY_ID,
+            aws_secret_access_key=R2_SECRET_ACCESS_KEY,
+            region_name="auto",
+            config=Config(signature_version="s3v4", retries={"max_attempts": 5}),
+        )
+    return _R2_CLIENT
+
+
+def r2_variant_key(photo_id: str, variant: str) -> str:
+    suffix = ".webp" if variant == "thumbnails" else ".jpg"
+    name = f"{variant}/{photo_id}{suffix}"
+    return f"{R2_PREFIX}/{name}" if R2_PREFIX else name
+
+
+def r2_redirect(key: str, filename: str | None = None, disposition: str = "inline", media_type: str | None = None):
+    """Redirect to a signed URL so image bytes are served directly by R2."""
+    params = {"Bucket": R2_BUCKET, "Key": key}
+    if filename:
+        safe_ascii = filename.encode("ascii", "ignore").decode("ascii").replace('"', "").replace("\\", "")
+        encoded = quote(filename, safe="")
+        params["ResponseContentDisposition"] = f"{disposition}; filename=\"{safe_ascii or 'foto'}\"; filename*=UTF-8''{encoded}"
+    if media_type:
+        params["ResponseContentType"] = media_type
+    try:
+        url = r2_client().generate_presigned_url("get_object", Params=params, ExpiresIn=3600)
+    except Exception as exc:
+        print(f"[r2-presign] {type(exc).__name__}: {exc}", flush=True)
+        raise HTTPException(502, detail="r2_signing_failed") from exc
+    return RedirectResponse(url, status_code=307, headers={"Cache-Control": "no-store"})
+
+
+def sync_r2_manifest() -> dict:
+    """Load the small R2 manifest into SQLite; originals stay in R2, not on Render."""
+    global R2_MANIFEST_LOADED
+    if not R2_CONFIGURED:
+        raise RuntimeError("R2 credentials are not configured")
+    response = r2_client().get_object(Bucket=R2_BUCKET, Key=R2_MANIFEST_KEY)
+    manifest = json.loads(response["Body"].read().decode("utf-8"))
+    photos = manifest.get("photos")
+    if manifest.get("version") != 1 or not isinstance(photos, list):
+        raise ValueError("Manifest R2 inválido; esperado version=1 e uma lista photos.")
+    seen_ids: set[str] = set()
+    inserted = 0
+    original_prefix = f"{R2_PREFIX}/originals/" if R2_PREFIX else "originals/"
+    now = time.time()
+    with db() as conn:
+        for item in photos:
+            rel = str(item.get("relative_path", "")).replace("\\", "/").strip("/")
+            photo_id = str(item.get("id", ""))
+            original_key = str(item.get("original_key", ""))
+            if not rel or not original_key.startswith(original_prefix) or photo_id != id_for(rel):
+                raise ValueError("Manifest contém caminho ou ID inválido.")
+            filename = Path(str(item.get("filename", ""))).name
+            if not filename:
+                raise ValueError(f"Nome inválido no manifest para {rel}")
+            category = str(item.get("category") or category_for(rel))[:80]
+            caption = str(item.get("caption") or Path(filename).stem)[:240]
+            width = max(1, int(item.get("width", 1)))
+            height = max(1, int(item.get("height", 1)))
+            file_size = max(0, int(item.get("file_size", 0)))
+            mtime = float(item.get("mtime", now))
+            conn.execute(
+                """INSERT INTO photos VALUES(?,?,?,?,?,?,?,?,?,?,?)
+                   ON CONFLICT(id) DO UPDATE SET relative_path=excluded.relative_path,
+                   filename=excluded.filename, category=excluded.category, caption=excluded.caption,
+                   thumb_filename=excluded.thumb_filename, file_size=excluded.file_size,
+                   mtime=excluded.mtime, width=excluded.width, height=excluded.height,
+                   indexed_at=excluded.indexed_at""",
+                (photo_id, original_key, filename, category, caption, photo_id + ".webp",
+                 file_size, mtime, width, height, now),
+            )
+            seen_ids.add(photo_id)
+            inserted += 1
+        for existing in conn.execute("SELECT id FROM photos").fetchall():
+            if existing["id"] not in seen_ids:
+                conn.execute("DELETE FROM photos WHERE id=?", (existing["id"],))
+    R2_MANIFEST_LOADED = True
+    return {"found": len(photos), "processed": inserted, "r2_manifest": R2_MANIFEST_KEY}
+
 
 def create_raw_previews(src: Path, photo_id: str) -> tuple[int,int]:
     """Create a web-sized JPEG preview and WebP thumbnail from a camera RAW file."""
@@ -222,8 +330,15 @@ def index_photos() -> dict:
 
 
 def _startup_index_worker():
-    """Index the committed gallery without blocking application health checks."""
+    """Load the R2 manifest when configured; otherwise index the local photo folder."""
     try:
+        if R2_CONFIGURED:
+            try:
+                result = sync_r2_manifest()
+                print(f"[album-index-startup] {json.dumps(result, ensure_ascii=False)}", flush=True)
+                return
+            except Exception as exc:
+                print(f"[album-index-startup] R2 manifest unavailable: {type(exc).__name__}: {exc}", flush=True)
         print(f"[album-index-startup] begin path={PHOTO_DIR}", flush=True)
         result = index_photos()
         print(f"[album-index-startup] {json.dumps(result, ensure_ascii=False)}", flush=True)
@@ -243,7 +358,7 @@ def auto_index_gallery_on_startup():
 def health():
     with db() as c:
         count=c.execute("SELECT COUNT(*) FROM photos").fetchone()[0]
-    return {"status":"ok","service":"The Love Walk 2026 Photo Album API","photos_indexed":count,"admin_configured":ADMIN_OK}
+    return {"status":"ok","service":"The Love Walk 2026 Photo Album API","photos_indexed":count,"admin_configured":ADMIN_OK,"r2_configured":R2_CONFIGURED,"r2_manifest_loaded":R2_MANIFEST_LOADED}
 
 OPERATOR_SESSIONS: dict[str, float] = {}
 OPERATOR_LOGIN_ATTEMPTS: dict[str, dict[str, float | int]] = {}
@@ -392,7 +507,7 @@ async def admin_index(request:Request):
         raise HTTPException(400,detail="confirmation_required") from e
     if body.get("confirm_gallery_scan") is not True:
         raise HTTPException(400,detail="confirmation_required")
-    return {"status":"completed",**await run_in_threadpool(index_photos)}
+    return {"status":"completed",**(await run_in_threadpool(sync_r2_manifest) if R2_CONFIGURED else await run_in_threadpool(index_photos))}
 
 @app.delete("/api/admin/photos/{photo_id}",dependencies=[Depends(admin_required)])
 def admin_remove_photo(photo_id:str):
@@ -410,6 +525,10 @@ def raw_preview(photo_id:str):
         row=c.execute("SELECT relative_path FROM photos WHERE id=?",(photo_id,)).fetchone()
     if not row:
         raise HTTPException(404,detail="photo_not_found")
+    if R2_MANIFEST_LOADED:
+        if Path(row["relative_path"]).suffix.lower() not in RAW_EXTENSIONS:
+            return media(photo_id)
+        return r2_redirect(r2_variant_key(photo_id, "previews"), filename=f"{Path(row['relative_path']).stem}.jpg", media_type="image/jpeg")
     source=(PHOTO_DIR/row["relative_path"]).resolve()
     if PHOTO_DIR not in source.parents or source.suffix.lower() not in EXTENSIONS or not source.is_file():
         raise HTTPException(404,detail="photo_not_found")
@@ -431,6 +550,19 @@ def download_photo(photo_id:str):
         row=c.execute("SELECT relative_path,filename FROM photos WHERE id=?",(photo_id,)).fetchone()
     if not row:
         raise HTTPException(404,detail="photo_not_found")
+    if R2_MANIFEST_LOADED:
+        is_raw = Path(row["relative_path"]).suffix.lower() in RAW_EXTENSIONS
+        if is_raw:
+            return r2_redirect(
+                r2_variant_key(photo_id, "previews"),
+                filename=f"{Path(row['filename']).stem}.jpg",
+                disposition="attachment",
+                media_type="image/jpeg",
+            )
+        return r2_redirect(
+            row["relative_path"], filename=row["filename"], disposition="attachment",
+            media_type=mimetypes.guess_type(row["filename"])[0] or "application/octet-stream",
+        )
     source=(PHOTO_DIR/row["relative_path"]).resolve()
     if PHOTO_DIR not in source.parents or source.suffix.lower() not in EXTENSIONS or not source.is_file():
         raise HTTPException(404,detail="photo_not_found")
@@ -452,6 +584,13 @@ def media(photo_id:str):
         row=c.execute("SELECT relative_path,filename FROM photos WHERE id=?",(photo_id,)).fetchone()
     if not row:
         raise HTTPException(404,detail="photo_not_found")
+    if R2_MANIFEST_LOADED:
+        is_raw = Path(row["relative_path"]).suffix.lower() in RAW_EXTENSIONS
+        content_type = "application/octet-stream" if is_raw else (mimetypes.guess_type(row["filename"])[0] or "application/octet-stream")
+        return r2_redirect(
+            row["relative_path"], filename=row["filename"],
+            disposition="attachment" if is_raw else "inline", media_type=content_type,
+        )
     path=(PHOTO_DIR/row["relative_path"]).resolve()
     if PHOTO_DIR not in path.parents or path.suffix.lower() not in EXTENSIONS or not path.is_file():
         raise HTTPException(404,detail="photo_not_found")
@@ -465,6 +604,8 @@ def thumb(photo_id:str):
         row=c.execute("SELECT thumb_filename FROM photos WHERE id=?",(photo_id,)).fetchone()
     if not row:
         raise HTTPException(404,detail="thumbnail_not_found")
+    if R2_MANIFEST_LOADED:
+        return r2_redirect(r2_variant_key(photo_id, "thumbnails"), filename=f"{photo_id}.webp", media_type="image/webp")
     path=(THUMB_DIR/row["thumb_filename"]).resolve()
     if THUMB_DIR not in path.parents or not path.is_file():
         raise HTTPException(404,detail="thumbnail_not_found")
