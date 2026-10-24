@@ -2,13 +2,13 @@
 
 ## Como adicionar fotos ao álbum
 
-1. Coloque as fotos diretamente nesta pasta pelo GitHub: **Add file → Upload files**.
-2. Aceite somente imagens que podem ser publicadas no álbum.
-3. Toque em **Commit changes** para salvar os arquivos na branch `main`.
-4. O site será republicado e indexará automaticamente as imagens quando o serviço iniciar. Depois que o deploy ficar concluído, confira o álbum em https://the-love-walk-2026-album.onrender.com.
+1. Coloque imagens diretamente nesta pasta pelo GitHub: **Add file → Upload files**, ou use o monitor automático instalado no computador.
+2. No computador, deixe o programa `INICIAR.bat` aberto e copie as imagens para a pasta local `Colocar as fotos aqui`. Quando o envio terminar, elas serão enviadas ao GitHub e o site será republicado automaticamente.
+3. Aceite somente imagens autorizadas para publicação.
+4. Também pode criar subpastas para separar por categoria.
 
-**Formatos aceitos:** JPG, JPEG, PNG e WebP.
+**Formatos aceitos:** JPG, JPEG, PNG, WebP e RAW de câmera compatível, como CR2, CR3, NEF, ARW, DNG, ORF, RW2, RAF, PEF e SRW. A compatibilidade depende do modelo da câmera.
 
-Você também pode criar subpastas para separar por categoria; o nome da subpasta será usado como filtro no site. Fotos colocadas diretamente nesta pasta aparecem na categoria padrão.
+Os RAWs são convertidos em prévias para a galeria; o arquivo original é mantido para download. Arquivos individuais acima de 95 MB não são enviados pelo monitor local porque o GitHub bloqueia arquivos acima de 100 MB.
 
-**Importante:** não apague fotos antigas dessa pasta, a menos que queira removê-las do álbum. Mantenha uma cópia de segurança dos arquivos originais.
+**Importante:** não apague imagens antigas desta pasta, a menos que queira removê-las do álbum. Mantenha uma cópia de segurança dos originais.
