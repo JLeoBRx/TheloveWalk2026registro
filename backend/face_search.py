@@ -141,8 +141,9 @@ def find_matching_photos(
     import cv2
 
     with _MATCH_LOCK:
-        detector, recognizer = _load_models()
+        # Validate the upload before downloading/loading the face models.
         query_image = _decode_image(selfie_bytes, "A selfie")
+        detector, recognizer = _load_models()
         query_faces = _face_rows(query_image, detector)
         if not query_faces:
             raise FaceSearchInputError(
