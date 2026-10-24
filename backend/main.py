@@ -22,7 +22,7 @@ DATA_DIR = Path(os.getenv("DATA_DIR", ROOT / "data")).resolve()
 THUMB_DIR = DATA_DIR / "thumbnails"
 DB_PATH = Path(os.getenv("DB_PATH", DATA_DIR / "the_love_walk.sqlite3")).resolve()
 ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "").strip()
-ADMIN_OK = len(ADMIN_TOKEN) >= 32 and "troque-por" not in ADMIN_TOKEN.lower()
+ADMIN_OK = bool(ADMIN_TOKEN) and "troque-por" not in ADMIN_TOKEN.lower()
 NUMBER_BOARD_TOKEN = os.getenv("NUMBER_BOARD_TOKEN", "").strip()
 NUMBER_BOARD_OK = len(NUMBER_BOARD_TOKEN) >= 32
 OPERATOR_PASSWORD = os.getenv("OPERATOR_PASSWORD", "").strip()
