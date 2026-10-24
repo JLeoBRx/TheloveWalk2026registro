@@ -5,6 +5,7 @@ import os
 import secrets
 import sqlite3
 import time
+from threading import Thread
 from contextlib import contextmanager
 import json
 from pathlib import Path
@@ -193,14 +194,22 @@ def index_photos() -> dict:
     return {"found":len(files),"processed":processed,"skipped_unchanged":skipped,"errors":errors}
 
 
+def _startup_index_worker():
+    """Index the committed gallery without blocking application health checks."""
+    try:
+        print(f"[album-index-startup] begin path={PHOTO_DIR}", flush=True)
+        result = index_photos()
+        print(f"[album-index-startup] {json.dumps(result, ensure_ascii=False)}", flush=True)
+    except Exception as exc:
+        print(f"[album-index-startup] {type(exc).__name__}: {exc}", flush=True)
+
+
 @app.on_event("startup")
 def auto_index_gallery_on_startup():
-    """Index images committed to the GitHub upload folder whenever the service starts."""
-    try:
-        result = index_photos()
-        print(f"[album-index-startup] {json.dumps(result, ensure_ascii=False)}")
-    except Exception as exc:
-        print(f"[album-index-startup] {type(exc).__name__}: {exc}")
+    """Schedule indexing of the GitHub upload folder after server startup."""
+    worker = Thread(target=_startup_index_worker, name="album-startup-index", daemon=True)
+    worker.start()
+    print(f"[album-index-startup] scheduled path={PHOTO_DIR}", flush=True)
 
 
 @app.get("/api/health")
