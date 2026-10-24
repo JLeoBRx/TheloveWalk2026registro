@@ -17,7 +17,7 @@ from starlette.concurrency import run_in_threadpool
 
 ROOT = Path(__file__).resolve().parents[1]
 load_dotenv(ROOT / ".env")
-PHOTO_DIR = Path(os.getenv("PHOTO_DIR", ROOT / "frontend" / "images" / "gallery")).resolve()
+PHOTO_DIR = Path(os.getenv("PHOTO_DIR", ROOT / "colocar as fotos aqui")).resolve()
 DATA_DIR = Path(os.getenv("DATA_DIR", ROOT / "data")).resolve()
 THUMB_DIR = DATA_DIR / "thumbnails"
 DB_PATH = Path(os.getenv("DB_PATH", DATA_DIR / "the_love_walk.sqlite3")).resolve()
@@ -148,6 +148,17 @@ def index_photos() -> dict:
                 c.execute("DELETE FROM photos WHERE id=?",(row["id"],))
                 (THUMB_DIR/row["thumb_filename"]).unlink(missing_ok=True)
     return {"found":len(files),"processed":processed,"skipped_unchanged":skipped,"errors":errors}
+
+
+@app.on_event("startup")
+def auto_index_gallery_on_startup():
+    """Index images committed to the GitHub upload folder whenever the service starts."""
+    try:
+        result = index_photos()
+        print(f"[album-index-startup] {json.dumps(result, ensure_ascii=False)}")
+    except Exception as exc:
+        print(f"[album-index-startup] {type(exc).__name__}: {exc}")
+
 
 @app.get("/api/health")
 def health():
