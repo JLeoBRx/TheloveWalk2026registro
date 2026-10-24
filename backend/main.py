@@ -1,4 +1,4 @@
-"""The Love Walk 2026 photo-album API. No facial recognition or biometric processing."""
+"""The Love Walk 2026 photo-album API, including request-scoped face search."""
 from __future__ import annotations
 import hashlib
 import io
@@ -6,17 +6,18 @@ import os
 import secrets
 import sqlite3
 import time
-from threading import Thread
+from threading import Lock, Thread
 from contextlib import contextmanager
 import json
 from pathlib import Path
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
+from fastapi import Depends, FastAPI, File, Header, HTTPException, Query, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from PIL import Image, ImageOps, UnidentifiedImageError
 import rawpy
 from starlette.concurrency import run_in_threadpool
+from .face_search import FaceSearchInputError, MAX_SELFIE_BYTES, find_matching_photos
 
 ROOT = Path(__file__).resolve().parents[1]
 load_dotenv(ROOT / ".env")
@@ -49,6 +50,12 @@ for path in (PHOTO_DIR, DATA_DIR, THUMB_DIR, RAW_PREVIEW_DIR):
 app = FastAPI(title="The Love Walk 2026 Photo Album API", version="2.0.0")
 origins = [s.strip() for s in os.getenv("CORS_ORIGINS", "http://localhost:8000,http://127.0.0.1:8000").split(",") if s.strip()]
 app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=False, allow_methods=["GET","POST","DELETE","OPTIONS"], allow_headers=["Content-Type","X-Admin-Token","X-Number-Board-Token","Authorization"])
+
+# Only transient rate-limit timestamps are retained; no selfie or face templates are stored.
+_FACE_SEARCH_LAST_QUERY: dict[str, float] = {}
+_FACE_SEARCH_RATE_LOCK = Lock()
+_FACE_SEARCH_COOLDOWN_SECONDS = 20
+_FACE_SEARCH_MAX_PHOTOS = 2500
 
 def connect():
     DATA_DIR.mkdir(parents=True, exist_ok=True)
@@ -368,6 +375,85 @@ async def update_number_board(request: Request):
             )
     return {"status": "updated", "updated_at": now}
 
+
+
+@app.post("/api/find-my-photos")
+async def find_my_photos(request: Request, image: UploadFile = File(...)):
+    """Find album photos matching a visitor's one-person reference selfie.
+
+    Selfie bytes and face features are processed for this request only and are
+    never written to disk or stored in SQLite. Results filter the gallery; this
+    public album endpoint is not an authentication or access-control mechanism.
+    """
+    client_ip = request.client.host if request.client else "unknown"
+    now = time.time()
+    with _FACE_SEARCH_RATE_LOCK:
+        for old_ip, last_time in list(_FACE_SEARCH_LAST_QUERY.items()):
+            if now - last_time > 600:
+                _FACE_SEARCH_LAST_QUERY.pop(old_ip, None)
+        last_query = _FACE_SEARCH_LAST_QUERY.get(client_ip, 0.0)
+        if now - last_query < _FACE_SEARCH_COOLDOWN_SECONDS:
+            wait = max(1, int(_FACE_SEARCH_COOLDOWN_SECONDS - (now - last_query)))
+            raise HTTPException(429, detail=f"Espere {wait} segundos antes de fazer outra busca por rosto.")
+        _FACE_SEARCH_LAST_QUERY[client_ip] = now
+
+    if image.content_type and image.content_type.lower() not in {
+        "image/jpeg", "image/png", "image/webp", "image/jpg"
+    }:
+        raise HTTPException(415, detail="Envie uma selfie em JPG, PNG ou WebP.")
+    try:
+        selfie_bytes = await image.read(MAX_SELFIE_BYTES + 1)
+    finally:
+        await image.close()
+    if len(selfie_bytes) > MAX_SELFIE_BYTES:
+        raise HTTPException(413, detail="A selfie deve ter no máximo 8 MB.")
+
+    with db() as conn:
+        rows = conn.execute("SELECT * FROM photos ORDER BY filename COLLATE NOCASE").fetchall()
+    if not rows:
+        return {"photos": [], "total": 0, "scanned": 0, "message": "O álbum ainda não tem fotos indexadas."}
+    if len(rows) > _FACE_SEARCH_MAX_PHOTOS:
+        raise HTTPException(
+            413,
+            detail=f"O acervo tem mais de {_FACE_SEARCH_MAX_PHOTOS} fotos; a busca facial está temporariamente limitada por segurança.",
+        )
+
+    try:
+        matches, scanned = await run_in_threadpool(
+            find_matching_photos,
+            selfie_bytes,
+            rows,
+            PHOTO_DIR,
+            RAW_PREVIEW_DIR,
+            RAW_EXTENSIONS,
+        )
+    except FaceSearchInputError as exc:
+        raise HTTPException(422, detail=str(exc)) from exc
+    except Exception as exc:
+        print(f"[face-search] {type(exc).__name__}: {exc}", flush=True)
+        raise HTTPException(
+            503,
+            detail="A busca facial não conseguiu iniciar. Tente novamente mais tarde.",
+        ) from exc
+    finally:
+        # Drop the request's reference to the uploaded bytes as soon as processing ends.
+        selfie_bytes = b""
+
+    row_by_id = {str(row["id"]): row for row in rows}
+    results = []
+    for match in matches:
+        row = row_by_id.get(match["id"])
+        if row is None:
+            continue
+        item = payload(row)
+        item["match_score"] = match["score"]
+        results.append(item)
+    return {
+        "photos": results,
+        "total": len(results),
+        "scanned": scanned,
+        "message": "A busca foi concluída. Confira os resultados, pois a comparação automática pode errar.",
+    }
 
 @app.get("/api/photos")
 def list_photos(offset:int=Query(0,ge=0),limit:int=Query(36,ge=1,le=1000),category:str|None=Query(None,max_length=80)):
