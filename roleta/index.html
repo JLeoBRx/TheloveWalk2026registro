@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#130720">
-<title>Roleta do Amor | Solteiros & Casados</title>
-<meta name="description" content="Sorteios de 1 a 80 para solteiros e casados. Duas roletas, números sem repetição e visual para eventos.">
+<title>Painel de Números | Solteiros & Casados</title>
+<meta name="description" content="Painel com seleção de números de 1 a 80 para as categorias Solteiros e Casados.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -31,25 +31,25 @@ main{padding:45px 0 70px}.section-heading{display:flex;align-items:end;justify-c
 </head>
 <body>
 <header class="topbar"><div class="wrap nav">
-  <div class="brand"><span class="brand-mark" aria-hidden="true">♡</span><span>Roleta do Amor<small>Solteiros & Casados</small></span></div>
-  <span class="top-tag"><i></i> Sorteios de 01 a 80</span>
+  <div class="brand"><span class="brand-mark" aria-hidden="true">♡</span><span>Painel de Números<small>Solteiros & Casados</small></span></div>
+  <span class="top-tag"><i></i> Números de 01 a 80</span>
 </div></header>
 <section class="hero"><div class="wrap hero-layout">
   <div class="hero-copy-block">
-    <div class="eyebrow">Diversão · Emoção · Surpresas</div>
-    <h1>Quem será<br>o próximo <span>sorteado?</span></h1>
-    <p class="hero-copy">Duas roletas especiais para animar o seu evento. Escolha a categoria, faça o sorteio e descubra o número da vez — sem repetições.</p>
+    <div class="eyebrow">Participação · Organização · Convivência</div>
+    <h1>Escolha a categoria<br>e revele seu <span>número.</span></h1>
+    <p class="hero-copy">Duas categorias para organizar a participação no seu evento. Selecione uma categoria e revele os números um por vez, sem repetir.</p>
     <div class="hero-metrics">
       <div class="metric"><strong>160</strong><span>números no total</span></div>
       <div class="metric"><span class="metric-icon">♡</span><span><strong>2</strong> roletas independentes</span></div>
-      <div class="metric"><span class="metric-icon">↻</span><span>Sorteio sem repetição</span></div>
+      <div class="metric"><span class="metric-icon">↻</span><span>Sem números repetidos</span></div>
     </div>
   </div>
   <div class="hero-visual" aria-hidden="true">
     <div class="hero-halo"></div><div class="hero-ring"></div><div class="hero-ring ring-two"></div>
-    <div class="hero-wheel"><span class="hero-wheel-pin"></span><div class="hero-wheel-center"><span>♡</span><small>RODA DA</small><strong>SORTE</strong></div></div>
+    <div class="hero-wheel"><span class="hero-wheel-pin"></span><div class="hero-wheel-center"><span>♡</span><small>PAINEL DE</small><strong>NÚMEROS</strong></div></div>
     <div class="floating-label first"><span class="live-dot"></span><div><small>FAIXA DE NÚMEROS</small><strong>01 — 80</strong></div></div>
-    <div class="floating-label second"><span class="float-symbol">♥</span><div><small>UMA GRANDE SURPRESA</small><strong>Quem será desta vez?</strong></div></div>
+    <div class="floating-label second"><span class="float-symbol">♥</span><div><small>SELEÇÃO DE NÚMEROS</small><strong>01 a 80 por categoria</strong></div></div>
   </div>
 </div></section>
 <main class="wrap">
@@ -57,9 +57,9 @@ main{padding:45px 0 70px}.section-heading{display:flex;align-items:end;justify-c
   <section class="roulette-grid" aria-label="Roletas de números">
     <article class="roulette-card" data-category="solteiros">
       <div class="card-top"><div class="category-title"><span class="category-icon" aria-hidden="true">♡</span><div><h3>Solteiros</h3><p>Roleta independente</p></div></div><span class="count-pill" id="solteirosCount">80 disponíveis</span></div>
-      <div class="stage"><div class="number-orb" id="solteirosOrb" aria-live="polite"><span class="wheel-segments" aria-hidden="true"></span><div class="wheel-center"><strong id="solteirosResult">--</strong></div></div><div class="result-label">Número sorteado</div><p class="result-message" id="solteirosMessage">Pronto para começar o sorteio?</p><div class="actions"><button class="spin-button" id="solteirosSpin" type="button"><span class="spin-symbol">⟳</span> Sortear número</button><button class="secondary-button" id="solteirosReset" type="button">↺ Reiniciar</button></div></div>
-      <div class="progress"><div class="progress-label"><span>Números sorteados</span><strong id="solteirosProgressText">0 de 80</strong></div><div class="progress-track"><div class="progress-bar" id="solteirosProgress"></div></div></div>
-      <div class="numbers-section"><div class="numbers-head"><h4>Controle dos números</h4><div class="legend"><span><i></i> Disponível</span><span class="used"><i></i> Sorteado</span></div></div><div class="number-grid" id="solteirosNumbers" aria-label="Números dos solteiros"></div><div class="history-row"><p class="history-label">ÚLTIMOS NÚMEROS SORTEADOS</p><div class="history" id="solteirosHistory"><span class="empty-history">Nenhum sorteio ainda.</span></div></div></div>
+      <div class="stage"><div class="number-orb" id="solteirosOrb" aria-live="polite"><span class="wheel-segments" aria-hidden="true"></span><div class="wheel-center"><strong id="solteirosResult">--</strong></div></div><div class="result-label">Número selecionado</div><p class="result-message" id="solteirosMessage">Pronto para revelar um número?</p><div class="actions"><button class="spin-button" id="solteirosSpin" type="button"><span class="spin-symbol">⟳</span> Revelar número</button><button class="secondary-button" id="solteirosReset" type="button">↺ Reiniciar</button></div></div>
+      <div class="progress"><div class="progress-label"><span>Números revelados</span><strong id="solteirosProgressText">0 de 80</strong></div><div class="progress-track"><div class="progress-bar" id="solteirosProgress"></div></div></div>
+      <div class="numbers-section"><div class="numbers-head"><h4>Controle dos números</h4><div class="legend"><span><i></i> Disponível</span><span class="used"><i></i> Revelado</span></div></div><div class="number-grid" id="solteirosNumbers" aria-label="Números dos solteiros"></div><div class="history-row"><p class="history-label">ÚLTIMOS NÚMEROS REVELADOS</p><div class="history" id="solteirosHistory"><span class="empty-history">Nenhum número revelado ainda.</span></div></div></div>
     </article>
     <article class="roulette-card" data-category="casados">
       <div class="card-top"><div class="category-title"><span class="category-icon" aria-hidden="true">♥</span><div><h3>Casados</h3><p>Roleta independente</p></div></div><span class="count-pill" id="casadosCount">80 disponíveis</span></div>
@@ -68,9 +68,9 @@ main{padding:45px 0 70px}.section-heading{display:flex;align-items:end;justify-c
       <div class="numbers-section"><div class="numbers-head"><h4>Controle dos números</h4><div class="legend"><span><i></i> Disponível</span><span class="used"><i></i> Sorteado</span></div></div><div class="number-grid" id="casadosNumbers" aria-label="Números dos casados"></div><div class="history-row"><p class="history-label">ÚLTIMOS NÚMEROS SORTEADOS</p><div class="history" id="casadosHistory"><span class="empty-history">Nenhum sorteio ainda.</span></div></div></div>
     </article>
   </section>
-  <aside class="howto"><div class="howto-icon" aria-hidden="true">✦</div><div><h4>Como funciona</h4><p>Toque em <strong>Sortear número</strong>. Os números sorteados ficam marcados e não se repetem dentro da mesma categoria. O progresso é salvo neste navegador mesmo após atualizar a página. Você pode reiniciar uma roleta ou as duas quando quiser.</p></div></aside>
+  <aside class="howto"><div class="howto-icon" aria-hidden="true">✦</div><div><h4>Como funciona</h4><p>Toque em <strong>Revelar número</strong>. Cada número revelado fica marcado para não aparecer novamente na mesma categoria. O progresso é salvo neste navegador mesmo após atualizar a página. Você pode reiniciar uma categoria ou as duas quando quiser.</p></div></aside>
 </main>
-<footer class="footer"><div class="wrap footer-inner"><p>Feito para compartilhar momentos especiais <strong>♡</strong></p><p>Roleta do Amor · números de 01 a 80</p></div></footer>
+<footer class="footer"><div class="wrap footer-inner"><p>Feito para compartilhar momentos especiais <strong>♡</strong></p><p>Painel de Números · 01 a 80</p></div></footer>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
 (function(){
@@ -92,16 +92,16 @@ main{padding:45px 0 70px}.section-heading{display:flex;align-items:end;justify-c
     el(key+'Progress').style.width=(s.drawn.length/TOTAL*100)+'%';
     el(key+'Result').textContent=s.last===null?'--':String(s.last).padStart(2,'0');
     el(key+'Spin').disabled=s.spinning||s.drawn.length===TOTAL;
-    el(key+'Spin').textContent=s.spinning?'Girando…':s.drawn.length===TOTAL?'✓ Todos sorteados':'⟳ Sortear número';
+    el(key+'Spin').textContent=s.spinning?'Girando…':s.drawn.length===TOTAL?'✓ Todos revelados':'⟳ Revelar número';
     el(key+'Reset').disabled=s.spinning||s.drawn.length===0;
     el(key+'Orb').classList.toggle('spinning',s.spinning);
     if(s.spinning)el(key+'Message').textContent='A roleta está girando…';
-    else if(s.drawn.length===TOTAL)el(key+'Message').textContent='Todos os 80 números foram sorteados!';
-    else if(s.last!==null)el(key+'Message').textContent='Número '+String(s.last).padStart(2,'0')+' foi sorteado. Boa sorte!';
-    else el(key+'Message').textContent='Pronto para começar o sorteio?';
+    else if(s.drawn.length===TOTAL)el(key+'Message').textContent='Todos os 80 números foram revelados!';
+    else if(s.last!==null)el(key+'Message').textContent='Número '+String(s.last).padStart(2,'0')+' foi selecionado.';
+    else el(key+'Message').textContent='Pronto para revelar um número?';
     const grid=el(key+'Numbers');grid.innerHTML='';
     for(let n=1;n<=TOTAL;n++){
-      const b=document.createElement('button');b.type='button';b.className='number-tile'+(drawn.has(n)?' picked':'')+(s.last===n?' last':'');b.textContent=String(n).padStart(2,'0');b.disabled=true;b.setAttribute('aria-label','Número '+n+(drawn.has(n)?', sorteado':' disponível'));grid.appendChild(b);
+      const b=document.createElement('button');b.type='button';b.className='number-tile'+(drawn.has(n)?' picked':'')+(s.last===n?' last':'');b.textContent=String(n).padStart(2,'0');b.disabled=true;b.setAttribute('aria-label','Número '+n+(drawn.has(n)?', revelado':' disponível'));grid.appendChild(b);
     }
     const history=el(key+'History');history.innerHTML='';
     if(!s.drawn.length){const empty=document.createElement('span');empty.style.cssText='color:var(--muted);font-size:.76rem';empty.textContent='Nenhum sorteio ainda.';history.appendChild(empty)}
@@ -120,14 +120,14 @@ main{padding:45px 0 70px}.section-heading{display:flex;align-items:end;justify-c
       delay=Math.min(220,delay+12);
       if(elapsed<1450){s.timer=setTimeout(tick,delay);return}
       s.drawn.push(finalNumber);s.last=finalNumber;s.spinning=false;s.timer=null;save(key);render(key);
-      showToast((key==='solteiros'?'Solteiros':'Casados')+': número '+String(finalNumber).padStart(2,'0')+' sorteado!');
-      if(s.drawn.length===TOTAL)showToast((key==='solteiros'?'Solteiros':'Casados')+': todos os 80 números foram sorteados!');
+      showToast((key==='solteiros'?'Solteiros':'Casados')+': número '+String(finalNumber).padStart(2,'0')+' revelado!');
+      if(s.drawn.length===TOTAL)showToast((key==='solteiros'?'Solteiros':'Casados')+': todos os 80 números foram revelados!');
     };
     s.timer=setTimeout(tick,delay);
   }
   function reset(key,ask){
     const s=states[key];if(s.spinning)return;
-    if(ask&&!window.confirm('Deseja reiniciar a roleta de '+key+'? Os números sorteados dessa categoria serão apagados.'))return;
+    if(ask&&!window.confirm('Deseja reiniciar a categoria '+key+'? Os números revelados dessa categoria serão apagados.'))return;
     s.drawn=[];s.last=null;save(key);render(key);showToast('Roleta de '+key+' reiniciada.');
   }
   ['solteiros','casados'].forEach(key=>{
@@ -135,7 +135,7 @@ main{padding:45px 0 70px}.section-heading{display:flex;align-items:end;justify-c
   });
   el('resetAll').addEventListener('click',()=>{
     if(states.solteiros.spinning||states.casados.spinning){showToast('Aguarde o sorteio terminar antes de reiniciar.');return}
-    if(!window.confirm('Reiniciar as duas roletas? Todos os números sorteados serão apagados.'))return;
+    if(!window.confirm('Reiniciar as duas categorias? Todos os números revelados serão apagados.'))return;
     ['solteiros','casados'].forEach(key=>{states[key].drawn=[];states[key].last=null;save(key);render(key)});
     showToast('As duas roletas foram reiniciadas.');
   });
