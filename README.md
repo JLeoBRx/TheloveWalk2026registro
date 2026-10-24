@@ -46,7 +46,7 @@ Não publique nem compartilhe esse token. Inicie o servidor:
 2. Confirme o upload com **Commit changes** na branch `main`. O Render publicará o novo commit e o serviço indexará as fotos automaticamente ao iniciar.
 3. Para criar filtros, organize as fotos em subpastas, por exemplo: `A concentração/`, `A caminhada/`, `Amigos e comunidade/` e `Encerramento/`.
 4. Se necessário, abra `/admin.html`, informe o token administrativo, confirme as autorizações e clique em **Sincronizar álbum** para atualizar manualmente.
-5. Formatos aceitos: JPG, JPEG, PNG e WebP.
+5. Formatos aceitos: JPG, JPEG, PNG, WebP e formatos RAW comuns de câmera (CR2, CR3, NEF, ARW, DNG, ORF, RW2, RAF, PEF, SRW e outros suportados pelo `rawpy`). O sistema gera prévias para a galeria e mantém o original. O RAW precisa ficar abaixo do limite de 100 MB por arquivo do GitHub; para arquivos maiores, use uma prévia JPEG/WebP ou um armazenamento de objetos próprio.
 
 O sistema cria miniaturas em `data/thumbnails` e mantém os originais na pasta da galeria. A página carrega as fotografias por páginas para suportar coleções grandes.
 
@@ -73,3 +73,8 @@ O visitante precisa iniciar a playlist com um clique; a partir daí, o player pa
 ## Antes de divulgar
 
 Confira as autorizações para publicação das fotos e complete o aviso de privacidade com os dados do responsável. O álbum não usa reconhecimento facial. A disponibilidade da música incorporada segue as regras do YouTube e do titular dos direitos.
+
+
+## Envio automático a partir do computador (Windows)
+
+Baixe o pacote de monitoramento local disponibilizado na conversa ou use a pasta `ferramentas_upload_local` se ela tiver sido incluída no pacote do projeto. O monitor cria a pasta `Colocar as fotos aqui` na Área de Trabalho, agrupa as fotos e faz commit/push para a branch `main`; o Render publica a atualização automaticamente e o servidor indexa as imagens ao iniciar. É necessário manter `INICIAR.bat` aberto e ter Git for Windows, Python 3 e autenticação GitHub com permissão de escrita no repositório. Arquivos individuais acima de 95 MB são deixados na pasta local, pois o GitHub bloqueia arquivos acima de 100 MB.
