@@ -39,6 +39,7 @@ RAW_EXTENSIONS = {
 }
 EXTENSIONS = STANDARD_EXTENSIONS | RAW_EXTENSIONS
 MAX_PIXELS = int(os.getenv("MAX_IMAGE_PIXELS", "40000000"))
+MAX_RAW_PIXELS = int(os.getenv("MAX_RAW_IMAGE_PIXELS", "60000000"))
 for path in (PHOTO_DIR, DATA_DIR, THUMB_DIR, RAW_PREVIEW_DIR):
     path.mkdir(parents=True, exist_ok=True)
 
@@ -102,8 +103,8 @@ def create_raw_previews(src: Path, photo_id: str) -> tuple[int,int]:
     thumb_path = THUMB_DIR / (photo_id + ".webp")
     try:
         with rawpy.imread(str(src)) as raw:
-            if raw.sizes.width * raw.sizes.height > MAX_PIXELS:
-                raise ValueError(f"RAW excede o limite de {MAX_PIXELS:,} pixels.")
+            if raw.sizes.width * raw.sizes.height > MAX_RAW_PIXELS:
+                raise ValueError(f"RAW excede o limite de {MAX_RAW_PIXELS:,} pixels.")
             # Half-size demosaicing is faster and sufficient for a web album preview.
             rgb = raw.postprocess(use_camera_wb=True, output_bps=8, half_size=True)
         im = Image.fromarray(rgb).convert("RGB")
