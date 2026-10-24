@@ -11,6 +11,19 @@
 <style>
 :root{color-scheme:dark;--bg:#1a0b2b;--deep:#130720;--surface:#241235;--surface2:#2c1940;--orange:#df6c35;--orange2:#f18a51;--white:#f8f4fa;--muted:#c0b4cb;--line:#493158;--max:1240px}
 *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:85px}body{margin:0;background:var(--bg);color:var(--white);font:400 16px/1.65 "DM Sans",sans-serif;overflow-x:hidden}a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer}button:focus-visible,a:focus-visible{outline:3px solid var(--orange2);outline-offset:4px}img{display:block;max-width:100%}[hidden]{display:none!important}.wrap{width:min(var(--max),calc(100% - 52px));margin-inline:auto}
+#photoPreloader{position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(ellipse at 50% 10%,rgba(103,59,126,.42),transparent 42%),linear-gradient(135deg,#130720 0%,#28153d 55%,#1a0b2b 100%);opacity:1;visibility:visible;transition:opacity .5s ease,visibility .5s ease}
+#photoPreloader.is-done{opacity:0;visibility:hidden;pointer-events:none}
+.preloader-panel{width:min(520px,100%);text-align:center;padding:clamp(28px,6vw,52px);border:1px solid rgba(241,138,81,.32);border-radius:22px;background:rgba(19,7,32,.58);box-shadow:0 28px 90px #0005}
+.preloader-mark{display:grid;place-items:center;width:64px;height:64px;margin:0 auto 20px;border-radius:20px 20px 20px 6px;background:var(--orange);color:var(--deep);font:800 1.15rem Manrope,sans-serif;box-shadow:0 0 0 12px rgba(223,108,53,.08)}
+.preloader-kicker{margin:0;color:var(--orange2);font-size:.68rem;font-weight:800;letter-spacing:.2em}
+.preloader-title{margin:14px 0 10px;font:800 clamp(1.8rem,5vw,2.75rem)/1.04 Manrope,sans-serif;letter-spacing:-.055em}
+.preloader-title span{color:var(--orange)}
+.preloader-message{margin:0 auto;max-width:360px;color:var(--muted);font-size:.92rem;line-height:1.6}
+.preloader-progress{height:7px;margin:28px 0 12px;border-radius:999px;overflow:hidden;background:#ffffff12;border:1px solid #ffffff0b}
+.preloader-progress-fill{display:block;width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--orange),var(--orange2));transition:width .2s ease}
+.preloader-count{margin:0;color:var(--muted);font-size:.76rem;font-variant-numeric:tabular-nums}
+body.preloading{overflow:hidden}
+@media(prefers-reduced-motion:reduce){#photoPreloader,#photoPreloader.is-done,.preloader-progress-fill{transition:none}}
 .site-header{position:sticky;top:0;z-index:30;background:rgba(19,7,32,.92);backdrop-filter:blur(18px);border-bottom:1px solid rgba(223,108,53,.22)}.nav{min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:22px}.brand{display:inline-flex;align-items:center;gap:11px;font:800 .98rem Manrope,sans-serif;letter-spacing:.015em}.brand-mark{display:grid;place-items:center;width:38px;height:38px;border-radius:12px 12px 12px 4px;background:var(--orange);color:var(--deep);font-size:.78rem}.brand small{display:block;color:var(--orange2);font:700 .63rem "DM Sans",sans-serif;letter-spacing:.12em;margin-top:2px}.nav-links{display:flex;align-items:center;gap:26px;color:var(--muted);font-size:.9rem}.nav-links a:hover{color:var(--orange2)}.nav-actions{display:flex;align-items:center;gap:10px}.pill-button{min-height:46px;border:1px solid var(--orange);border-radius:999px;padding:0 18px;display:inline-flex;align-items:center;justify-content:center;gap:9px;font-weight:700;transition:transform .2s,background .2s}.pill-button:hover{transform:translateY(-2px)}.pill-primary{background:var(--orange);color:var(--deep)}.pill-quiet{background:transparent;color:var(--white)}.pill-quiet:hover{background:var(--orange);color:var(--deep)}.menu-toggle{display:none;background:transparent;border:1px solid var(--line);color:var(--white);border-radius:10px;padding:8px 12px}
 .intro{position:relative;isolation:isolate;min-height:min(750px,calc(100svh - 76px));display:flex;align-items:center;overflow:hidden;background:radial-gradient(ellipse at 78% 28%,rgba(103,59,126,.34),transparent 32%),radial-gradient(ellipse at 15% 86%,rgba(223,108,53,.10),transparent 32%),linear-gradient(125deg,#1b0b2c 0%,#28153d 55%,#1a0b2b 100%);border-bottom:1px solid rgba(223,108,53,.25);padding:68px 0 78px}.intro:before{content:"";position:absolute;z-index:-1;width:min(64vw,760px);aspect-ratio:1;border:1px solid rgba(223,108,53,.19);border-radius:50%;right:-12%;top:-34%;box-shadow:0 0 0 36px rgba(223,108,53,.025),0 0 0 90px rgba(223,108,53,.02)}.intro-grid{display:grid;grid-template-columns:1.07fr .93fr;gap:clamp(36px,6vw,92px);align-items:center}.eyebrow{display:flex;align-items:center;gap:11px;color:var(--orange2);font-size:.72rem;font-weight:800;letter-spacing:.19em;text-transform:uppercase}.eyebrow:before{content:"";width:26px;height:1px;background:var(--orange)}.intro h1{margin:24px 0 18px;font:800 clamp(3.7rem,7.7vw,7.5rem)/.84 Manrope,sans-serif;letter-spacing:-.09em}.intro h1 span{display:block}.intro h1 .the-love{font-size:.48em;line-height:1.05;letter-spacing:-.06em;color:var(--orange2);margin-bottom:12px}.intro h1 .walk-word{color:var(--white)}.intro h1 .year-word{color:var(--orange);font-size:.42em;letter-spacing:-.04em;text-align:left;margin-top:18px}.intro-copy{max-width:540px;color:var(--muted);font-size:1.08rem;line-height:1.8;margin:24px 0 0}.intro-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}.cover-art{position:relative;min-height:435px;display:grid;place-items:center}.cover-card{position:relative;width:min(100%,400px);aspect-ratio:4/4.65;padding:28px;overflow:hidden;border:1px solid rgba(241,138,81,.38);border-radius:8px 8px 26px 8px;background:linear-gradient(145deg,rgba(67,39,88,.96),rgba(23,9,39,.98));box-shadow:0 30px 90px rgba(0,0,0,.3);transform:rotate(2.4deg)}.cover-card:before,.cover-card:after{content:"";position:absolute;border:1px solid rgba(241,138,81,.35);border-radius:50%;aspect-ratio:1;pointer-events:none}.cover-card:before{width:105%;right:-30%;top:-19%}.cover-card:after{width:75%;left:-17%;bottom:-26%;border-color:rgba(248,244,250,.18)}.cover-sun{position:absolute;right:13%;top:11%;width:70px;aspect-ratio:1;border-radius:50%;background:var(--orange);box-shadow:0 0 0 15px rgba(223,108,53,.09)}.cover-kicker{position:relative;z-index:1;font-size:.63rem;font-weight:800;letter-spacing:.18em;color:var(--orange2)}.cover-name{position:absolute;z-index:1;left:26px;right:20px;top:34%;font:800 clamp(2.3rem,4.3vw,4.2rem)/.82 Manrope,sans-serif;letter-spacing:-.085em}.cover-name span{display:block}.cover-name span:nth-child(2){color:var(--orange)}.cover-bottom{position:absolute;z-index:1;left:28px;right:25px;bottom:28px;display:flex;align-items:end;justify-content:space-between;gap:12px}.cover-bottom strong{font:800 1.7rem Manrope,sans-serif;color:var(--orange2)}.cover-bottom small{max-width:120px;text-align:right;color:var(--muted);font-size:.65rem;letter-spacing:.13em;text-transform:uppercase}.cover-sticker{position:absolute;z-index:3;left:-1%;bottom:8%;display:grid;place-items:center;width:94px;aspect-ratio:1;border-radius:50%;background:var(--orange);color:var(--deep);font:800 1.15rem Manrope,sans-serif;box-shadow:0 14px 45px rgba(0,0,0,.24);transform:rotate(-9deg)}.cover-spark{position:absolute;right:1%;top:6%;font-size:2.8rem;color:var(--orange2);transform:rotate(18deg)}
 .music-strip{background:var(--deep);border-bottom:1px solid var(--line);padding:18px 0}.music-inner{display:flex;justify-content:space-between;align-items:center;gap:22px}.music-info{display:flex;align-items:center;gap:15px;min-width:0}.vinyl{width:48px;height:48px;flex:none;border:1px solid rgba(241,138,81,.6);border-radius:50%;display:grid;place-items:center;background:repeating-radial-gradient(circle at center,#241332 0 3px,#382046 4px 5px);position:relative}.vinyl:after{content:"";width:10px;height:10px;background:var(--orange);border-radius:50%}.music-label{font-size:.65rem;letter-spacing:.16em;color:var(--orange2);font-weight:800;text-transform:uppercase}.music-title{font:700 .98rem Manrope,sans-serif;line-height:1.3;margin-top:3px}.music-subtitle{font-size:.78rem;color:var(--muted);margin-top:3px}
@@ -152,7 +165,17 @@
 }
 </style>
 </head>
-<body>
+<body class="preloading">
+<div id="photoPreloader" role="status" aria-live="polite" aria-label="Carregando o álbum de fotografias">
+ <div class="preloader-panel">
+  <span class="preloader-mark" aria-hidden="true">tlw</span>
+  <p class="preloader-kicker">THE LOVE WALK · 2026</p>
+  <h1 class="preloader-title">Preparando suas memórias<span>.</span></h1>
+  <p class="preloader-message" id="preloaderMessage">Estamos carregando todas as fotografias para você.</p>
+  <div class="preloader-progress" role="progressbar" aria-label="Progresso do carregamento" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="preloaderProgress"><span class="preloader-progress-fill" id="preloaderProgressFill"></span></div>
+  <p class="preloader-count" id="preloaderCount">Iniciando o álbum…</p>
+ </div>
+</div>
 <header class="site-header"><div class="wrap nav">
 <a class="brand" href="#inicio" aria-label="The Love Walk 2026, início"><span class="brand-mark">tlw</span><span>THE LOVE WALK<small>2026 · ÁLBUM DE FOTOGRAFIAS</small></span></a>
 <nav class="nav-links" id="navLinks" aria-label="Navegação principal"><a href="#album">O álbum</a><a href="#trilha">Música tema</a></nav>
@@ -182,20 +205,74 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
 const $=s=>document.querySelector(s);
-let page=1,pageSize=28,category="",total=0,photos=[],lightIndex=0,lightList=[],categories=[],galleryRequest=0,loadingMore=false;
+let page=1,pageSize=60,category="",total=0,photos=[],lightIndex=0,lightList=[],categories=[],galleryRequest=0,loadingMore=false,preloaderFinished=false;
+const preloaderStartedAt=Date.now();
 const grid=$("#galleryGrid");
 function showToast(message){const t=$("#toast");t.textContent=message;t.classList.add("show");window.setTimeout(()=>t.classList.remove("show"),2800)}
+function setPreloaderProgress(message,percent,detail){
+ if(preloaderFinished)return;
+ const value=Math.max(0,Math.min(100,Math.round(percent)));
+ $("#preloaderMessage").textContent=message;
+ $("#preloaderProgressFill").style.width=value+"%";
+ $("#preloaderProgress").setAttribute("aria-valuenow",String(value));
+ $("#preloaderCount").textContent=detail||value+"%";
+}
+async function finishPreloader(message,detail){
+ if(preloaderFinished)return;
+ setPreloaderProgress(message,100,detail||"Tudo pronto!");
+ const remaining=Math.max(0,5000-(Date.now()-preloaderStartedAt));
+ if(remaining)await new Promise(resolve=>window.setTimeout(resolve,remaining));
+ preloaderFinished=true;
+ const overlay=$("#photoPreloader");
+ overlay.classList.add("is-done");
+ document.body.classList.remove("preloading");
+ window.setTimeout(()=>{overlay.hidden=true},550);
+}
+async function fetchGalleryPage(pageNumber,selectedCategory){
+ const qs=new URLSearchParams({page:String(pageNumber),page_size:String(pageSize)});
+ if(selectedCategory)qs.set("category",selectedCategory);
+ const response=await fetch("/api/gallery?"+qs,{headers:{Accept:"application/json"}});
+ if(!response.ok)throw new Error("Não foi possível buscar a página "+pageNumber+" da galeria.");
+ return response.json();
+}
+async function preloadGalleryImages(requestId){
+ const images=Array.from(grid.querySelectorAll(".photo-card img"));
+ if(!images.length){setPreloaderProgress("Nenhuma fotografia publicada por enquanto.",100,"0 miniaturas");return}
+ let completed=0;
+ const update=()=>{
+  if(requestId!==galleryRequest||preloaderFinished)return;
+  const percent=45+Math.round(55*completed/images.length);
+  setPreloaderProgress("Carregando as miniaturas de todas as fotografias…",percent,completed.toLocaleString("pt-BR")+" de "+images.length.toLocaleString("pt-BR")+" miniaturas");
+ };
+ await Promise.all(images.map(image=>new Promise(resolve=>{
+  let settled=false;
+  const done=()=>{
+   if(settled)return;
+   settled=true;
+   image.removeEventListener("load",done);
+   image.removeEventListener("error",done);
+   completed++;
+   update();
+   resolve();
+  };
+  if(image.complete){done();return}
+  image.addEventListener("load",done,{once:true});
+  image.addEventListener("error",done,{once:true});
+  if(image.complete)done();
+ })));
+}
 $("#menuToggle").addEventListener("click",()=>{const n=$("#navLinks"),open=n.classList.toggle("open");$("#menuToggle").setAttribute("aria-expanded",String(open))});
 $("#navLinks").addEventListener("click",e=>{if(e.target.closest("a"))$("#navLinks").classList.remove("open")});
 function updateFilters(){const f=$("#filters");f.replaceChildren();[""].concat(categories.filter(c=>c)).forEach(value=>{const b=document.createElement("button");b.type="button";b.className="filter";b.dataset.category=value;b.setAttribute("aria-pressed",String(value===category));b.textContent=value||"Todas as fotos";f.append(b)})}
 function aspectRatioFor(photo){const w=Number(photo.width),h=Number(photo.height);return w>0&&h>0?w/h:1.5}
-function photoButton(photo,index){const b=document.createElement("button");b.type="button";b.className="photo-card";const ratio=aspectRatioFor(photo);b.dataset.aspectRatio=String(ratio);if(ratio>=1.55)b.classList.add("wide");b.setAttribute("aria-label","Abrir fotografia "+(index+1));const im=document.createElement("img");im.loading="lazy";im.decoding="async";im.src=photo.thumb||photo.url||photo.src;im.alt=photo.alt||photo.caption||"Fotografia do The Love Walk 2026";im.addEventListener("load",()=>{if(!(Number(photo.width)>0&&Number(photo.height)>0)&&im.naturalWidth>0&&im.naturalHeight>0){b.dataset.aspectRatio=String(im.naturalWidth/im.naturalHeight);b.classList.toggle("wide",im.naturalWidth/im.naturalHeight>=1.55);layoutPhotoGrid()}});const cap=document.createElement("span");cap.className="photo-caption";cap.textContent=photo.caption||"The Love Walk 2026";const num=document.createElement("span");num.className="photo-number";num.textContent=String(index+1).padStart(2,"0");b.append(im,num,cap);b.addEventListener("click",()=>openLightbox(index,photos));return b}
+function photoButton(photo,index){const b=document.createElement("button");b.type="button";b.className="photo-card";const ratio=aspectRatioFor(photo);b.dataset.aspectRatio=String(ratio);if(ratio>=1.55)b.classList.add("wide");b.setAttribute("aria-label","Abrir fotografia "+(index+1));const im=document.createElement("img");im.loading="eager";im.decoding="async";im.fetchPriority="low";im.src=photo.thumb||photo.url||photo.src;im.alt=photo.alt||photo.caption||"Fotografia do The Love Walk 2026";im.addEventListener("load",()=>{if(!(Number(photo.width)>0&&Number(photo.height)>0)&&im.naturalWidth>0&&im.naturalHeight>0){b.dataset.aspectRatio=String(im.naturalWidth/im.naturalHeight);b.classList.toggle("wide",im.naturalWidth/im.naturalHeight>=1.55);layoutPhotoGrid()}});const cap=document.createElement("span");cap.className="photo-caption";cap.textContent=photo.caption||"The Love Walk 2026";const num=document.createElement("span");num.className="photo-number";num.textContent=String(index+1).padStart(2,"0");b.append(im,num,cap);b.addEventListener("click",()=>openLightbox(index,photos));return b}
 function layoutPhotoGrid(){const style=getComputedStyle(grid),rowHeight=parseFloat(style.gridAutoRows)||8,rowGap=parseFloat(style.rowGap)||12;grid.querySelectorAll(".photo-card").forEach(card=>{const ratio=Math.min(4,Math.max(.25,Number(card.dataset.aspectRatio)||1.5));const width=card.getBoundingClientRect().width;if(width>0){const idealHeight=width/ratio;const rows=Math.max(1,Math.ceil((idealHeight+rowGap)/(rowHeight+rowGap)));card.style.gridRowEnd="span "+rows}})}
 let layoutFrame=0;function schedulePhotoLayout(){if(layoutFrame)cancelAnimationFrame(layoutFrame);layoutFrame=requestAnimationFrame(()=>{layoutFrame=0;layoutPhotoGrid()})}
 window.addEventListener("resize",schedulePhotoLayout,{passive:true});
 function emptyState(title,message){const d=document.createElement("div");d.className="empty-state";const icon=document.createElement("div");icon.className="empty-icon";icon.textContent="▧";const h=document.createElement("h3");h.textContent=title;const p=document.createElement("p");p.textContent=message;d.append(icon,h,p);return d}
 async function loadGallery(reset){
  const requestId=reset?++galleryRequest:galleryRequest;
+ const isInitialLoad=!preloaderFinished;
  if(reset){
   page=1;photos=[];loadingMore=false;grid.replaceChildren();
   $("#loadMore").hidden=true;$("#loadMore").disabled=false;
@@ -204,43 +281,64 @@ async function loadGallery(reset){
  }
  $("#galleryStatus").textContent="Buscando as fotografias…";
  $("#albumStatusTop").textContent="Atualizando álbum…";
+ if(isInitialLoad)setPreloaderProgress("Conectando ao álbum de fotografias…",5,"Preparando conexão");
  try{
-  const qs=new URLSearchParams({page:String(page),page_size:String(pageSize)});
-  if(category)qs.set("category",category);
-  const response=await fetch("/api/gallery?"+qs);
-  if(!response.ok)throw new Error("API indisponível");
-  const data=await response.json();
+  const selectedCategory=category;
+  const first=await fetchGalleryPage(1,selectedCategory);
   if(requestId!==galleryRequest)return;
-  total=Number(data.total??data.count??0);
-  categories=Array.isArray(data.categories)?data.categories:[];
-  const incoming=Array.isArray(data.results)?data.results:[];
-  if(reset){
-   photos=incoming;
-   grid.replaceChildren();
-   if(!photos.length)grid.append(emptyState("As lembranças estão a caminho","Este álbum está pronto. Quando as fotografias autorizadas forem adicionadas ao acervo, elas aparecerão aqui organizadas para você explorar."));
-   else photos.forEach((p,i)=>grid.append(photoButton(p,i)));
+  total=Number(first.total??first.count??0);
+  categories=Array.isArray(first.categories)?first.categories:[];
+  const pageCount=Math.ceil(total/pageSize);
+  const collected=Array.isArray(first.results)?first.results.slice():[];
+  let completedPages=1;
+  if(isInitialLoad)setPreloaderProgress("Organizando a coleção completa…",Math.max(8,Math.min(40,5+35*completedPages/Math.max(1,pageCount))),collected.length.toLocaleString("pt-BR")+" de "+total.toLocaleString("pt-BR")+" fotografias identificadas");
+  for(let startPage=2;startPage<=pageCount;startPage+=4){
+   const pageNumbers=[];
+   for(let p=startPage;p<Math.min(startPage+4,pageCount+1);p++)pageNumbers.push(p);
+   const batches=await Promise.all(pageNumbers.map(p=>fetchGalleryPage(p,selectedCategory)));
+   if(requestId!==galleryRequest)return;
+   batches.forEach(data=>{if(Array.isArray(data.results))collected.push(...data.results)});
+   completedPages+=pageNumbers.length;
+   if(isInitialLoad){
+    const percent=5+35*completedPages/Math.max(1,pageCount);
+    setPreloaderProgress("Organizando a coleção completa…",Math.min(40,percent),Math.min(collected.length,total).toLocaleString("pt-BR")+" de "+total.toLocaleString("pt-BR")+" fotografias identificadas");
+   }
+  }
+  const seen=new Set();
+  photos=collected.filter(photo=>{
+   const key=String(photo.id??photo.url??photo.src??photo.filename??photo.thumb??"");
+   if(!key)return true;
+   if(seen.has(key))return false;
+   seen.add(key);return true;
+  });
+  page=Math.max(1,pageCount);
+  grid.replaceChildren();
+  if(!photos.length){
+   grid.append(emptyState("As lembranças estão a caminho","Este álbum está pronto. Quando as fotografias autorizadas forem adicionadas ao acervo, elas aparecerão aqui organizadas para você explorar."));
   }else{
-   const seen=new Set(photos.map(p=>String(p.id??p.url??p.src??p.filename??"")).filter(Boolean));
-   const unique=incoming.filter(p=>{const key=String(p.id??p.url??p.src??p.filename??"");if(!key)return true;if(seen.has(key))return false;seen.add(key);return true;});
-   const start=photos.length;
-   photos=photos.concat(unique);
-   unique.forEach((p,i)=>grid.append(photoButton(p,start+i)));
+   const fragment=document.createDocumentFragment();
+   photos.forEach((photo,index)=>fragment.append(photoButton(photo,index)));
+   grid.append(fragment);
   }
   $("#photoCount").textContent=total.toLocaleString("pt-BR");
-  $("#albumStatusTop").textContent=total===0?"A coleção está vazia por enquanto":"Coleção atualizada";
+  $("#albumStatusTop").textContent=total===0?"A coleção está vazia por enquanto":"Todas as fotografias foram organizadas";
   updateFilters();schedulePhotoLayout();
-  $("#galleryStatus").textContent=total===0?"Nenhuma fotografia foi adicionada ainda.":photos.length>=total?"Fim do álbum: "+photos.length+" de "+total+" fotografias exibidas.":"Exibindo "+photos.length+" de "+total+" fotografias.";
+  $("#galleryStatus").textContent=total===0?"Nenhuma fotografia foi adicionada ainda.":photos.length>=total?"Todas as "+photos.length.toLocaleString("pt-BR")+" fotografias estão no álbum.":"Foram carregadas "+photos.length.toLocaleString("pt-BR")+" de "+total.toLocaleString("pt-BR")+" fotografias.";
   const more=$("#loadMore");
-  if(!photos.length||incoming.length===0||photos.length>=total){
-   more.hidden=false;more.disabled=true;more.textContent="Você chegou ao fim do álbum";more.setAttribute("aria-disabled","true");
-  }else{
-   more.hidden=false;more.disabled=false;more.textContent="Carregar mais fotografias ↓";more.removeAttribute("aria-disabled");
+  more.hidden=true;more.disabled=true;more.textContent="Todas as fotografias já foram carregadas";more.setAttribute("aria-disabled","true");
+  if(isInitialLoad){
+   setPreloaderProgress("Todas as fotografias foram encontradas. Preparando as miniaturas…",45,photos.length.toLocaleString("pt-BR")+" fotografias organizadas");
+   await preloadGalleryImages(requestId);
+   if(requestId!==galleryRequest)return;
+   await finishPreloader("Todas as fotografias estão prontas!",photos.length.toLocaleString("pt-BR")+" fotografias preparadas");
   }
  }catch(error){
   if(requestId!==galleryRequest)return;
-  if(reset)grid.replaceChildren(emptyState("Não foi possível carregar o álbum","Confira se o servidor está ligado e tente atualizar a página."));
-  $("#galleryStatus").textContent="A conexão com a galeria falhou.";
-  $("#albumStatusTop").textContent="Servidor indisponível";$("#loadMore").hidden=true;
+  if(reset)grid.replaceChildren(emptyState("Não foi possível carregar o álbum","Verifique a conexão e atualize a página para tentar novamente."));
+  $("#galleryStatus").textContent="A conexão com a galeria falhou. Atualize a página para tentar novamente.";
+  $("#albumStatusTop").textContent="Servidor indisponível";
+  $("#loadMore").hidden=true;
+  if(isInitialLoad)await finishPreloader("Não foi possível conectar ao álbum.","Tente atualizar a página quando a conexão estiver disponível.");
  }
 }
 $("#filters").addEventListener("click",e=>{const b=e.target.closest("[data-category]");if(!b)return;category=b.dataset.category;loadGallery(true)});
