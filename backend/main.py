@@ -1,6 +1,7 @@
 """The Love Walk 2026 photo-album API. No facial recognition or biometric processing."""
 from __future__ import annotations
 import hashlib
+import io
 import os
 import secrets
 import sqlite3
@@ -107,9 +108,33 @@ def create_raw_previews(src: Path, photo_id: str) -> tuple[int,int]:
         with rawpy.imread(str(src)) as raw:
             if raw.sizes.width * raw.sizes.height > MAX_RAW_PIXELS:
                 raise ValueError(f"RAW excede o limite de {MAX_RAW_PIXELS:,} pixels.")
-            # Half-size demosaicing is faster and sufficient for a web album preview.
-            rgb = raw.postprocess(use_camera_wb=True, output_bps=8, half_size=True)
-        im = Image.fromarray(rgb).convert("RGB")
+
+            # Prefer the JPEG preview embedded by the camera; it is much faster
+            # than demosaicing every sensor pixel on a small hosting instance.
+            im = None
+            try:
+                embedded = raw.extract_thumb()
+                if embedded.format == rawpy.ThumbFormat.JPEG:
+                    with Image.open(io.BytesIO(embedded.data)) as embedded_image:
+                        embedded_image.load()
+                        candidate = ImageOps.exif_transpose(embedded_image).convert("RGB")
+                elif embedded.format == rawpy.ThumbFormat.BITMAP:
+                    candidate = Image.fromarray(embedded.data).convert("RGB")
+                else:
+                    candidate = None
+
+                if candidate is not None and min(candidate.size) >= 640:
+                    im = candidate
+                    print(f"[album-index] using embedded preview {src.name} {im.width}x{im.height}", flush=True)
+            except (rawpy.LibRawNoThumbnailError, rawpy.LibRawUnsupportedThumbnailError,
+                    UnidentifiedImageError, OSError, ValueError) as thumb_error:
+                print(f"[album-index] embedded preview unavailable for {src.name}: {thumb_error}", flush=True)
+
+            if im is None:
+                print(f"[album-index] demosaicing RAW {src.name}", flush=True)
+                rgb = raw.postprocess(use_camera_wb=True, output_bps=8, half_size=True)
+                im = Image.fromarray(rgb).convert("RGB")
+
         dimensions = im.size
         im.thumbnail((2400, 2400), Image.Resampling.LANCZOS)
         preview_path.parent.mkdir(parents=True, exist_ok=True)
@@ -173,6 +198,7 @@ def index_photos() -> dict:
                 if old and old["file_size"]==stat.st_size and abs(old["mtime"]-stat.st_mtime)<0.01 and thumb and thumb.is_file() and (source.suffix.lower() not in RAW_EXTENSIONS or (RAW_PREVIEW_DIR/(pid+".jpg")).is_file()):
                     skipped+=1
                     continue
+            print(f"[album-index] processing {source.name}", flush=True)
             width,height=create_thumb(source,THUMB_DIR/(pid+".webp"))
             caption=source.stem.replace("_"," ").replace("-"," ").strip() or "The Love Walk 2026"
             with db() as c:
@@ -182,9 +208,10 @@ def index_photos() -> dict:
                   file_size=excluded.file_size,mtime=excluded.mtime,width=excluded.width,height=excluded.height,indexed_at=excluded.indexed_at""",
                   (pid,rel,source.name,category_for(rel),caption,pid+".webp",stat.st_size,stat.st_mtime,width,height,time.time()))
             processed+=1
+            print(f"[album-index] indexed {source.name}", flush=True)
         except Exception as e:
             errors+=1
-            print(f"[album-index] {source.name}: {type(e).__name__}: {e}")
+            print(f"[album-index] {source.name}: {type(e).__name__}: {e}", flush=True)
     with db() as c:
         for row in c.execute("SELECT id,relative_path,thumb_filename FROM photos").fetchall():
             if row["relative_path"] not in found:
