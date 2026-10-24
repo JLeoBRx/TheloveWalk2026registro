@@ -52,9 +52,47 @@ main{padding:45px 0 70px}.section-heading{display:flex;align-items:end;justify-c
 @media(max-width:760px){.sync-panel{grid-template-columns:1fr;gap:14px}.sync-actions{align-items:stretch}.public-view-link{align-self:flex-start}.sync-details{width:100%}.sync-details summary{text-align:left}}
 @media(max-width:520px){.sync-panel{padding:14px;gap:12px;margin-bottom:18px}.sync-copy{gap:10px}.sync-copy strong{font-size:.83rem}.sync-copy p{font-size:.72rem}.sync-icon{width:32px;height:32px}.public-view-link{min-height:36px;font-size:.7rem}.sync-details summary{font-size:.7rem}}
 
+
+/* Autenticação da área do operador */
+body.auth-locked{overflow:hidden}
+body.auth-locked>:not(#operatorLogin){visibility:hidden!important;pointer-events:none!important}
+.operator-login{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:20px;background:radial-gradient(ellipse at 50% 0%,#39204e 0,rgba(19,7,32,.98) 62%),#130720}
+.operator-login[hidden]{display:none!important}
+.login-card{width:min(100%,430px);padding:30px;border:1px solid rgba(241,138,81,.28);border-radius:22px;background:linear-gradient(150deg,#2c1940,#1a0b2b);box-shadow:0 30px 90px #0007}
+.login-brand{display:flex;align-items:center;gap:11px;margin-bottom:27px}
+.login-brand-mark{display:grid;place-items:center;width:45px;height:45px;border-radius:14px 14px 14px 5px;background:linear-gradient(145deg,#f18a51,#cf5c2a);color:#190923;font-size:1.5rem}
+.login-brand strong{display:block;font:800 1rem Manrope,sans-serif}
+.login-brand small{display:block;margin-top:3px;color:var(--orange2);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;font-weight:800}
+.login-card .eyebrow{font-size:.64rem}
+.login-card h2{margin:12px 0 9px;font:800 clamp(1.8rem,7vw,2.35rem)/1.05 Manrope,sans-serif;letter-spacing:-.065em}
+.login-intro{margin:0 0 23px;color:var(--muted);font-size:.88rem;line-height:1.7}
+.login-label{display:block;margin-bottom:7px;color:#eee2f2;font-size:.76rem;font-weight:700}
+.login-input{width:100%;min-height:48px;padding:0 14px;border:1px solid rgba(192,180,203,.26);border-radius:11px;background:#130720;color:var(--white);font:inherit;font-size:.9rem;letter-spacing:.08em}
+.login-input:focus{outline:2px solid rgba(241,138,81,.6);outline-offset:2px}
+.login-submit{width:100%;min-height:48px;margin-top:13px;border:0;border-radius:11px;background:linear-gradient(135deg,#f18a51,#df6c35);color:#1b0928;font-weight:800;box-shadow:0 7px 22px #df6c352d}
+.login-submit:disabled{opacity:.65;cursor:wait}
+.login-status{min-height:1.5em;margin:12px 0 0;color:var(--muted);font-size:.74rem;line-height:1.55}
+.login-status.error{color:#ffb3a8}.login-footnote{margin:18px 0 0;padding-top:14px;border-top:1px solid var(--line);color:#a99ab5;font-size:.68rem;line-height:1.6}
+@media(max-width:520px){.login-card{padding:23px 19px;border-radius:18px}}
 </style>
 </head>
-<body>
+<body class="auth-locked">
+
+<section class="operator-login" id="operatorLogin" aria-labelledby="operatorLoginTitle">
+  <div class="login-card">
+    <div class="login-brand"><span class="login-brand-mark" aria-hidden="true">♡</span><div><strong>Painel de Números</strong><small>Área restrita do operador</small></div></div>
+    <div class="eyebrow">Acesso autorizado</div>
+    <h2 id="operatorLoginTitle">Entrar no painel</h2>
+    <p class="login-intro">Digite a senha do organizador para acessar os controles de Solteiros e Casados e publicar os resultados em tempo real.</p>
+    <form id="operatorLoginForm">
+      <label class="login-label" for="operatorPassword">Senha do operador</label>
+      <input class="login-input" id="operatorPassword" name="password" type="password" autocomplete="current-password" required placeholder="Digite a senha" autofocus>
+      <button class="login-submit" id="operatorLoginButton" type="submit">Entrar no painel →</button>
+      <p class="login-status" id="operatorLoginStatus" role="status" aria-live="polite">Acesso restrito aos organizadores.</p>
+    </form>
+    <p class="login-footnote">Este acesso é separado do painel público de acompanhamento.</p>
+  </div>
+</section>
 <header class="topbar"><div class="wrap nav">
   <div class="brand"><span class="brand-mark" aria-hidden="true">♡</span><span>Painel de Números<small>Solteiros & Casados</small></span></div>
   <span class="top-tag"><i></i> Números de 01 a 80</span>
@@ -94,12 +132,7 @@ main{padding:45px 0 70px}.section-heading{display:flex;align-items:end;justify-c
     </div>
     <div class="sync-actions">
       <a class="public-view-link" href="https://painel-numeros-ao-vivo.onrender.com" target="_blank" rel="noopener">Abrir painel público ↗</a>
-      <details class="sync-details">
-        <summary>Conectar como organizador</summary>
-        <label for="syncKey">Chave do organizador</label>
-        <div class="key-row"><input id="syncKey" type="password" autocomplete="off" spellcheck="false" placeholder="Cole a chave de conexão"><button id="connectSync" type="button">Conectar</button></div>
-        <p class="sync-status" id="syncStatus" role="status">Ainda não conectado. Só o organizador precisa desta chave.</p>
-      </details>
+      <p class="sync-status" id="syncStatus" role="status">Faça login para conectar e atualizar o painel público.</p>
     </div>
   </section>
   <section class="roulette-grid" aria-label="Categorias de números">
@@ -124,11 +157,10 @@ main{padding:45px 0 70px}.section-heading{display:flex;align-items:end;justify-c
 (function(){
   const TOTAL=80;
   const SYNC_API='https://the-love-walk-2026-album.onrender.com/api/number-board';
-  const SYNC_KEY='number-board-control-key-v1';
+  const LOGIN_API='https://the-love-walk-2026-album.onrender.com/api/operator-login';
+  const SESSION_KEY='number-board-operator-session-v1';
   let syncQueue=Promise.resolve();
   const syncStatus=document.getElementById('syncStatus');
-  const syncKeyInput=document.getElementById('syncKey');
-  const connectButton=document.getElementById('connectSync');
   const states={
     solteiros:{drawn:[],last:null,timer:null,spinning:false},
     casados:{drawn:[],last:null,timer:null,spinning:false}
@@ -136,14 +168,16 @@ main{padding:45px 0 70px}.section-heading{display:flex;align-items:end;justify-c
   let toastTimer;
   function showToast(message){const el=document.getElementById('toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2600)}
   function setSyncStatus(message,kind=''){if(!syncStatus)return;syncStatus.textContent=message;syncStatus.className='sync-status'+(kind?' '+kind:'')}
-  function accessKey(){try{return sessionStorage.getItem(SYNC_KEY)||''}catch(e){return ''}}
+  function accessKey(){try{return sessionStorage.getItem(SESSION_KEY)||''}catch(e){return ''}}
+  function setLoginMessage(message,kind=''){const el=document.getElementById('operatorLoginStatus');if(el){el.textContent=message;el.className='login-status'+(kind?' '+kind:'')}}
+  function unlockOperator(){document.body.classList.remove('auth-locked');const login=document.getElementById('operatorLogin');if(login)login.hidden=true;}
   function queueBoardSync(){
     if(!accessKey())return Promise.resolve(false);
     syncQueue=syncQueue.catch(()=>{}).then(async()=>{
       const token=accessKey();if(!token)return false;
       const body={categories:{solteiros:{drawn:[...states.solteiros.drawn],last:states.solteiros.last},casados:{drawn:[...states.casados.drawn],last:states.casados.last}}};
       try{
-        const response=await fetch(SYNC_API,{method:'POST',headers:{'Content-Type':'application/json','X-Number-Board-Token':token},body:JSON.stringify(body),cache:'no-store'});
+        const response=await fetch(SYNC_API,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify(body),cache:'no-store'});
         if(response.status===401){setSyncStatus('Chave inválida. Confira a chave do organizador.','error');return false}
         if(!response.ok){setSyncStatus('Não foi possível atualizar o painel público (HTTP '+response.status+').','error');return false}
         setSyncStatus('Conectado · painel público atualizado automaticamente.','connected');
@@ -151,16 +185,6 @@ main{padding:45px 0 70px}.section-heading{display:flex;align-items:end;justify-c
       }catch(e){setSyncStatus('Falha de conexão com o painel público. Tente novamente.','error');return false}
     });
     return syncQueue;
-  }
-  async function connectPublicBoard(){
-    const token=(syncKeyInput?.value||'').trim();
-    if(!token){setSyncStatus('Cole a chave do organizador para conectar.','error');return}
-    try{sessionStorage.setItem(SYNC_KEY,token)}catch(e){}
-    if(connectButton){connectButton.disabled=true;connectButton.textContent='Conectando…'}
-    setSyncStatus('Conectando ao painel público…');
-    const ok=await queueBoardSync();
-    if(connectButton){connectButton.disabled=false;connectButton.textContent=ok?'Conectado ✓':'Tentar novamente'}
-    if(ok){if(syncKeyInput)syncKeyInput.value='';showToast('Painel público conectado!');}
   }
   function storageKey(key){return 'roleta-do-amor-v1-'+key}
   function save(key){try{localStorage.setItem(storageKey(key),JSON.stringify({drawn:states[key].drawn,last:states[key].last}))}catch(e){}}
@@ -214,8 +238,45 @@ main{padding:45px 0 70px}.section-heading{display:flex;align-items:end;justify-c
   ['solteiros','casados'].forEach(key=>{
     load(key);el(key+'Spin').addEventListener('click',()=>draw(key));el(key+'Reset').addEventListener('click',()=>reset(key,true));render(key);
   });
-  connectButton?.addEventListener('click',connectPublicBoard);
-  if(accessKey()){setSyncStatus('Chave disponível nesta sessão. Reconectando ao painel público…');void queueBoardSync();if(connectButton)connectButton.textContent='Conectar novamente'}
+  const loginForm=document.getElementById('operatorLoginForm');
+  const loginButton=document.getElementById('operatorLoginButton');
+  loginForm?.addEventListener('submit',async(event)=>{
+    event.preventDefault();
+    const password=(document.getElementById('operatorPassword')?.value||'');
+    if(!password){setLoginMessage('Digite a senha do operador.','error');return}
+    if(loginButton){loginButton.disabled=true;loginButton.textContent='Verificando…'}
+    setLoginMessage('Verificando a senha com o servidor…');
+    try{
+      const response=await fetch(LOGIN_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password}),cache:'no-store'});
+      const result=await response.json().catch(()=>({}));
+      if(!response.ok||!result.access_token){
+        if(response.status===429)throw new Error('Muitas tentativas. Aguarde alguns minutos antes de tentar novamente.');
+        if(response.status===503)throw new Error('A autenticação ainda não está configurada no servidor.');
+        throw new Error('Senha incorreta. Confira e tente novamente.');
+      }
+      try{sessionStorage.setItem(SESSION_KEY,result.access_token)}catch(e){throw new Error('Não foi possível salvar a sessão neste navegador.')}
+      const synced=await queueBoardSync();
+      if(!synced)throw new Error('A senha foi aceita, mas não foi possível conectar ao painel público. Tente novamente.');
+      const passwordInput=document.getElementById('operatorPassword');if(passwordInput)passwordInput.value='';
+      unlockOperator();
+    }catch(error){
+      try{sessionStorage.removeItem(SESSION_KEY)}catch(e){}
+      setLoginMessage(error.message||'Não foi possível entrar. Verifique sua conexão.','error');
+    }finally{
+      if(loginButton){loginButton.disabled=false;loginButton.textContent='Entrar no painel →'}
+    }
+  });
+  async function resumeOperatorSession(){
+    if(!accessKey())return;
+    setLoginMessage('Validando sua sessão…');
+    const ok=await queueBoardSync();
+    if(ok){unlockOperator();return}
+    try{sessionStorage.removeItem(SESSION_KEY)}catch(e){}
+    document.body.classList.add('auth-locked');
+    const login=document.getElementById('operatorLogin');if(login)login.hidden=false;
+    setLoginMessage('Sua sessão expirou. Digite a senha novamente.','error');
+  }
+  void resumeOperatorSession();
   el('resetAll').addEventListener('click',()=>{
     if(states.solteiros.spinning||states.casados.spinning){showToast('Aguarde a seleção terminar antes de reiniciar.');return}
     if(!window.confirm('Reiniciar as duas categorias? Todos os números revelados serão apagados.'))return;
