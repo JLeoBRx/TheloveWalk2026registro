@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
-"""Match whole-image perceptual hashes to original repo photos, not faces."""
-import io, json, math, shutil
+"""Match repository originals to reference images using whole-image and crop perceptual hashes."""
+import gzip
+import io
+import json
+import math
+import shutil
 from pathlib import Path
+
 import numpy as np
 import rawpy
 from PIL import Image, ImageOps
@@ -10,6 +15,7 @@ from scipy.fftpack import dct
 ROOT = Path(__file__).resolve().parents[1]
 PHOTO_DIR = ROOT / "colocar as fotos aqui"
 REFS_FILE = ROOT / "scripts" / "reference_hashes.json"
+CROP_REFS_FILE = ROOT / "scripts" / "unmatched_reference_crops.json.gz"
 DEST = ROOT / "fotosdopastor e a dona"
 SUPPORTED = {".jpg", ".jpeg", ".png", ".tif", ".tiff", ".cr2", ".arw", ".nef", ".dng"}
 
@@ -61,6 +67,8 @@ def score(ref, cand):
 
 def main():
     refs = json.loads(REFS_FILE.read_text(encoding="utf-8"))
+    with gzip.open(CROP_REFS_FILE, "rt", encoding="utf-8") as f:
+        extra_variants = {r["name"]: r["variants"] for r in json.load(f)}
     source_files = sorted(p for p in PHOTO_DIR.rglob("*") if p.is_file() and p.suffix.lower() in SUPPORTED)
     print(f"[match] references={len(refs)} source_files={len(source_files)}")
     candidates = []
@@ -74,18 +82,28 @@ def main():
     DEST.mkdir(parents=True, exist_ok=True)
     copied, rows = {}, []
     for ref in refs:
+        variants = extra_variants.get(ref["name"])
+        if not variants:
+            variants = [{"p": ref["phash"], "d": ref["dhash"],
+                         "w": ref["w"], "h": ref["h"], "t": "full"}]
         ranked = []
         for cand in candidates:
-            value, pd, dd, ad = score(ref, cand)
-            ranked.append((value, pd, dd, ad, cand))
+            cand_best = None
+            for v in variants:
+                variant_ref = {"phash": v["p"], "dhash": v["d"], "w": v["w"], "h": v["h"]}
+                value, pd, dd, ad = score(variant_ref, cand)
+                result = (value, pd, dd, ad, cand, v.get("t", "full"))
+                if cand_best is None or result[:4] < cand_best[:4]:
+                    cand_best = result
+            ranked.append(cand_best)
         ranked.sort(key=lambda x: (x[0], x[1], x[2]))
         if not ranked:
             rows.append((ref["name"], None, None, None, "sem candidatos"))
             continue
-        best_score, best_p, best_d, best_ad, best = ranked[0]
+        best_score, best_p, best_d, best_ad, best, best_variant = ranked[0]
         if best_p > 8 or best_d > 20 or best_ad > 0.48:
             rows.append((ref["name"], None, best_p, best_d, "sem correspondência suficientemente confiável"))
-            print(f"[unmatched] {ref['name']}: best pHash={best_p}, dHash={best_d}")
+            print(f"[unmatched] {ref['name']}: best pHash={best_p}, dHash={best_d}, crop={best_variant}")
             continue
         group = [x for x in ranked if x[1] <= min(8, best_p + 2)
                  and x[2] <= best_d + 5
@@ -94,22 +112,23 @@ def main():
         if not group:
             group = [ranked[0]]
         chosen_names = []
-        for value, pd, dd, ad, cand in group:
+        for value, pd, dd, ad, cand, variant_tag in group:
             source = cand["path"]
             destination = DEST / source.name
             if not destination.exists():
                 shutil.copy2(source, destination)
             copied[source.as_posix()] = {"phash_distance": pd, "dhash_distance": dd,
-                                          "score": round(value, 2), "reference": ref["name"]}
-            chosen_names.append(f"{source.name} (pHash {pd}; dHash {dd})")
+                                          "score": round(value, 2), "reference": ref["name"],
+                                          "variant": variant_tag}
+            chosen_names.append(f"{source.name} (pHash {pd}; dHash {dd}; crop {variant_tag})")
         rows.append((ref["name"], "; ".join(chosen_names), best_p, best_d, "correspondência encontrada"))
-        print(f"[match] {ref['name']} -> {', '.join(x[4]['path'].name for x in group)} (p={best_p}, d={best_d})")
+        print(f"[match] {ref['name']} -> {', '.join(x[4]['path'].name for x in group)} (p={best_p}, d={best_d}, crop={best_variant})")
 
     report = ["# Relatório de correspondência de fotos originais", "",
               f"Referências analisadas: {len(refs)}",
               f"Arquivos originais examinados: {len(source_files)}",
-              f"Arquivos originais copiados: {len(copied)}", "",
-              "Correspondências calculadas por hashes perceptuais da imagem inteira; não foi usado reconhecimento facial.", "",
+              f"Arquivos originais copiados nesta varredura: {len(copied)}", "",
+              "Correspondências por hash perceptual da imagem inteira e por recortes de referência; não foi usado reconhecimento facial.", "",
               "| Foto de referência | Original encontrado | Distância pHash | Distância dHash | Resultado |",
               "|---|---|---:|---:|---|"]
     for reference, matched, pd, dd, status in rows:

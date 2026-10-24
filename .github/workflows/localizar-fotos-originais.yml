@@ -8,6 +8,7 @@ on:
       - ".github/workflows/localizar-fotos-originais.yml"
       - "scripts/localizar_fotos_originais.py"
       - "scripts/reference_hashes.json"
+      - "scripts/unmatched_reference_crops.json.gz"
   workflow_dispatch:
 
 permissions:
@@ -32,6 +33,7 @@ jobs:
             /.github/workflows/localizar-fotos-originais.yml
             /scripts/localizar_fotos_originais.py
             /scripts/reference_hashes.json
+            /scripts/unmatched_reference_crops.json.gz
             /colocar as fotos aqui/*.jpg
             /colocar as fotos aqui/*.jpeg
             /colocar as fotos aqui/*.CR2
@@ -53,6 +55,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "Nenhum arquivo novo para salvar."
           else
-            git commit -m "Copy original photos matching supplied references"
+            git commit -m "Improve original photo matching with crop variants"
             git push origin HEAD:localizar-originais-pastor
           fi
