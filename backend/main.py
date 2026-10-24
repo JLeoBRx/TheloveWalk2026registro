@@ -175,51 +175,74 @@ def payload(row: sqlite3.Row) -> dict:
             "original":f"/media/{row['id']}","is_raw":is_raw,"category":row["category"],"caption":row["caption"],
             "alt":row["caption"],"width":row["width"],"height":row["height"]}
 
-def index_photos() -> dict:
-    files=sorted(p for p in PHOTO_DIR.rglob("*") if p.is_file() and p.suffix.lower() in EXTENSIONS)
-    found:set[str]=set()
-    processed=skipped=errors=0
-    for source in files:
-        try:
-            if source.is_symlink():
-                errors+=1
-                continue
-            source=source.resolve(strict=True)
-            if PHOTO_DIR not in source.parents:
-                errors+=1
-                continue
-            rel=source.relative_to(PHOTO_DIR).as_posix()
-            found.add(rel)
-            stat=source.stat()
-            pid=id_for(rel)
-            with db() as c:
-                old=c.execute("SELECT file_size,mtime,thumb_filename FROM photos WHERE id=?",(pid,)).fetchone()
-                thumb=(THUMB_DIR/old["thumb_filename"]) if old else None
-                if old and old["file_size"]==stat.st_size and abs(old["mtime"]-stat.st_mtime)<0.01 and thumb and thumb.is_file() and (source.suffix.lower() not in RAW_EXTENSIONS or (RAW_PREVIEW_DIR/(pid+".jpg")).is_file()):
-                    skipped+=1
-                    continue
-            print(f"[album-index] processing {source.name}", flush=True)
-            width,height=create_thumb(source,THUMB_DIR/(pid+".webp"))
-            caption=source.stem.replace("_"," ").replace("-"," ").strip() or "The Love Walk 2026"
-            with db() as c:
-                c.execute("""INSERT INTO photos VALUES(?,?,?,?,?,?,?,?,?,?,?)
-                  ON CONFLICT(id) DO UPDATE SET relative_path=excluded.relative_path,filename=excluded.filename,
-                  category=excluded.category,caption=excluded.caption,thumb_filename=excluded.thumb_filename,
-                  file_size=excluded.file_size,mtime=excluded.mtime,width=excluded.width,height=excluded.height,indexed_at=excluded.indexed_at""",
-                  (pid,rel,source.name,category_for(rel),caption,pid+".webp",stat.st_size,stat.st_mtime,width,height,time.time()))
-            processed+=1
-            print(f"[album-index] indexed {source.name}", flush=True)
-        except Exception as e:
-            errors+=1
-            print(f"[album-index] {source.name}: {type(e).__name__}: {e}", flush=True)
-    with db() as c:
-        for row in c.execute("SELECT id,relative_path,thumb_filename FROM photos").fetchall():
-            if row["relative_path"] not in found:
-                c.execute("DELETE FROM photos WHERE id=?",(row["id"],))
-                (THUMB_DIR/row["thumb_filename"]).unlink(missing_ok=True)
-                (RAW_PREVIEW_DIR/(row["id"]+".jpg")).unlink(missing_ok=True)
-    return {"found":len(files),"processed":processed,"skipped_unchanged":skipped,"errors":errors}
+INDEX_STATUS = {
+    "running": False,
+    "complete": False,
+    "failed": False,
+    "error": "",
+    "total_files": 0,
+    "processed": 0,
+    "errors": 0,
+}
 
+
+def index_photos() -> dict:
+    INDEX_STATUS.update({
+        "running": True, "complete": False, "failed": False, "error": "",
+        "total_files": 0, "processed": 0, "errors": 0,
+    })
+    processed = skipped = errors = 0
+    try:
+        files = sorted(p for p in PHOTO_DIR.rglob("*") if p.is_file() and p.suffix.lower() in EXTENSIONS)
+        INDEX_STATUS["total_files"] = len(files)
+        found: set[str] = set()
+        for position, source in enumerate(files, start=1):
+            try:
+                if source.is_symlink():
+                    errors += 1
+                    continue
+                source = source.resolve(strict=True)
+                if PHOTO_DIR not in source.parents:
+                    errors += 1
+                    continue
+                rel = source.relative_to(PHOTO_DIR).as_posix()
+                found.add(rel)
+                stat = source.stat()
+                pid = id_for(rel)
+                with db() as c:
+                    old = c.execute("SELECT file_size,mtime,thumb_filename FROM photos WHERE id=?", (pid,)).fetchone()
+                    thumb = (THUMB_DIR / old["thumb_filename"]) if old else None
+                    if old and old["file_size"] == stat.st_size and abs(old["mtime"] - stat.st_mtime) < 0.01 and thumb and thumb.is_file() and (source.suffix.lower() not in RAW_EXTENSIONS or (RAW_PREVIEW_DIR / (pid + ".jpg")).is_file()):
+                        skipped += 1
+                        continue
+                print(f"[album-index] processing {source.name}", flush=True)
+                width, height = create_thumb(source, THUMB_DIR / (pid + ".webp"))
+                caption = source.stem.replace("_", " ").replace("-", " ").strip() or "The Love Walk 2026"
+                with db() as c:
+                    c.execute("""INSERT INTO photos VALUES(?,?,?,?,?,?,?,?,?,?,?)
+                      ON CONFLICT(id) DO UPDATE SET relative_path=excluded.relative_path,filename=excluded.filename,
+                      category=excluded.category,caption=excluded.caption,thumb_filename=excluded.thumb_filename,
+                      file_size=excluded.file_size,mtime=excluded.mtime,width=excluded.width,height=excluded.height,indexed_at=excluded.indexed_at""",
+                      (pid, rel, source.name, category_for(rel), caption, pid + ".webp", stat.st_size, stat.st_mtime, width, height, time.time()))
+                processed += 1
+                print(f"[album-index] indexed {source.name}", flush=True)
+            except Exception as e:
+                errors += 1
+                print(f"[album-index] {source.name}: {type(e).__name__}: {e}", flush=True)
+            finally:
+                INDEX_STATUS.update({"processed": position, "errors": errors})
+        with db() as c:
+            for row in c.execute("SELECT id,relative_path,thumb_filename FROM photos").fetchall():
+                if row["relative_path"] not in found:
+                    c.execute("DELETE FROM photos WHERE id=?", (row["id"],))
+                    (THUMB_DIR / row["thumb_filename"]).unlink(missing_ok=True)
+                    (RAW_PREVIEW_DIR / (row["id"] + ".jpg")).unlink(missing_ok=True)
+        return {"found": len(files), "processed": processed, "skipped_unchanged": skipped, "errors": errors}
+    except Exception as exc:
+        INDEX_STATUS.update({"failed": True, "error": type(exc).__name__})
+        raise
+    finally:
+        INDEX_STATUS.update({"running": False, "complete": not INDEX_STATUS["failed"], "errors": errors})
 
 def _startup_index_worker():
     """Index the committed gallery without blocking application health checks."""
@@ -242,8 +265,20 @@ def auto_index_gallery_on_startup():
 @app.get("/api/health")
 def health():
     with db() as c:
-        count=c.execute("SELECT COUNT(*) FROM photos").fetchone()[0]
-    return {"status":"ok","service":"The Love Walk 2026 Photo Album API","photos_indexed":count,"admin_configured":ADMIN_OK}
+        count = c.execute("SELECT COUNT(*) FROM photos").fetchone()[0]
+    return {
+        "status": "ok",
+        "service": "The Love Walk 2026 Photo Album API",
+        "photos_indexed": count,
+        "admin_configured": ADMIN_OK,
+        "indexing": INDEX_STATUS["running"],
+        "index_complete": INDEX_STATUS["complete"],
+        "index_failed": INDEX_STATUS["failed"],
+        "index_error": INDEX_STATUS["error"],
+        "index_total_files": INDEX_STATUS["total_files"],
+        "index_processed": INDEX_STATUS["processed"],
+        "index_errors": INDEX_STATUS["errors"],
+    }
 
 OPERATOR_SESSIONS: dict[str, float] = {}
 OPERATOR_LOGIN_ATTEMPTS: dict[str, dict[str, float | int]] = {}

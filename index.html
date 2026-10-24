@@ -235,13 +235,53 @@ async function fetchGalleryPage(pageNumber,selectedCategory){
  if(!response.ok)throw new Error("Não foi possível buscar a página "+pageNumber+" da galeria.");
  return response.json();
 }
+async function waitForGalleryIndex(requestId){
+ let failedChecks=0;
+ while(requestId===galleryRequest){
+  let status;
+  try{
+   const response=await fetch("/api/health",{cache:"no-store",headers:{Accept:"application/json"}});
+   if(!response.ok)throw new Error("Servidor indisponível");
+   status=await response.json();
+   failedChecks=0;
+  }catch(error){
+   failedChecks++;
+   if(failedChecks>=20)throw new Error("Não foi possível conectar ao serviço de fotografias. Atualize a página para tentar novamente.");
+   setPreloaderProgress("Conectando ao serviço de fotografias…",5,"Aguardando o servidor");
+   await new Promise(resolve=>window.setTimeout(resolve,1500));
+   continue;
+  }
+  if(status.index_failed)throw new Error("O servidor encontrou um problema ao preparar a galeria. Atualize a página para tentar novamente.");
+  if(status.index_complete===true&&!status.indexing)return status;
+  const fileCount=Math.max(0,Number(status.index_total_files)||0);
+  const processed=Math.max(0,Number(status.index_processed)||0);
+  const photoCount=Math.max(0,Number(status.photos_indexed)||0);
+  const fraction=fileCount>0?Math.min(1,processed/fileCount):0;
+  setPreloaderProgress(
+   "Preparando a coleção completa no servidor…",
+   Math.round(5+25*fraction),
+   fileCount>0
+    ?processed.toLocaleString("pt-BR")+" de "+fileCount.toLocaleString("pt-BR")+" arquivos conferidos · "+photoCount.toLocaleString("pt-BR")+" fotografias indexadas"
+    :photoCount.toLocaleString("pt-BR")+" fotografias indexadas · verificando a coleção"
+  );
+  await new Promise(resolve=>window.setTimeout(resolve,1200));
+ }
+ return null;
+}
+async function fetchGalleryPage(pageNumber,selectedCategory){
+ const qs=new URLSearchParams({page:String(pageNumber),page_size:String(pageSize)});
+ if(selectedCategory)qs.set("category",selectedCategory);
+ const response=await fetch("/api/gallery?"+qs,{headers:{Accept:"application/json"}});
+ if(!response.ok)throw new Error("Não foi possível buscar a página "+pageNumber+" da galeria.");
+ return response.json();
+}
 async function preloadGalleryImages(requestId){
  const images=Array.from(grid.querySelectorAll(".photo-card img"));
  if(!images.length){setPreloaderProgress("Nenhuma fotografia publicada por enquanto.",100,"0 miniaturas");return}
  let completed=0;
  const update=()=>{
   if(requestId!==galleryRequest||preloaderFinished)return;
-  const percent=45+Math.round(55*completed/images.length);
+  const percent=55+Math.round(45*completed/images.length);
   setPreloaderProgress("Carregando as miniaturas de todas as fotografias…",percent,completed.toLocaleString("pt-BR")+" de "+images.length.toLocaleString("pt-BR")+" miniaturas");
  };
  await Promise.all(images.map(image=>new Promise(resolve=>{
@@ -284,6 +324,10 @@ async function loadGallery(reset){
  if(isInitialLoad)setPreloaderProgress("Conectando ao álbum de fotografias…",5,"Preparando conexão");
  try{
   const selectedCategory=category;
+  if(isInitialLoad){
+   const indexed=await waitForGalleryIndex(requestId);
+   if(requestId!==galleryRequest||!indexed)return;
+  }
   const first=await fetchGalleryPage(1,selectedCategory);
   if(requestId!==galleryRequest)return;
   total=Number(first.total??first.count??0);
@@ -291,7 +335,7 @@ async function loadGallery(reset){
   const pageCount=Math.ceil(total/pageSize);
   const collected=Array.isArray(first.results)?first.results.slice():[];
   let completedPages=1;
-  if(isInitialLoad)setPreloaderProgress("Organizando a coleção completa…",Math.max(8,Math.min(40,5+35*completedPages/Math.max(1,pageCount))),collected.length.toLocaleString("pt-BR")+" de "+total.toLocaleString("pt-BR")+" fotografias identificadas");
+  if(isInitialLoad)setPreloaderProgress("Organizando a coleção completa…",Math.max(30,Math.min(55,30+25*completedPages/Math.max(1,pageCount))),collected.length.toLocaleString("pt-BR")+" de "+total.toLocaleString("pt-BR")+" fotografias identificadas");
   for(let startPage=2;startPage<=pageCount;startPage+=4){
    const pageNumbers=[];
    for(let p=startPage;p<Math.min(startPage+4,pageCount+1);p++)pageNumbers.push(p);
@@ -300,8 +344,8 @@ async function loadGallery(reset){
    batches.forEach(data=>{if(Array.isArray(data.results))collected.push(...data.results)});
    completedPages+=pageNumbers.length;
    if(isInitialLoad){
-    const percent=5+35*completedPages/Math.max(1,pageCount);
-    setPreloaderProgress("Organizando a coleção completa…",Math.min(40,percent),Math.min(collected.length,total).toLocaleString("pt-BR")+" de "+total.toLocaleString("pt-BR")+" fotografias identificadas");
+    const percent=30+25*completedPages/Math.max(1,pageCount);
+    setPreloaderProgress("Organizando a coleção completa…",Math.min(55,percent),Math.min(collected.length,total).toLocaleString("pt-BR")+" de "+total.toLocaleString("pt-BR")+" fotografias identificadas");
    }
   }
   const seen=new Set();
@@ -327,7 +371,7 @@ async function loadGallery(reset){
   const more=$("#loadMore");
   more.hidden=true;more.disabled=true;more.textContent="Todas as fotografias já foram carregadas";more.setAttribute("aria-disabled","true");
   if(isInitialLoad){
-   setPreloaderProgress("Todas as fotografias foram encontradas. Preparando as miniaturas…",45,photos.length.toLocaleString("pt-BR")+" fotografias organizadas");
+   setPreloaderProgress("Todas as fotografias foram encontradas. Preparando as miniaturas…",55,photos.length.toLocaleString("pt-BR")+" fotografias organizadas");
    await preloadGalleryImages(requestId);
    if(requestId!==galleryRequest)return;
    await finishPreloader("Todas as fotografias estão prontas!",photos.length.toLocaleString("pt-BR")+" fotografias preparadas");
