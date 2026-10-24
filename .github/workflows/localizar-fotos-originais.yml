@@ -15,18 +15,26 @@ permissions:
 
 concurrency:
   group: localizar-originais-pastor
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   procurar:
     runs-on: ubuntu-latest
     timeout-minutes: 180
     steps:
-      - name: Baixar repositório com fotos originais
+      - name: Baixar somente as imagens JPEG necessárias
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
           lfs: false
+          filter: blob:none
+          sparse-checkout: |
+            /.github/workflows/localizar-fotos-originais.yml
+            /scripts/localizar_fotos_originais.py
+            /scripts/reference_hashes.json
+            /colocar as fotos aqui/*.jpg
+            /colocar as fotos aqui/*.jpeg
+          sparse-checkout-cone-mode: false
       - name: Preparar Python
         uses: actions/setup-python@v5
         with:
