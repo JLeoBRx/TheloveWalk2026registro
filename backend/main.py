@@ -138,10 +138,10 @@ def create_raw_previews(src: Path, photo_id: str) -> tuple[int,int]:
         dimensions = im.size
         im.thumbnail((2400, 2400), Image.Resampling.LANCZOS)
         preview_path.parent.mkdir(parents=True, exist_ok=True)
-        im.save(preview_path, "JPEG", quality=88, optimize=True)
+        im.save(preview_path, "JPEG", quality=86, optimize=False)
         im.thumbnail((800, 800), Image.Resampling.LANCZOS)
         thumb_path.parent.mkdir(parents=True, exist_ok=True)
-        im.save(thumb_path, "WEBP", quality=86, method=6)
+        im.save(thumb_path, "WEBP", quality=82, method=2)
         return dimensions
     except Exception as exc:
         preview_path.unlink(missing_ok=True)
@@ -153,16 +153,18 @@ def create_thumb(src: Path, out: Path) -> tuple[int,int]:
     if src.suffix.lower() in RAW_EXTENSIONS:
         return create_raw_previews(src, out.stem)
     try:
-        with Image.open(src) as im:
-            if im.format not in {"JPEG","PNG","WEBP"}:
+        with Image.open(src) as source:
+            if source.format not in {"JPEG","PNG","WEBP"}:
                 raise ValueError("Formato de imagem não suportado.")
-            if im.width*im.height>MAX_PIXELS:
+            if source.width*source.height>MAX_PIXELS:
                 raise ValueError("Imagem excede o limite de pixels.")
-            im=ImageOps.exif_transpose(im).convert("RGB")
+            # Resize before RGB conversion so JPEG decoders can use draft/downsampling.
+            im=ImageOps.exif_transpose(source)
             dimensions=im.size
             im.thumbnail((800,800),Image.Resampling.LANCZOS)
+            im=im.convert("RGB")
             out.parent.mkdir(parents=True,exist_ok=True)
-            im.save(out,"WEBP",quality=86,method=6)
+            im.save(out,"WEBP",quality=82,method=2)
             return dimensions
     except (UnidentifiedImageError,OSError) as e:
         raise ValueError("Arquivo de imagem inválido.") from e
@@ -254,9 +256,48 @@ def _startup_index_worker():
         print(f"[album-index-startup] {type(exc).__name__}: {exc}", flush=True)
 
 
+def _load_prebuilt_gallery_index() -> bool:
+    marker = DATA_DIR / ".gallery-index-ready.json"
+    if not marker.is_file():
+        return False
+    try:
+        meta = json.loads(marker.read_text(encoding="utf-8"))
+        if meta.get("version") != 1:
+            return False
+        files = [p for p in PHOTO_DIR.rglob("*") if p.is_file() and p.suffix.lower() in EXTENSIONS]
+        if len(files) != int(meta.get("source_files", -1)):
+            return False
+        with db() as c:
+            rows = c.execute("SELECT id, relative_path, thumb_filename FROM photos").fetchall()
+        if len(rows) != int(meta.get("indexed_photos", -1)):
+            return False
+        for row in rows:
+            thumb = (THUMB_DIR / row["thumb_filename"]).resolve()
+            if THUMB_DIR not in thumb.parents or not thumb.is_file():
+                return False
+            if Path(row["relative_path"]).suffix.lower() in RAW_EXTENSIONS and not (RAW_PREVIEW_DIR / (row["id"] + ".jpg")).is_file():
+                return False
+        INDEX_STATUS.update({
+            "running": False,
+            "complete": True,
+            "failed": False,
+            "error": "",
+            "total_files": len(files),
+            "processed": len(files),
+            "errors": int(meta.get("errors", 0)),
+        })
+        print(f"[album-index-startup] using prebuilt cache: {len(rows)} photos ready", flush=True)
+        return True
+    except Exception as exc:
+        print(f"[album-index-startup] prebuilt cache check failed: {type(exc).__name__}", flush=True)
+        return False
+
+
 @app.on_event("startup")
 def auto_index_gallery_on_startup():
-    """Schedule indexing of the GitHub upload folder after server startup."""
+    """Use the built gallery cache when available; otherwise rebuild it safely."""
+    if _load_prebuilt_gallery_index():
+        return
     worker = Thread(target=_startup_index_worker, name="album-startup-index", daemon=True)
     worker.start()
     print(f"[album-index-startup] scheduled path={PHOTO_DIR}", flush=True)
@@ -406,6 +447,8 @@ async def update_number_board(request: Request):
 
 @app.get("/api/photos")
 def list_photos(offset:int=Query(0,ge=0),limit:int=Query(36,ge=1,le=1000),category:str|None=Query(None,max_length=80)):
+    if not INDEX_STATUS["complete"]:
+        raise HTTPException(status_code=503, detail="gallery_indexing")
     with db() as c:
         total=c.execute("SELECT COUNT(*) FROM photos WHERE (? IS NULL OR category=?)",(category,category)).fetchone()[0]
         rows=c.execute("SELECT * FROM photos WHERE (? IS NULL OR category=?) ORDER BY indexed_at DESC,filename COLLATE NOCASE LIMIT ? OFFSET ?",
