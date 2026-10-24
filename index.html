@@ -276,15 +276,24 @@ async function fetchGalleryPage(pageNumber,selectedCategory){
  return response.json();
 }
 async function preloadGalleryImages(requestId){
- const images=Array.from(grid.querySelectorAll(".photo-card img"));
- if(!images.length){setPreloaderProgress("Nenhuma fotografia publicada por enquanto.",100,"0 miniaturas");return}
+ const allImages=Array.from(grid.querySelectorAll(".photo-card img"));
+ if(!allImages.length){
+  setPreloaderProgress("Nenhuma fotografia publicada por enquanto.",100,"0 miniaturas");
+  return;
+ }
+ // Only wait for the first screen. Remaining thumbnails load lazily as visitors scroll.
+ const images=allImages.slice(0,Math.min(12,allImages.length));
  let completed=0;
  const update=()=>{
   if(requestId!==galleryRequest||preloaderFinished)return;
   const percent=55+Math.round(45*completed/images.length);
-  setPreloaderProgress("Carregando as miniaturas de todas as fotografias…",percent,completed.toLocaleString("pt-BR")+" de "+images.length.toLocaleString("pt-BR")+" miniaturas");
+  setPreloaderProgress(
+   "Preparando as primeiras fotografias…",
+   percent,
+   completed.toLocaleString("pt-BR")+" de "+images.length.toLocaleString("pt-BR")+" miniaturas iniciais"
+  );
  };
- await Promise.all(images.map(image=>new Promise(resolve=>{
+ const firstScreen=Promise.all(images.map(image=>new Promise(resolve=>{
   let settled=false;
   const done=()=>{
    if(settled)return;
@@ -300,12 +309,14 @@ async function preloadGalleryImages(requestId){
   image.addEventListener("error",done,{once:true});
   if(image.complete)done();
  })));
+ // Never hold visitors on the intro for minutes if a thumbnail is slow.
+ await Promise.race([firstScreen,new Promise(resolve=>window.setTimeout(resolve,2500))]);
 }
 $("#menuToggle").addEventListener("click",()=>{const n=$("#navLinks"),open=n.classList.toggle("open");$("#menuToggle").setAttribute("aria-expanded",String(open))});
 $("#navLinks").addEventListener("click",e=>{if(e.target.closest("a"))$("#navLinks").classList.remove("open")});
 function updateFilters(){const f=$("#filters");f.replaceChildren();[""].concat(categories.filter(c=>c)).forEach(value=>{const b=document.createElement("button");b.type="button";b.className="filter";b.dataset.category=value;b.setAttribute("aria-pressed",String(value===category));b.textContent=value||"Todas as fotos";f.append(b)})}
 function aspectRatioFor(photo){const w=Number(photo.width),h=Number(photo.height);return w>0&&h>0?w/h:1.5}
-function photoButton(photo,index){const b=document.createElement("button");b.type="button";b.className="photo-card";const ratio=aspectRatioFor(photo);b.dataset.aspectRatio=String(ratio);if(ratio>=1.55)b.classList.add("wide");b.setAttribute("aria-label","Abrir fotografia "+(index+1));const im=document.createElement("img");im.loading="eager";im.decoding="async";im.fetchPriority="low";im.src=photo.thumb||photo.url||photo.src;im.alt=photo.alt||photo.caption||"Fotografia do The Love Walk 2026";im.addEventListener("load",()=>{if(!(Number(photo.width)>0&&Number(photo.height)>0)&&im.naturalWidth>0&&im.naturalHeight>0){b.dataset.aspectRatio=String(im.naturalWidth/im.naturalHeight);b.classList.toggle("wide",im.naturalWidth/im.naturalHeight>=1.55);layoutPhotoGrid()}});const cap=document.createElement("span");cap.className="photo-caption";cap.textContent=photo.caption||"The Love Walk 2026";const num=document.createElement("span");num.className="photo-number";num.textContent=String(index+1).padStart(2,"0");b.append(im,num,cap);b.addEventListener("click",()=>openLightbox(index,photos));return b}
+function photoButton(photo,index){const b=document.createElement("button");b.type="button";b.className="photo-card";const ratio=aspectRatioFor(photo);b.dataset.aspectRatio=String(ratio);if(ratio>=1.55)b.classList.add("wide");b.setAttribute("aria-label","Abrir fotografia "+(index+1));const im=document.createElement("img");im.loading=index<12?"eager":"lazy";im.decoding="async";im.fetchPriority=index<8?"high":"low";im.src=photo.thumb||photo.url||photo.src;im.alt=photo.alt||photo.caption||"Fotografia do The Love Walk 2026";im.addEventListener("load",()=>{if(!(Number(photo.width)>0&&Number(photo.height)>0)&&im.naturalWidth>0&&im.naturalHeight>0){b.dataset.aspectRatio=String(im.naturalWidth/im.naturalHeight);b.classList.toggle("wide",im.naturalWidth/im.naturalHeight>=1.55);layoutPhotoGrid()}});const cap=document.createElement("span");cap.className="photo-caption";cap.textContent=photo.caption||"The Love Walk 2026";const num=document.createElement("span");num.className="photo-number";num.textContent=String(index+1).padStart(2,"0");b.append(im,num,cap);b.addEventListener("click",()=>openLightbox(index,photos));return b}
 function layoutPhotoGrid(){const style=getComputedStyle(grid),rowHeight=parseFloat(style.gridAutoRows)||8,rowGap=parseFloat(style.rowGap)||12;grid.querySelectorAll(".photo-card").forEach(card=>{const ratio=Math.min(4,Math.max(.25,Number(card.dataset.aspectRatio)||1.5));const width=card.getBoundingClientRect().width;if(width>0){const idealHeight=width/ratio;const rows=Math.max(1,Math.ceil((idealHeight+rowGap)/(rowHeight+rowGap)));card.style.gridRowEnd="span "+rows}})}
 let layoutFrame=0;function schedulePhotoLayout(){if(layoutFrame)cancelAnimationFrame(layoutFrame);layoutFrame=requestAnimationFrame(()=>{layoutFrame=0;layoutPhotoGrid()})}
 window.addEventListener("resize",schedulePhotoLayout,{passive:true});
@@ -371,10 +382,10 @@ async function loadGallery(reset){
   const more=$("#loadMore");
   more.hidden=true;more.disabled=true;more.textContent="Todas as fotografias já foram carregadas";more.setAttribute("aria-disabled","true");
   if(isInitialLoad){
-   setPreloaderProgress("Todas as fotografias foram encontradas. Preparando as miniaturas…",55,photos.length.toLocaleString("pt-BR")+" fotografias organizadas");
+   setPreloaderProgress("Álbum completo organizado. Preparando a primeira tela…",55,photos.length.toLocaleString("pt-BR")+" fotografias no álbum");
    await preloadGalleryImages(requestId);
    if(requestId!==galleryRequest)return;
-   await finishPreloader("Todas as fotografias estão prontas!",photos.length.toLocaleString("pt-BR")+" fotografias preparadas");
+   await finishPreloader("Álbum completo pronto para explorar!",photos.length.toLocaleString("pt-BR")+" fotografias · miniaturas carregadas conforme você navega");
   }
  }catch(error){
   if(requestId!==galleryRequest)return;
