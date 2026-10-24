@@ -6,3 +6,6 @@ python-dotenv==1.0.1
 pytest==8.3.5
 httpx==0.28.1
 rawpy==0.27.1
+python-multipart==0.0.20
+numpy<2
+opencv-contrib-python-headless==4.10.0.84
