@@ -27,6 +27,23 @@ main{padding:45px 0 70px}.section-heading{display:flex;align-items:end;justify-c
 @media(max-width:900px){.hero-layout{grid-template-columns:minmax(0,1fr) minmax(270px,.8fr);gap:20px;padding-block:51px 43px}.hero-visual{min-height:315px}.hero-wheel{width:228px}.hero-ring{width:295px;height:295px}.hero-ring.ring-two{width:340px;height:340px}.floating-label.first{right:-5px}.roulette-grid{grid-template-columns:1fr}.number-orb{width:190px}.roulette-card{max-width:700px;width:100%;margin-inline:auto}}
 @media(max-width:600px){.wrap{width:calc(100% - 28px)}.nav{min-height:65px}.brand{font-size:.84rem;gap:9px}.brand-mark{width:36px;height:36px;font-size:1.35rem}.brand small{font-size:.54rem}.top-tag{font-size:.66rem;padding:7px 9px;gap:6px}.hero-layout{grid-template-columns:1fr;gap:0;padding-block:39px 28px}.eyebrow{font-size:.61rem;letter-spacing:.16em}.hero h1{font-size:clamp(2.65rem,11.4vw,4rem);line-height:.99;margin:18px 0 14px}.hero-copy{font-size:.91rem;line-height:1.73}.hero-metrics{gap:7px;margin-top:20px}.metric{padding:7px 9px;gap:7px;font-size:.66rem;border-radius:9px}.metric strong{font-size:1rem}.metric-icon{font-size:.85rem}.hero-visual{min-height:235px;margin-top:12px}.hero-wheel{width:178px;padding:9px}.hero-wheel-center span{font-size:1.5rem}.hero-wheel-center small{font-size:.42rem;margin-top:4px}.hero-wheel-center strong{font-size:1.25rem}.hero-ring{width:220px;height:220px}.hero-ring.ring-two{width:270px;height:270px}.floating-label{gap:7px;padding:8px 9px;border-radius:10px}.floating-label small{font-size:.43rem}.floating-label strong{font-size:.68rem}.floating-label.first{top:7px;right:0}.floating-label.second{left:0;bottom:3px}.float-symbol{font-size:1.1rem}.live-dot{width:7px;height:7px}main{padding:30px 0 48px}.section-heading{align-items:flex-start;gap:9px;margin-bottom:19px}.section-heading h2{font-size:1.75rem}.section-heading p{max-width:240px;font-size:.76rem;line-height:1.5}.reset-all{min-height:37px;padding:0 9px;border-radius:9px;font-size:.65rem;gap:5px}.roulette-grid{gap:17px}.roulette-card{border-radius:18px}.card-top{padding:16px 13px 13px;gap:7px}.category-title{gap:8px}.category-icon{width:38px;height:38px;border-radius:12px;font-size:1.3rem}.category-title h3{font-size:1.1rem}.category-title p{font-size:.65rem;margin-top:3px}.count-pill{padding:5px 7px;border-radius:7px;font-size:.6rem}.stage{padding:22px 10px 17px}.number-orb{width:162px;max-width:68%;margin-bottom:16px}.wheel-segments{inset:7px}.wheel-center strong{font-size:3.25rem}.number-orb:after{top:-9px}.result-label{font-size:.6rem;letter-spacing:.2em}.result-message{font-size:.78rem;margin:6px 0 16px}.actions{gap:7px}.spin-button{min-height:46px;padding:0 15px;border-radius:10px;font-size:.78rem;gap:6px}.secondary-button{min-height:44px;padding:0 12px;border-radius:10px;font-size:.7rem}.progress{padding:0 14px 17px}.progress-label{font-size:.66rem}.progress-label strong{font-size:.67rem}.numbers-section{padding:15px 12px 16px}.numbers-head{align-items:flex-start;flex-direction:column;gap:7px;margin-bottom:11px}.numbers-head h4{font-size:.85rem}.legend{font-size:.61rem;gap:10px}.number-grid{grid-template-columns:repeat(8,minmax(0,1fr));gap:5px}.number-tile{min-height:32px;border-radius:6px;font-size:.72rem}.history-row{margin-top:14px}.history-label{font-size:.63rem}.history-chip{min-width:29px;padding:4px 6px;font-size:.67rem}.howto{gap:10px;margin-top:18px;padding:13px;border-radius:12px}.howto-icon{width:30px;height:30px;border-radius:9px;font-size:.95rem}.howto h4{font-size:.79rem}.howto p{font-size:.73rem}.footer-inner{align-items:flex-start;flex-direction:column;gap:7px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+
+/* Estilo visual neutro de seleção numérica */
+.number-board{position:relative;width:min(100%,365px);padding:19px;border:1px solid rgba(241,138,81,.28);border-radius:20px;background:linear-gradient(155deg,rgba(48,27,68,.97),rgba(23,9,38,.97));box-shadow:0 26px 70px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.06);transform:rotate(-2deg)}
+.board-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}.board-kicker{display:block;color:var(--orange2);font-size:.53rem;letter-spacing:.17em;font-weight:800}.board-top strong{display:block;margin-top:3px;font:800 1.02rem Manrope,sans-serif;letter-spacing:-.035em}.board-range{display:grid;place-items:center;padding:7px 9px;border:1px solid #f18a513c;border-radius:8px;color:var(--orange2);font:800 .77rem Manrope,sans-serif;background:#df6c350d}
+.board-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}.board-grid span{display:grid;place-items:center;min-height:43px;border:1px solid rgba(192,180,203,.13);border-radius:8px;background:linear-gradient(145deg,#3a244a,#2a173a);color:#ded1e6;font:800 .87rem Manrope,sans-serif;font-variant-numeric:tabular-nums}.board-grid span.board-active{background:linear-gradient(145deg,#f18a51,#df6c35);border-color:#ffc49e;color:#1a0b2b;box-shadow:0 5px 15px #df6c3533}
+.board-bottom{display:flex;align-items:center;gap:8px;margin-top:14px;color:var(--muted);font-size:.67rem}.board-status{width:7px;height:7px;flex:none;border-radius:50%;background:#f18a51}
+.number-orb{width:194px;max-width:65%;border:1px solid rgba(241,138,81,.42);border-radius:25px;background:linear-gradient(150deg,#39234b,#221031 78%);box-shadow:0 15px 34px #08020c50,inset 0 1px 0 rgba(255,255,255,.07);transition:border-color .2s,box-shadow .2s}
+.number-orb:before{content:"";position:absolute;inset:8px;border:1px solid rgba(241,138,81,.16);border-radius:18px;background:radial-gradient(ellipse at 50% 0%,rgba(241,138,81,.07),transparent 70%);z-index:0}
+.number-orb:after{display:none}
+.number-display{position:relative;z-index:2;display:grid;place-items:center;width:100%;height:100%;min-height:194px}
+.number-display:before{content:"#";position:absolute;top:18px;font:800 .65rem Manrope,sans-serif;letter-spacing:.2em;color:var(--orange2);opacity:.85}
+.number-display strong{font:800 clamp(3.7rem,6vw,4.6rem)/1 Manrope,sans-serif;letter-spacing:-.075em;color:var(--white);font-variant-numeric:tabular-nums;text-shadow:0 4px 20px #08020b70}
+.number-orb.spinning{border-color:rgba(241,138,81,.9);box-shadow:0 15px 34px #08020c50,0 0 28px #f18a5125,inset 0 1px 0 rgba(255,255,255,.07)}
+.number-orb.spinning .number-display strong{animation:number-pulse .13s ease-in-out infinite alternate;color:var(--orange2)}
+.number-orb.spinning .number-display:before{content:"SELECIONANDO"}
+@media(max-width:600px){.number-board{width:min(100%,330px);padding:14px;border-radius:16px}.board-top{margin-bottom:12px}.board-top strong{font-size:.9rem}.board-grid{gap:5px}.board-grid span{min-height:36px;font-size:.77rem}.board-bottom{font-size:.61rem;margin-top:11px}.number-orb{width:162px;max-width:68%;border-radius:22px}.number-orb:before{border-radius:16px}.number-display{min-height:162px}.number-display:before{top:15px}.number-display strong{font-size:3.7rem}}
+
 </style>
 </head>
 <body>
@@ -41,29 +58,37 @@ main{padding:45px 0 70px}.section-heading{display:flex;align-items:end;justify-c
     <p class="hero-copy">Duas categorias para organizar a participação no seu evento. Selecione uma categoria e revele os números um por vez, sem repetir.</p>
     <div class="hero-metrics">
       <div class="metric"><strong>160</strong><span>números no total</span></div>
-      <div class="metric"><span class="metric-icon">♡</span><span><strong>2</strong> roletas independentes</span></div>
+      <div class="metric"><span class="metric-icon">♡</span><span><strong>2</strong> categorias independentes</span></div>
       <div class="metric"><span class="metric-icon">↻</span><span>Sem números repetidos</span></div>
     </div>
   </div>
   <div class="hero-visual" aria-hidden="true">
     <div class="hero-halo"></div><div class="hero-ring"></div><div class="hero-ring ring-two"></div>
-    <div class="hero-wheel"><span class="hero-wheel-pin"></span><div class="hero-wheel-center"><span>♡</span><small>PAINEL DE</small><strong>NÚMEROS</strong></div></div>
-    <div class="floating-label first"><span class="live-dot"></span><div><small>FAIXA DE NÚMEROS</small><strong>01 — 80</strong></div></div>
-    <div class="floating-label second"><span class="float-symbol">♥</span><div><small>SELEÇÃO DE NÚMEROS</small><strong>01 a 80 por categoria</strong></div></div>
+    <div class="number-board">
+      <div class="board-top"><div><span class="board-kicker">PAINEL DE CONTROLE</span><strong>Seleção numérica</strong></div><span class="board-range">01–80</span></div>
+      <div class="board-grid">
+        <span>04</span><span>12</span><span>19</span><span>27</span>
+        <span>33</span><span class="board-active">41</span><span>56</span><span>62</span>
+        <span>68</span><span>73</span><span>78</span><span>80</span>
+      </div>
+      <div class="board-bottom"><span class="board-status"></span> 80 números por categoria</div>
+    </div>
+    <div class="floating-label first"><span class="live-dot"></span><div><small>CATEGORIAS</small><strong>Solteiros · Casados</strong></div></div>
+    <div class="floating-label second"><span class="float-symbol">#</span><div><small>CONTROLE INDIVIDUAL</small><strong>Sem repetição</strong></div></div>
   </div>
 </div></section>
 <main class="wrap">
-  <div class="section-heading"><div><h2>Escolha sua <span>roleta</span></h2><p>Cada categoria tem sua própria sequência de números.</p></div><button class="reset-all" id="resetAll" type="button"><span aria-hidden="true">↺</span> Reiniciar as duas</button></div>
-  <section class="roulette-grid" aria-label="Roletas de números">
+  <div class="section-heading"><div><h2>Selecione uma <span>categoria</span></h2><p>Cada categoria tem sua própria sequência de números.</p></div><button class="reset-all" id="resetAll" type="button"><span aria-hidden="true">↺</span> Reiniciar as duas</button></div>
+  <section class="roulette-grid" aria-label="Categorias de números">
     <article class="roulette-card" data-category="solteiros">
-      <div class="card-top"><div class="category-title"><span class="category-icon" aria-hidden="true">♡</span><div><h3>Solteiros</h3><p>Roleta independente</p></div></div><span class="count-pill" id="solteirosCount">80 disponíveis</span></div>
-      <div class="stage"><div class="number-orb" id="solteirosOrb" aria-live="polite"><span class="wheel-segments" aria-hidden="true"></span><div class="wheel-center"><strong id="solteirosResult">--</strong></div></div><div class="result-label">Número selecionado</div><p class="result-message" id="solteirosMessage">Pronto para revelar um número?</p><div class="actions"><button class="spin-button" id="solteirosSpin" type="button"><span class="spin-symbol">⟳</span> Revelar número</button><button class="secondary-button" id="solteirosReset" type="button">↺ Reiniciar</button></div></div>
+      <div class="card-top"><div class="category-title"><span class="category-icon" aria-hidden="true">♡</span><div><h3>Solteiros</h3><p>Seleção independente</p></div></div><span class="count-pill" id="solteirosCount">80 disponíveis</span></div>
+      <div class="stage"><div class="number-orb" id="solteirosOrb" aria-live="polite"><div class="number-display"><strong id="solteirosResult">--</strong></div></div><div class="result-label">Número selecionado</div><p class="result-message" id="solteirosMessage">Pronto para revelar um número?</p><div class="actions"><button class="spin-button" id="solteirosSpin" type="button"><span class="spin-symbol">→</span> Revelar número</button><button class="secondary-button" id="solteirosReset" type="button">↺ Reiniciar</button></div></div>
       <div class="progress"><div class="progress-label"><span>Números revelados</span><strong id="solteirosProgressText">0 de 80</strong></div><div class="progress-track"><div class="progress-bar" id="solteirosProgress"></div></div></div>
       <div class="numbers-section"><div class="numbers-head"><h4>Controle dos números</h4><div class="legend"><span><i></i> Disponível</span><span class="used"><i></i> Revelado</span></div></div><div class="number-grid" id="solteirosNumbers" aria-label="Números dos solteiros"></div><div class="history-row"><p class="history-label">ÚLTIMOS NÚMEROS REVELADOS</p><div class="history" id="solteirosHistory"><span class="empty-history">Nenhum número revelado ainda.</span></div></div></div>
     </article>
     <article class="roulette-card" data-category="casados">
-      <div class="card-top"><div class="category-title"><span class="category-icon" aria-hidden="true">♥</span><div><h3>Casados</h3><p>Roleta independente</p></div></div><span class="count-pill" id="casadosCount">80 disponíveis</span></div>
-      <div class="stage"><div class="number-orb" id="casadosOrb" aria-live="polite"><span class="wheel-segments" aria-hidden="true"></span><div class="wheel-center"><strong id="casadosResult">--</strong></div></div><div class="result-label">Número selecionado</div><p class="result-message" id="casadosMessage">Pronto para revelar um número?</p><div class="actions"><button class="spin-button" id="casadosSpin" type="button"><span class="spin-symbol">⟳</span> Revelar número</button><button class="secondary-button" id="casadosReset" type="button">↺ Reiniciar</button></div></div>
+      <div class="card-top"><div class="category-title"><span class="category-icon" aria-hidden="true">♥</span><div><h3>Casados</h3><p>Seleção independente</p></div></div><span class="count-pill" id="casadosCount">80 disponíveis</span></div>
+      <div class="stage"><div class="number-orb" id="casadosOrb" aria-live="polite"><div class="number-display"><strong id="casadosResult">--</strong></div></div><div class="result-label">Número selecionado</div><p class="result-message" id="casadosMessage">Pronto para revelar um número?</p><div class="actions"><button class="spin-button" id="casadosSpin" type="button"><span class="spin-symbol">→</span> Revelar número</button><button class="secondary-button" id="casadosReset" type="button">↺ Reiniciar</button></div></div>
       <div class="progress"><div class="progress-label"><span>Números revelados</span><strong id="casadosProgressText">0 de 80</strong></div><div class="progress-track"><div class="progress-bar" id="casadosProgress"></div></div></div>
       <div class="numbers-section"><div class="numbers-head"><h4>Controle dos números</h4><div class="legend"><span><i></i> Disponível</span><span class="used"><i></i> Revelado</span></div></div><div class="number-grid" id="casadosNumbers" aria-label="Números dos casados"></div><div class="history-row"><p class="history-label">ÚLTIMOS NÚMEROS REVELADOS</p><div class="history" id="casadosHistory"><span class="empty-history">Nenhum número revelado ainda.</span></div></div></div>
     </article>
@@ -95,7 +120,7 @@ main{padding:45px 0 70px}.section-heading{display:flex;align-items:end;justify-c
     el(key+'Spin').textContent=s.spinning?'Girando…':s.drawn.length===TOTAL?'✓ Todos revelados':'⟳ Revelar número';
     el(key+'Reset').disabled=s.spinning||s.drawn.length===0;
     el(key+'Orb').classList.toggle('spinning',s.spinning);
-    if(s.spinning)el(key+'Message').textContent='A roleta está girando…';
+    if(s.spinning)el(key+'Message').textContent='Selecionando número…';
     else if(s.drawn.length===TOTAL)el(key+'Message').textContent='Todos os 80 números foram revelados!';
     else if(s.last!==null)el(key+'Message').textContent='Número '+String(s.last).padStart(2,'0')+' foi selecionado.';
     else el(key+'Message').textContent='Pronto para revelar um número?';
@@ -128,7 +153,7 @@ main{padding:45px 0 70px}.section-heading{display:flex;align-items:end;justify-c
   function reset(key,ask){
     const s=states[key];if(s.spinning)return;
     if(ask&&!window.confirm('Deseja reiniciar a categoria '+key+'? Os números revelados dessa categoria serão apagados.'))return;
-    s.drawn=[];s.last=null;save(key);render(key);showToast('Roleta de '+key+' reiniciada.');
+    s.drawn=[];s.last=null;save(key);render(key);showToast('Categoria '+key+' reiniciada.');
   }
   ['solteiros','casados'].forEach(key=>{
     load(key);el(key+'Spin').addEventListener('click',()=>draw(key));el(key+'Reset').addEventListener('click',()=>reset(key,true));render(key);
