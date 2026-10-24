@@ -20,7 +20,8 @@ MAX_IMAGE_PIXELS = 24_000_000
 MAX_FACE_SCORE = float(os.getenv("FACE_SEARCH_THRESHOLD", "0.40"))
 MIN_DETECTION_SCORE = 0.85
 
-_MODEL_DIR = Path(os.getenv("DATA_DIR", "data")).resolve() / "face_models"
+_PROJECT_ROOT = Path(__file__).resolve().parents[1]
+_MODEL_DIR = Path(os.getenv("DATA_DIR", str(_PROJECT_ROOT / "data"))).expanduser().resolve() / "face_models"
 _DETECTOR_PATH = _MODEL_DIR / "face_detection_yunet_2023mar.onnx"
 _RECOGNIZER_PATH = _MODEL_DIR / "face_recognition_sface_2021dec.onnx"
 
