@@ -171,8 +171,8 @@ def payload(row: sqlite3.Row) -> dict:
     is_raw = Path(row["relative_path"]).suffix.lower() in RAW_EXTENSIONS
     display_url = f"/preview/{row['id']}" if is_raw else f"/media/{row['id']}"
     return {"id":row["id"],"url":display_url,"src":display_url,
-            "thumb":f"/thumb/{row['id']}","download":f"/media/{row['id']}",
-            "is_raw":is_raw,"category":row["category"],"caption":row["caption"],
+            "thumb":f"/thumb/{row['id']}","download":f"/download/{row['id']}",
+            "original":f"/media/{row['id']}","is_raw":is_raw,"category":row["category"],"caption":row["caption"],
             "alt":row["caption"],"width":row["width"],"height":row["height"]}
 
 def index_photos() -> dict:
@@ -422,6 +422,28 @@ def raw_preview(photo_id:str):
         except ValueError as exc:
             raise HTTPException(422,detail=str(exc)) from exc
     return FileResponse(preview_path,media_type="image/jpeg",headers={"Cache-Control":"public, max-age=86400","X-Content-Type-Options":"nosniff"})
+
+
+@app.get("/download/{photo_id}")
+def download_photo(photo_id:str):
+    """Download a browser-friendly image; RAW files are delivered as JPEG previews."""
+    with db() as c:
+        row=c.execute("SELECT relative_path,filename FROM photos WHERE id=?",(photo_id,)).fetchone()
+    if not row:
+        raise HTTPException(404,detail="photo_not_found")
+    source=(PHOTO_DIR/row["relative_path"]).resolve()
+    if PHOTO_DIR not in source.parents or source.suffix.lower() not in EXTENSIONS or not source.is_file():
+        raise HTTPException(404,detail="photo_not_found")
+    headers={"Cache-Control":"no-store","X-Content-Type-Options":"nosniff"}
+    if source.suffix.lower() in RAW_EXTENSIONS:
+        preview_path=RAW_PREVIEW_DIR/(photo_id+".jpg")
+        if not preview_path.is_file():
+            try:
+                create_raw_previews(source,photo_id)
+            except ValueError as exc:
+                raise HTTPException(422,detail=str(exc)) from exc
+        return FileResponse(preview_path,filename=f"{source.stem}.jpg",media_type="image/jpeg",headers=headers)
+    return FileResponse(source,filename=row["filename"],headers=headers)
 
 
 @app.get("/media/{photo_id}")
