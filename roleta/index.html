@@ -44,6 +44,14 @@ main{padding:45px 0 70px}.section-heading{display:flex;align-items:end;justify-c
 .number-orb.spinning .number-display:before{content:"SELECIONANDO"}
 @media(max-width:600px){.number-board{width:min(100%,330px);padding:14px;border-radius:16px}.board-top{margin-bottom:12px}.board-top strong{font-size:.9rem}.board-grid{gap:5px}.board-grid span{min-height:36px;font-size:.77rem}.board-bottom{font-size:.61rem;margin-top:11px}.number-orb{width:162px;max-width:68%;border-radius:22px}.number-orb:before{border-radius:16px}.number-display{min-height:162px}.number-display:before{top:15px}.number-display strong{font-size:3.7rem}}
 
+
+.sync-panel{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:24px;margin:0 0 22px;padding:19px 20px;border:1px solid rgba(241,138,81,.24);border-radius:17px;background:linear-gradient(110deg,rgba(44,25,64,.72),rgba(27,12,42,.64));box-shadow:0 12px 34px rgba(0,0,0,.08)}
+.sync-copy{display:flex;align-items:flex-start;gap:13px}.sync-icon{display:grid;place-items:center;flex:none;width:37px;height:37px;border:1px solid rgba(241,138,81,.3);border-radius:11px;background:rgba(223,108,53,.13);color:var(--orange2);font-size:1.2rem}.sync-copy strong{display:block;font:800 .91rem Manrope,sans-serif;color:var(--white)}.sync-copy p{margin:5px 0 0;max-width:520px;color:var(--muted);font-size:.77rem;line-height:1.65}
+.sync-actions{display:flex;align-items:flex-end;flex-direction:column;gap:9px}.public-view-link{display:inline-flex;align-items:center;justify-content:center;min-height:39px;padding:0 13px;border:1px solid rgba(241,138,81,.43);border-radius:10px;color:var(--orange2);font-size:.75rem;font-weight:800;white-space:nowrap;text-decoration:none}.public-view-link:hover{background:rgba(223,108,53,.1)}
+.sync-details{width:min(335px,100%);text-align:left}.sync-details summary{cursor:pointer;list-style:none;color:#e7ddeb;text-align:right;font-size:.73rem;font-weight:700}.sync-details summary::-webkit-details-marker{display:none}.sync-details summary:after{content:" ＋";color:var(--orange2)}.sync-details[open] summary{margin-bottom:10px}.sync-details[open] summary:after{content:" −"}.sync-details label{display:block;margin-bottom:5px;color:var(--muted);font-size:.69rem}.key-row{display:flex;gap:6px}.key-row input{width:0;min-width:0;flex:1;padding:10px;border:1px solid rgba(192,180,203,.2);border-radius:9px;background:#130720;color:var(--white);font:inherit;font-size:.74rem}.key-row input:focus{outline:2px solid rgba(241,138,81,.45);outline-offset:1px}.key-row button{border:0;border-radius:9px;background:var(--orange);color:#1a0b2b;padding:0 13px;font-size:.72rem;font-weight:800}.sync-status{margin:7px 0 0;color:var(--muted);font-size:.67rem;line-height:1.5}.sync-status.connected{color:#a8d8b0}.sync-status.error{color:#ffb3a8}
+@media(max-width:760px){.sync-panel{grid-template-columns:1fr;gap:14px}.sync-actions{align-items:stretch}.public-view-link{align-self:flex-start}.sync-details{width:100%}.sync-details summary{text-align:left}}
+@media(max-width:520px){.sync-panel{padding:14px;gap:12px;margin-bottom:18px}.sync-copy{gap:10px}.sync-copy strong{font-size:.83rem}.sync-copy p{font-size:.72rem}.sync-icon{width:32px;height:32px}.public-view-link{min-height:36px;font-size:.7rem}.sync-details summary{font-size:.7rem}}
+
 </style>
 </head>
 <body>
@@ -79,6 +87,21 @@ main{padding:45px 0 70px}.section-heading{display:flex;align-items:end;justify-c
 </div></section>
 <main class="wrap">
   <div class="section-heading"><div><h2>Selecione uma <span>categoria</span></h2><p>Cada categoria tem sua própria sequência de números.</p></div><button class="reset-all" id="resetAll" type="button"><span aria-hidden="true">↺</span> Reiniciar as duas</button></div>
+  <section class="sync-panel" aria-label="Painel público ao vivo">
+    <div class="sync-copy">
+      <span class="sync-icon" aria-hidden="true">↗</span>
+      <div><strong>Compartilhar resultados em tempo real</strong><p>Conecte este painel do organizador à tela pública. Cada número revelado aparecerá automaticamente para quem estiver acompanhando.</p></div>
+    </div>
+    <div class="sync-actions">
+      <a class="public-view-link" href="https://painel-numeros-ao-vivo.onrender.com" target="_blank" rel="noopener">Abrir painel público ↗</a>
+      <details class="sync-details">
+        <summary>Conectar como organizador</summary>
+        <label for="syncKey">Chave do organizador</label>
+        <div class="key-row"><input id="syncKey" type="password" autocomplete="off" spellcheck="false" placeholder="Cole a chave de conexão"><button id="connectSync" type="button">Conectar</button></div>
+        <p class="sync-status" id="syncStatus" role="status">Ainda não conectado. Só o organizador precisa desta chave.</p>
+      </details>
+    </div>
+  </section>
   <section class="roulette-grid" aria-label="Categorias de números">
     <article class="roulette-card" data-category="solteiros">
       <div class="card-top"><div class="category-title"><span class="category-icon" aria-hidden="true">♡</span><div><h3>Solteiros</h3><p>Seleção independente</p></div></div><span class="count-pill" id="solteirosCount">80 disponíveis</span></div>
@@ -100,12 +123,45 @@ main{padding:45px 0 70px}.section-heading{display:flex;align-items:end;justify-c
 <script>
 (function(){
   const TOTAL=80;
+  const SYNC_API='https://the-love-walk-2026-album.onrender.com/api/number-board';
+  const SYNC_KEY='number-board-control-key-v1';
+  let syncQueue=Promise.resolve();
+  const syncStatus=document.getElementById('syncStatus');
+  const syncKeyInput=document.getElementById('syncKey');
+  const connectButton=document.getElementById('connectSync');
   const states={
     solteiros:{drawn:[],last:null,timer:null,spinning:false},
     casados:{drawn:[],last:null,timer:null,spinning:false}
   };
   let toastTimer;
   function showToast(message){const el=document.getElementById('toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2600)}
+  function setSyncStatus(message,kind=''){if(!syncStatus)return;syncStatus.textContent=message;syncStatus.className='sync-status'+(kind?' '+kind:'')}
+  function accessKey(){try{return sessionStorage.getItem(SYNC_KEY)||''}catch(e){return ''}}
+  function queueBoardSync(){
+    if(!accessKey())return Promise.resolve(false);
+    syncQueue=syncQueue.catch(()=>{}).then(async()=>{
+      const token=accessKey();if(!token)return false;
+      const body={categories:{solteiros:{drawn:[...states.solteiros.drawn],last:states.solteiros.last},casados:{drawn:[...states.casados.drawn],last:states.casados.last}}};
+      try{
+        const response=await fetch(SYNC_API,{method:'POST',headers:{'Content-Type':'application/json','X-Number-Board-Token':token},body:JSON.stringify(body),cache:'no-store'});
+        if(response.status===401){setSyncStatus('Chave inválida. Confira a chave do organizador.','error');return false}
+        if(!response.ok){setSyncStatus('Não foi possível atualizar o painel público (HTTP '+response.status+').','error');return false}
+        setSyncStatus('Conectado · painel público atualizado automaticamente.','connected');
+        return true;
+      }catch(e){setSyncStatus('Falha de conexão com o painel público. Tente novamente.','error');return false}
+    });
+    return syncQueue;
+  }
+  async function connectPublicBoard(){
+    const token=(syncKeyInput?.value||'').trim();
+    if(!token){setSyncStatus('Cole a chave do organizador para conectar.','error');return}
+    try{sessionStorage.setItem(SYNC_KEY,token)}catch(e){}
+    if(connectButton){connectButton.disabled=true;connectButton.textContent='Conectando…'}
+    setSyncStatus('Conectando ao painel público…');
+    const ok=await queueBoardSync();
+    if(connectButton){connectButton.disabled=false;connectButton.textContent=ok?'Conectado ✓':'Tentar novamente'}
+    if(ok){if(syncKeyInput)syncKeyInput.value='';showToast('Painel público conectado!');}
+  }
   function storageKey(key){return 'roleta-do-amor-v1-'+key}
   function save(key){try{localStorage.setItem(storageKey(key),JSON.stringify({drawn:states[key].drawn,last:states[key].last}))}catch(e){}}
   function load(key){try{const raw=localStorage.getItem(storageKey(key));if(!raw)return;const data=JSON.parse(raw);if(Array.isArray(data.drawn)){states[key].drawn=[...new Set(data.drawn.filter(n=>Number.isInteger(n)&&n>=1&&n<=TOTAL))];states[key].last=states[key].drawn.includes(data.last)?data.last:(states[key].drawn.at(-1)||null)}}catch(e){}}
@@ -144,7 +200,7 @@ main{padding:45px 0 70px}.section-heading{display:flex;align-items:end;justify-c
       elapsed+=delay;
       delay=Math.min(220,delay+12);
       if(elapsed<1450){s.timer=setTimeout(tick,delay);return}
-      s.drawn.push(finalNumber);s.last=finalNumber;s.spinning=false;s.timer=null;save(key);render(key);
+      s.drawn.push(finalNumber);s.last=finalNumber;s.spinning=false;s.timer=null;save(key);render(key);void queueBoardSync();
       showToast((key==='solteiros'?'Solteiros':'Casados')+': número '+String(finalNumber).padStart(2,'0')+' revelado!');
       if(s.drawn.length===TOTAL)showToast((key==='solteiros'?'Solteiros':'Casados')+': todos os 80 números foram revelados!');
     };
@@ -153,16 +209,18 @@ main{padding:45px 0 70px}.section-heading{display:flex;align-items:end;justify-c
   function reset(key,ask){
     const s=states[key];if(s.spinning)return;
     if(ask&&!window.confirm('Deseja reiniciar a categoria '+key+'? Os números revelados dessa categoria serão apagados.'))return;
-    s.drawn=[];s.last=null;save(key);render(key);showToast('Categoria '+key+' reiniciada.');
+    s.drawn=[];s.last=null;save(key);render(key);void queueBoardSync();showToast('Categoria '+key+' reiniciada.');
   }
   ['solteiros','casados'].forEach(key=>{
     load(key);el(key+'Spin').addEventListener('click',()=>draw(key));el(key+'Reset').addEventListener('click',()=>reset(key,true));render(key);
   });
+  connectButton?.addEventListener('click',connectPublicBoard);
+  if(accessKey()){setSyncStatus('Chave disponível nesta sessão. Reconectando ao painel público…');void queueBoardSync();if(connectButton)connectButton.textContent='Conectar novamente'}
   el('resetAll').addEventListener('click',()=>{
     if(states.solteiros.spinning||states.casados.spinning){showToast('Aguarde a seleção terminar antes de reiniciar.');return}
     if(!window.confirm('Reiniciar as duas categorias? Todos os números revelados serão apagados.'))return;
     ['solteiros','casados'].forEach(key=>{states[key].drawn=[];states[key].last=null;save(key);render(key)});
-    showToast('As duas roletas foram reiniciadas.');
+    void queueBoardSync();showToast('As duas categorias foram reiniciadas.');
   });
 })();
 </script>
