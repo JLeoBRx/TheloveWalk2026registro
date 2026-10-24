@@ -42,11 +42,11 @@ Não publique nem compartilhe esse token. Inicie o servidor:
 
 ## Adicionar fotografias
 
-1. Copie fotografias autorizadas para `frontend/images/gallery/`.
-2. Para criar filtros, organize-as em subpastas, por exemplo: `A concentração/`, `A caminhada/`, `Amigos e comunidade/` e `Encerramento/`.
-3. Abra `/admin.html), informe o token, confirme as autorizações e clique em **Sincronizar álbum**.
-4. Atualize a página inicial. As subpastas tornam-se categorias automaticamente.
-5. Formatos aceitos: JPG, PNG e WebP.
+1. Abra a pasta [`colocar as fotos aqui/`](https://github.com/JLeoBRx/TheloveWalk2026registro/tree/main/colocar%20as%20fotos%20aqui) no GitHub e use **Add file → Upload files** para enviar as fotografias.
+2. Confirme o upload com **Commit changes** na branch `main`. O Render publicará o novo commit e o serviço indexará as fotos automaticamente ao iniciar.
+3. Para criar filtros, organize as fotos em subpastas, por exemplo: `A concentração/`, `A caminhada/`, `Amigos e comunidade/` e `Encerramento/`.
+4. Se necessário, abra `/admin.html`, informe o token administrativo, confirme as autorizações e clique em **Sincronizar álbum** para atualizar manualmente.
+5. Formatos aceitos: JPG, JPEG, PNG e WebP.
 
 O sistema cria miniaturas em `data/thumbnails` e mantém os originais na pasta da galeria. A página carrega as fotografias por páginas para suportar coleções grandes.
 
