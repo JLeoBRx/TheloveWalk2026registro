@@ -18,7 +18,8 @@ from starlette.concurrency import run_in_threadpool
 
 ROOT = Path(__file__).resolve().parents[1]
 load_dotenv(ROOT / ".env")
-PHOTO_DIR = Path(os.getenv("PHOTO_DIR", ROOT / "colocar as fotos aqui")).resolve()
+PHOTO_DIR_CONFIG = Path(os.getenv("PHOTO_DIR", str(ROOT / "colocar as fotos aqui"))).expanduser()
+PHOTO_DIR = (PHOTO_DIR_CONFIG if PHOTO_DIR_CONFIG.is_absolute() else ROOT / PHOTO_DIR_CONFIG).resolve()
 DATA_DIR = Path(os.getenv("DATA_DIR", ROOT / "data")).resolve()
 THUMB_DIR = DATA_DIR / "thumbnails"
 RAW_PREVIEW_DIR = DATA_DIR / "raw_previews"
