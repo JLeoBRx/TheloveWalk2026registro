@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 180
     steps:
-      - name: Baixar somente as imagens JPEG necessárias
+      - name: Baixar as fotos originais e os arquivos RAW
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
@@ -34,6 +34,8 @@ jobs:
             /scripts/reference_hashes.json
             /colocar as fotos aqui/*.jpg
             /colocar as fotos aqui/*.jpeg
+            /colocar as fotos aqui/*.CR2
+            /fotosdopastor e a dona/*
           sparse-checkout-cone-mode: false
       - name: Preparar Python
         uses: actions/setup-python@v5
@@ -47,7 +49,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- "fotosdopastor e a dona"
+          git add --sparse -- "fotosdopastor e a dona"
           if git diff --cached --quiet; then
             echo "Nenhum arquivo novo para salvar."
           else
