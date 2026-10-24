@@ -63,9 +63,9 @@ main{padding:45px 0 70px}.section-heading{display:flex;align-items:end;justify-c
     </article>
     <article class="roulette-card" data-category="casados">
       <div class="card-top"><div class="category-title"><span class="category-icon" aria-hidden="true">♥</span><div><h3>Casados</h3><p>Roleta independente</p></div></div><span class="count-pill" id="casadosCount">80 disponíveis</span></div>
-      <div class="stage"><div class="number-orb" id="casadosOrb" aria-live="polite"><span class="wheel-segments" aria-hidden="true"></span><div class="wheel-center"><strong id="casadosResult">--</strong></div></div><div class="result-label">Número sorteado</div><p class="result-message" id="casadosMessage">Pronto para começar o sorteio?</p><div class="actions"><button class="spin-button" id="casadosSpin" type="button"><span class="spin-symbol">⟳</span> Sortear número</button><button class="secondary-button" id="casadosReset" type="button">↺ Reiniciar</button></div></div>
-      <div class="progress"><div class="progress-label"><span>Números sorteados</span><strong id="casadosProgressText">0 de 80</strong></div><div class="progress-track"><div class="progress-bar" id="casadosProgress"></div></div></div>
-      <div class="numbers-section"><div class="numbers-head"><h4>Controle dos números</h4><div class="legend"><span><i></i> Disponível</span><span class="used"><i></i> Sorteado</span></div></div><div class="number-grid" id="casadosNumbers" aria-label="Números dos casados"></div><div class="history-row"><p class="history-label">ÚLTIMOS NÚMEROS SORTEADOS</p><div class="history" id="casadosHistory"><span class="empty-history">Nenhum sorteio ainda.</span></div></div></div>
+      <div class="stage"><div class="number-orb" id="casadosOrb" aria-live="polite"><span class="wheel-segments" aria-hidden="true"></span><div class="wheel-center"><strong id="casadosResult">--</strong></div></div><div class="result-label">Número selecionado</div><p class="result-message" id="casadosMessage">Pronto para revelar um número?</p><div class="actions"><button class="spin-button" id="casadosSpin" type="button"><span class="spin-symbol">⟳</span> Revelar número</button><button class="secondary-button" id="casadosReset" type="button">↺ Reiniciar</button></div></div>
+      <div class="progress"><div class="progress-label"><span>Números revelados</span><strong id="casadosProgressText">0 de 80</strong></div><div class="progress-track"><div class="progress-bar" id="casadosProgress"></div></div></div>
+      <div class="numbers-section"><div class="numbers-head"><h4>Controle dos números</h4><div class="legend"><span><i></i> Disponível</span><span class="used"><i></i> Revelado</span></div></div><div class="number-grid" id="casadosNumbers" aria-label="Números dos casados"></div><div class="history-row"><p class="history-label">ÚLTIMOS NÚMEROS REVELADOS</p><div class="history" id="casadosHistory"><span class="empty-history">Nenhum número revelado ainda.</span></div></div></div>
     </article>
   </section>
   <aside class="howto"><div class="howto-icon" aria-hidden="true">✦</div><div><h4>Como funciona</h4><p>Toque em <strong>Revelar número</strong>. Cada número revelado fica marcado para não aparecer novamente na mesma categoria. O progresso é salvo neste navegador mesmo após atualizar a página. Você pode reiniciar uma categoria ou as duas quando quiser.</p></div></aside>
@@ -104,7 +104,7 @@ main{padding:45px 0 70px}.section-heading{display:flex;align-items:end;justify-c
       const b=document.createElement('button');b.type='button';b.className='number-tile'+(drawn.has(n)?' picked':'')+(s.last===n?' last':'');b.textContent=String(n).padStart(2,'0');b.disabled=true;b.setAttribute('aria-label','Número '+n+(drawn.has(n)?', revelado':' disponível'));grid.appendChild(b);
     }
     const history=el(key+'History');history.innerHTML='';
-    if(!s.drawn.length){const empty=document.createElement('span');empty.style.cssText='color:var(--muted);font-size:.76rem';empty.textContent='Nenhum sorteio ainda.';history.appendChild(empty)}
+    if(!s.drawn.length){const empty=document.createElement('span');empty.style.cssText='color:var(--muted);font-size:.76rem';empty.textContent='Nenhum número revelado ainda.';history.appendChild(empty)}
     else s.drawn.slice(-8).reverse().forEach((n,i)=>{const chip=document.createElement('span');chip.className='history-chip'+(i===0?' latest':'');chip.textContent=String(n).padStart(2,'0');history.appendChild(chip)});
   }
   function draw(key){
@@ -134,7 +134,7 @@ main{padding:45px 0 70px}.section-heading{display:flex;align-items:end;justify-c
     load(key);el(key+'Spin').addEventListener('click',()=>draw(key));el(key+'Reset').addEventListener('click',()=>reset(key,true));render(key);
   });
   el('resetAll').addEventListener('click',()=>{
-    if(states.solteiros.spinning||states.casados.spinning){showToast('Aguarde o sorteio terminar antes de reiniciar.');return}
+    if(states.solteiros.spinning||states.casados.spinning){showToast('Aguarde a seleção terminar antes de reiniciar.');return}
     if(!window.confirm('Reiniciar as duas categorias? Todos os números revelados serão apagados.'))return;
     ['solteiros','casados'].forEach(key=>{states[key].drawn=[];states[key].last=null;save(key);render(key)});
     showToast('As duas roletas foram reiniciadas.');
