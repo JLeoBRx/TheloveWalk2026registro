@@ -177,6 +177,13 @@ def find_matching_photos(
                 else:
                     # Pillow thumbnailing avoids loading full-resolution camera images into OpenCV.
                     with Image.open(candidate_path) as opened:
+                        if opened.width <= 0 or opened.height <= 0 or opened.width * opened.height > 60_000_000:
+                            continue
+                        # JPEG draft decoding can greatly reduce memory for large camera files.
+                        try:
+                            opened.draft("RGB", (1800, 1800))
+                        except (AttributeError, OSError):
+                            pass
                         opened.load()
                         rgb = ImageOps.exif_transpose(opened).convert("RGB")
                         rgb.thumbnail((1800, 1800), Image.Resampling.LANCZOS)
