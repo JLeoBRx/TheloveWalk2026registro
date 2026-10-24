@@ -25,6 +25,8 @@ ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "").strip()
 ADMIN_OK = len(ADMIN_TOKEN) >= 32 and "troque-por" not in ADMIN_TOKEN.lower()
 NUMBER_BOARD_TOKEN = os.getenv("NUMBER_BOARD_TOKEN", "").strip()
 NUMBER_BOARD_OK = len(NUMBER_BOARD_TOKEN) >= 32
+OPERATOR_PASSWORD = os.getenv("OPERATOR_PASSWORD", "").strip()
+OPERATOR_PASSWORD_OK = bool(OPERATOR_PASSWORD)
 EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
 MAX_PIXELS = int(os.getenv("MAX_IMAGE_PIXELS", "40000000"))
 for path in (PHOTO_DIR, DATA_DIR, THUMB_DIR):
@@ -32,7 +34,7 @@ for path in (PHOTO_DIR, DATA_DIR, THUMB_DIR):
 
 app = FastAPI(title="The Love Walk 2026 Photo Album API", version="2.0.0")
 origins = [s.strip() for s in os.getenv("CORS_ORIGINS", "http://localhost:8000,http://127.0.0.1:8000").split(",") if s.strip()]
-app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=False, allow_methods=["GET","POST","DELETE","OPTIONS"], allow_headers=["Content-Type","X-Admin-Token","X-Number-Board-Token"])
+app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=False, allow_methods=["GET","POST","DELETE","OPTIONS"], allow_headers=["Content-Type","X-Admin-Token","X-Number-Board-Token","Authorization"])
 
 def connect():
     DATA_DIR.mkdir(parents=True, exist_ok=True)
@@ -153,11 +155,58 @@ def health():
         count=c.execute("SELECT COUNT(*) FROM photos").fetchone()[0]
     return {"status":"ok","service":"The Love Walk 2026 Photo Album API","photos_indexed":count,"admin_configured":ADMIN_OK}
 
-def number_board_required(token: str | None = Header(default=None, alias="X-Number-Board-Token")):
+OPERATOR_SESSIONS: dict[str, float] = {}
+OPERATOR_LOGIN_ATTEMPTS: dict[str, dict[str, float | int]] = {}
+OPERATOR_SESSION_SECONDS = 8 * 60 * 60
+
+def number_board_required(
+    token: str | None = Header(default=None, alias="X-Number-Board-Token"),
+    authorization: str | None = Header(default=None, alias="Authorization"),
+):
+    if NUMBER_BOARD_OK and token and secrets.compare_digest(token, NUMBER_BOARD_TOKEN):
+        return
+    if authorization and authorization.lower().startswith("bearer "):
+        session_token = authorization[7:].strip()
+        expires_at = OPERATOR_SESSIONS.get(session_token, 0)
+        if expires_at > time.time():
+            return
+        OPERATOR_SESSIONS.pop(session_token, None)
     if not NUMBER_BOARD_OK:
         raise HTTPException(503, detail="number_board_not_configured")
-    if not token or not secrets.compare_digest(token, NUMBER_BOARD_TOKEN):
-        raise HTTPException(401, detail="number_board_unauthorized")
+    raise HTTPException(401, detail="number_board_unauthorized")
+
+@app.post("/api/operator-login")
+async def operator_login(request: Request):
+    """Verify the operator password and issue a short-lived server-side session."""
+    if not OPERATOR_PASSWORD_OK:
+        raise HTTPException(503, detail="operator_auth_not_configured")
+
+    client_ip = request.client.host if request.client else "unknown"
+    now = time.time()
+    attempt = OPERATOR_LOGIN_ATTEMPTS.get(client_ip, {"count": 0, "blocked_until": 0.0})
+    if float(attempt.get("blocked_until", 0.0)) > now:
+        raise HTTPException(429, detail="too_many_login_attempts")
+    if float(attempt.get("blocked_until", 0.0)) != 0.0:
+        attempt = {"count": 0, "blocked_until": 0.0}
+
+    try:
+        body = await request.json()
+    except Exception as exc:
+        raise HTTPException(400, detail="invalid_json") from exc
+    candidate = body.get("password") if isinstance(body, dict) else None
+    if not isinstance(candidate, str) or not secrets.compare_digest(candidate, OPERATOR_PASSWORD):
+        count = int(attempt.get("count", 0)) + 1
+        blocked_until = now + 600 if count >= 5 else 0.0
+        OPERATOR_LOGIN_ATTEMPTS[client_ip] = {"count": count, "blocked_until": blocked_until}
+        raise HTTPException(401, detail="operator_unauthorized")
+
+    OPERATOR_LOGIN_ATTEMPTS.pop(client_ip, None)
+    for old_token, expiry in list(OPERATOR_SESSIONS.items()):
+        if expiry <= now:
+            OPERATOR_SESSIONS.pop(old_token, None)
+    access_token = secrets.token_urlsafe(32)
+    OPERATOR_SESSIONS[access_token] = now + OPERATOR_SESSION_SECONDS
+    return {"access_token": access_token, "token_type": "Bearer", "expires_in": OPERATOR_SESSION_SECONDS}
 
 NUMBER_BOARD_CATEGORIES = ("solteiros", "casados")
 
