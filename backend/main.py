@@ -13,6 +13,7 @@ from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from PIL import Image, ImageOps, UnidentifiedImageError
+import rawpy
 from starlette.concurrency import run_in_threadpool
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -20,6 +21,7 @@ load_dotenv(ROOT / ".env")
 PHOTO_DIR = Path(os.getenv("PHOTO_DIR", ROOT / "colocar as fotos aqui")).resolve()
 DATA_DIR = Path(os.getenv("DATA_DIR", ROOT / "data")).resolve()
 THUMB_DIR = DATA_DIR / "thumbnails"
+RAW_PREVIEW_DIR = DATA_DIR / "raw_previews"
 DB_PATH = Path(os.getenv("DB_PATH", DATA_DIR / "the_love_walk.sqlite3")).resolve()
 ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "").strip()
 ADMIN_OK = bool(ADMIN_TOKEN) and "troque-por" not in ADMIN_TOKEN.lower()
@@ -27,9 +29,17 @@ NUMBER_BOARD_TOKEN = os.getenv("NUMBER_BOARD_TOKEN", "").strip()
 NUMBER_BOARD_OK = len(NUMBER_BOARD_TOKEN) >= 32
 OPERATOR_PASSWORD = os.getenv("OPERATOR_PASSWORD", "").strip()
 OPERATOR_PASSWORD_OK = bool(OPERATOR_PASSWORD)
-EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
+STANDARD_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
+RAW_EXTENSIONS = {
+    ".3fr", ".arw", ".bay", ".cap", ".cr2", ".cr3", ".crw", ".dcs", ".dcr",
+    ".dng", ".drf", ".eip", ".erf", ".fff", ".iiq", ".k25", ".kdc", ".mef",
+    ".mos", ".mrw", ".nef", ".nrw", ".obm", ".orf", ".pef", ".ptx", ".pxn",
+    ".qtk", ".raf", ".raw", ".rdc", ".rw2", ".rwl", ".sr2", ".srf", ".srw",
+    ".sti", ".x3f"
+}
+EXTENSIONS = STANDARD_EXTENSIONS | RAW_EXTENSIONS
 MAX_PIXELS = int(os.getenv("MAX_IMAGE_PIXELS", "40000000"))
-for path in (PHOTO_DIR, DATA_DIR, THUMB_DIR):
+for path in (PHOTO_DIR, DATA_DIR, THUMB_DIR, RAW_PREVIEW_DIR):
     path.mkdir(parents=True, exist_ok=True)
 
 app = FastAPI(title="The Love Walk 2026 Photo Album API", version="2.0.0")
@@ -86,7 +96,32 @@ def category_for(rel: str) -> str:
     parent=Path(rel).parent.name
     return parent if parent not in {"", "."} else "A caminhada"
 
+def create_raw_previews(src: Path, photo_id: str) -> tuple[int,int]:
+    """Create a web-sized JPEG preview and WebP thumbnail from a camera RAW file."""
+    preview_path = RAW_PREVIEW_DIR / (photo_id + ".jpg")
+    thumb_path = THUMB_DIR / (photo_id + ".webp")
+    try:
+        with rawpy.imread(str(src)) as raw:
+            # Half-size demosaicing is faster and sufficient for a web album preview.
+            rgb = raw.postprocess(use_camera_wb=True, output_bps=8, half_size=True)
+        im = Image.fromarray(rgb).convert("RGB")
+        dimensions = im.size
+        im.thumbnail((2400, 2400), Image.Resampling.LANCZOS)
+        preview_path.parent.mkdir(parents=True, exist_ok=True)
+        im.save(preview_path, "JPEG", quality=88, optimize=True)
+        im.thumbnail((800, 800), Image.Resampling.LANCZOS)
+        thumb_path.parent.mkdir(parents=True, exist_ok=True)
+        im.save(thumb_path, "WEBP", quality=86, method=6)
+        return dimensions
+    except Exception as exc:
+        preview_path.unlink(missing_ok=True)
+        thumb_path.unlink(missing_ok=True)
+        raise ValueError(f"Não foi possível revelar o RAW ({src.suffix.upper()}): {exc}") from exc
+
+
 def create_thumb(src: Path, out: Path) -> tuple[int,int]:
+    if src.suffix.lower() in RAW_EXTENSIONS:
+        return create_raw_previews(src, out.stem)
     try:
         with Image.open(src) as im:
             if im.format not in {"JPEG","PNG","WEBP"}:
@@ -103,8 +138,11 @@ def create_thumb(src: Path, out: Path) -> tuple[int,int]:
         raise ValueError("Arquivo de imagem inválido.") from e
 
 def payload(row: sqlite3.Row) -> dict:
-    return {"id":row["id"],"url":f"/media/{row['id']}","src":f"/media/{row['id']}",
-            "thumb":f"/thumb/{row['id']}","category":row["category"],"caption":row["caption"],
+    is_raw = Path(row["relative_path"]).suffix.lower() in RAW_EXTENSIONS
+    display_url = f"/preview/{row['id']}" if is_raw else f"/media/{row['id']}"
+    return {"id":row["id"],"url":display_url,"src":display_url,
+            "thumb":f"/thumb/{row['id']}","download":f"/media/{row['id']}",
+            "is_raw":is_raw,"category":row["category"],"caption":row["caption"],
             "alt":row["caption"],"width":row["width"],"height":row["height"]}
 
 def index_photos() -> dict:
@@ -127,7 +165,7 @@ def index_photos() -> dict:
             with db() as c:
                 old=c.execute("SELECT file_size,mtime,thumb_filename FROM photos WHERE id=?",(pid,)).fetchone()
                 thumb=(THUMB_DIR/old["thumb_filename"]) if old else None
-                if old and old["file_size"]==stat.st_size and abs(old["mtime"]-stat.st_mtime)<0.01 and thumb and thumb.is_file():
+                if old and old["file_size"]==stat.st_size and abs(old["mtime"]-stat.st_mtime)<0.01 and thumb and thumb.is_file() and (source.suffix.lower() not in RAW_EXTENSIONS or (RAW_PREVIEW_DIR/(pid+".jpg")).is_file()):
                     skipped+=1
                     continue
             width,height=create_thumb(source,THUMB_DIR/(pid+".webp"))
@@ -147,6 +185,7 @@ def index_photos() -> dict:
             if row["relative_path"] not in found:
                 c.execute("DELETE FROM photos WHERE id=?",(row["id"],))
                 (THUMB_DIR/row["thumb_filename"]).unlink(missing_ok=True)
+                (RAW_PREVIEW_DIR/(row["id"]+".jpg")).unlink(missing_ok=True)
     return {"found":len(files),"processed":processed,"skipped_unchanged":skipped,"errors":errors}
 
 
@@ -325,6 +364,26 @@ def admin_remove_photo(photo_id:str):
     (THUMB_DIR/row["thumb_filename"]).unlink(missing_ok=True)
     return {"status":"removed_from_album","photo_id":photo_id,"source_file_deleted":False}
 
+@app.get("/preview/{photo_id}")
+def raw_preview(photo_id:str):
+    with db() as c:
+        row=c.execute("SELECT relative_path FROM photos WHERE id=?",(photo_id,)).fetchone()
+    if not row:
+        raise HTTPException(404,detail="photo_not_found")
+    source=(PHOTO_DIR/row["relative_path"]).resolve()
+    if PHOTO_DIR not in source.parents or source.suffix.lower() not in EXTENSIONS or not source.is_file():
+        raise HTTPException(404,detail="photo_not_found")
+    if source.suffix.lower() not in RAW_EXTENSIONS:
+        return media(photo_id)
+    preview_path=RAW_PREVIEW_DIR/(photo_id+".jpg")
+    if not preview_path.is_file():
+        try:
+            create_raw_previews(source, photo_id)
+        except ValueError as exc:
+            raise HTTPException(422,detail=str(exc)) from exc
+    return FileResponse(preview_path,media_type="image/jpeg",headers={"Cache-Control":"public, max-age=86400","X-Content-Type-Options":"nosniff"})
+
+
 @app.get("/media/{photo_id}")
 def media(photo_id:str):
     with db() as c:
@@ -334,7 +393,9 @@ def media(photo_id:str):
     path=(PHOTO_DIR/row["relative_path"]).resolve()
     if PHOTO_DIR not in path.parents or path.suffix.lower() not in EXTENSIONS or not path.is_file():
         raise HTTPException(404,detail="photo_not_found")
-    return FileResponse(path,filename=row["filename"],headers={"Cache-Control":"public, max-age=86400","X-Content-Type-Options":"nosniff"})
+    is_raw = path.suffix.lower() in RAW_EXTENSIONS
+    headers={"Cache-Control":"public, max-age=86400","X-Content-Type-Options":"nosniff"}
+    return FileResponse(path,filename=row["filename"],media_type="application/octet-stream" if is_raw else None,headers=headers)
 
 @app.get("/thumb/{photo_id}")
 def thumb(photo_id:str):
