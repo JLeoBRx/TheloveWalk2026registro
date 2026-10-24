@@ -84,7 +84,7 @@ def id_for(rel: str) -> str:
 
 def category_for(rel: str) -> str:
     parent=Path(rel).parent.name
-    return parent if parent!="." else "A caminhada"
+    return parent if parent not in {"", "."} else "A caminhada"
 
 def create_thumb(src: Path, out: Path) -> tuple[int,int]:
     try:
