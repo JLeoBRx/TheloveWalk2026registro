@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import io
 import mimetypes
+from urllib.parse import quote
 import boto3
 from botocore.config import Config
 import os
