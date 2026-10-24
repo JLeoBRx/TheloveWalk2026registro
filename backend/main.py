@@ -179,11 +179,11 @@ def get_number_board():
                 drawn = json.loads(row["drawn_json"])
             except (TypeError, json.JSONDecodeError):
                 drawn = []
-            categories[category] = {"drawn": drawn, "last": row["last_number"]}
+            categories[category] = {"drawn": drawn, "last": row["last_number"], "updated_at": float(row["updated_at"]), "version": int(row["version"])}
             updated_at = max(updated_at, float(row["updated_at"]))
             version = max(version, int(row["version"]))
         else:
-            categories[category] = {"drawn": [], "last": None}
+            categories[category] = {"drawn": [], "last": None, "updated_at": 0.0, "version": 0}
     return {"categories": categories, "updated_at": updated_at, "version": version}
 
 
