@@ -5,6 +5,7 @@ import os
 import secrets
 import sqlite3
 import time
+from threading import Thread
 from contextlib import contextmanager
 import json
 from pathlib import Path
@@ -18,7 +19,8 @@ from starlette.concurrency import run_in_threadpool
 
 ROOT = Path(__file__).resolve().parents[1]
 load_dotenv(ROOT / ".env")
-PHOTO_DIR = Path(os.getenv("PHOTO_DIR", ROOT / "colocar as fotos aqui")).resolve()
+PHOTO_DIR_CONFIG = Path(os.getenv("PHOTO_DIR", str(ROOT / "colocar as fotos aqui"))).expanduser()
+PHOTO_DIR = (PHOTO_DIR_CONFIG if PHOTO_DIR_CONFIG.is_absolute() else ROOT / PHOTO_DIR_CONFIG).resolve()
 DATA_DIR = Path(os.getenv("DATA_DIR", ROOT / "data")).resolve()
 THUMB_DIR = DATA_DIR / "thumbnails"
 RAW_PREVIEW_DIR = DATA_DIR / "raw_previews"
@@ -192,14 +194,22 @@ def index_photos() -> dict:
     return {"found":len(files),"processed":processed,"skipped_unchanged":skipped,"errors":errors}
 
 
+def _startup_index_worker():
+    """Index the committed gallery without blocking application health checks."""
+    try:
+        print(f"[album-index-startup] begin path={PHOTO_DIR}", flush=True)
+        result = index_photos()
+        print(f"[album-index-startup] {json.dumps(result, ensure_ascii=False)}", flush=True)
+    except Exception as exc:
+        print(f"[album-index-startup] {type(exc).__name__}: {exc}", flush=True)
+
+
 @app.on_event("startup")
 def auto_index_gallery_on_startup():
-    """Index images committed to the GitHub upload folder whenever the service starts."""
-    try:
-        result = index_photos()
-        print(f"[album-index-startup] {json.dumps(result, ensure_ascii=False)}")
-    except Exception as exc:
-        print(f"[album-index-startup] {type(exc).__name__}: {exc}")
+    """Schedule indexing of the GitHub upload folder after server startup."""
+    worker = Thread(target=_startup_index_worker, name="album-startup-index", daemon=True)
+    worker.start()
+    print(f"[album-index-startup] scheduled path={PHOTO_DIR}", flush=True)
 
 
 @app.get("/api/health")
