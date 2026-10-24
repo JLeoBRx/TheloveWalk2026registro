@@ -102,6 +102,8 @@ def create_raw_previews(src: Path, photo_id: str) -> tuple[int,int]:
     thumb_path = THUMB_DIR / (photo_id + ".webp")
     try:
         with rawpy.imread(str(src)) as raw:
+            if raw.sizes.width * raw.sizes.height > MAX_PIXELS:
+                raise ValueError(f"RAW excede o limite de {MAX_PIXELS:,} pixels.")
             # Half-size demosaicing is faster and sufficient for a web album preview.
             rgb = raw.postprocess(use_camera_wb=True, output_bps=8, half_size=True)
         im = Image.fromarray(rgb).convert("RGB")
