@@ -109,6 +109,7 @@ Docker: `docker compose up --build` (inclui PostgreSQL; defina `POSTGRES_PASSWOR
 | `DOWNLOADS_DEFAULT` | `true` | Download liberado por padrão. |
 | `RAW_ORIGINAL_DOWNLOADS` | `true` | Oferece o arquivo RAW original (além do JPEG da câmera). |
 | `NEW_PHOTOS_REQUIRE_REVIEW` | `false` | Fotos novas ficam ocultas até “Publicar fotos em revisão”. |
+| `CATEGORIES_FROM_FOLDERS` | `false` | `true` transforma subpastas em filtros por momento; padrão é álbum único. |
 
 ## 4. Configurações versionadas (`config/`)
 
@@ -141,9 +142,10 @@ Sem banco durável em produção, o painel entra em **modo somente leitura** (a 
 
 ## 6. Fotos: sincronização e publicação
 
-1. **Modo R2 (recomendado):** envie os originais para `originais/` no bucket, mantendo subpastas para
-   os momentos (`originais/01 - Chegada/IMG_0001.CR2`).
-   **Modo local:** coloque em `fjnight/fotos/` e faça commit (navegador do GitHub: até 25 MB/arquivo).
+1. **Modo local:** coloque as fotos **direto** em `fjnight/fotos/`, sem separar, e faça commit na
+   `main` (navegador do GitHub: até 25 MB/arquivo). **Modo R2:** envie para `originais/` no bucket.
+   Por padrão o álbum é único e ordenado pelo horário da foto; para transformar subpastas em filtros
+   por momento (`01 - Chegada/`, `02 - Louvor/`…), defina `CATEGORIES_FROM_FOLDERS=true`.
 2. No painel, **Sincronizar** (ou aguarde o próximo deploy/início do servidor).
 3. Formatos: JPG, PNG, WebP e RAW (CR2, CR3, NEF, ARW, DNG, ORF, RW2, RAF, PEF, SRW…).
 

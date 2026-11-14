@@ -242,8 +242,9 @@ async function refreshStatus() {
     "Nenhuma sincronização registrada ainda.";
   const sel = $("categoryFilter");
   if (sel.options.length === 1) {
-    for (const cat of c.categories) sel.append(el("option", { value: cat.id, text: `${cat.label} (${cat.count})` }));
+    for (const cat of c.categories.filter((x) => x.id)) sel.append(el("option", { value: cat.id, text: `${cat.label} (${cat.count})` }));
   }
+  sel.hidden = sel.options.length === 1;   // álbum único: não há momentos para filtrar
   renderJob(s.job);
 }
 

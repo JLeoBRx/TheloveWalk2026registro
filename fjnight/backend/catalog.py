@@ -49,6 +49,8 @@ def is_valid_id(pid: str) -> bool:
 
 
 def category_of(rel: str) -> str:
+    if not settings.categories_from_folders:
+        return ""  # álbum único: as fotos ficam juntas, em ordem de horário
     parts = PurePosixPath(rel).parts
     return parts[0] if len(parts) > 1 else ""
 
@@ -216,6 +218,7 @@ def index_catalog(progress: Callable[[int, int, str], None] | None = None) -> di
         try:
             row = rows.get(rel)
             if row and row["source_sig"] == src.sig and row["version"] == version and ready(row["id"]) \
+                    and row["category"] == category_of(rel) \
                     and row["sha256"] not in claimed:
                 claimed[row["sha256"]] = rel
                 stats["unchanged"] += 1

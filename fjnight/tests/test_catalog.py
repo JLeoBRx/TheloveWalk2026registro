@@ -179,3 +179,21 @@ def test_empty_gallery_is_served():
     c = client()
     assert c.get("/api/photos").json()["total"] == 0
     assert c.get("/").status_code == 200
+
+
+def test_default_single_album_ignores_subfolders():
+    from support import set_setting
+    set_setting("categories_from_folders", False)
+    try:
+        sync()
+        c = client()
+        items = c.get("/api/photos").json()["items"]
+        assert len(items) == 3 and {i["category"] for i in items} == {""}
+        assert c.get("/api/event").json()["categories"] == [{"id": "", "label": "Outras", "count": 3}]
+        # ordem pelo horário da foto, não pela pasta
+        dated = [i["taken_at"] for i in items if i["taken_at"]]
+        assert dated == sorted(dated)
+    finally:
+        set_setting("categories_from_folders", True)
+    sync()   # voltar a ativar as pastas reclassifica sem reprocessar imagens
+    assert {i["category"] for i in client().get("/api/photos").json()["items"]} == {"01 - Chegada", "02 - Louvor"}
