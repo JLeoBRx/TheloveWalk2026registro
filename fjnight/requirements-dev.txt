@@ -1,4 +1,4 @@
 -r requirements.txt
 pytest==8.3.5
 httpx==0.28.1
-moto[s3]==5.1.4
+moto[s3,server]==5.1.4

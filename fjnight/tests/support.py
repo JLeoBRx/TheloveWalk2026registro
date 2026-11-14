@@ -177,3 +177,17 @@ def search(c: TestClient, data: bytes, version: str | None = None, face: int | N
     headers = {"Content-Type": ctype, "X-Consent": "true", "X-Consent-Version": version or CONSENT_VERSION}
     url = "/api/faces/search" + (f"?face={face}" if face is not None else "")
     return c.post(url, content=data, headers=headers)
+
+
+def fetch_download(c: TestClient, url: str) -> tuple[bytes, str]:
+    """Segue o download como o navegador: no R2, a aplicação redireciona para uma URL assinada."""
+    r = c.get(url, follow_redirects=False)
+    if r.status_code in (302, 307):
+        import httpx
+
+        assert "X-Amz-Signature" in r.headers["location"]
+        external = httpx.get(r.headers["location"], timeout=60)
+        assert external.status_code == 200
+        return external.content, external.headers.get("content-type", "")
+    assert r.status_code == 200, r.text
+    return r.content, r.headers.get("content-type", "")

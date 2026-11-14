@@ -5,7 +5,7 @@ services:
     plan: free
     branch: main
     autoDeploy: true
-    # Envios de fotos da FJ Night não devem republicar o álbum da Love Walk.
+    # Envios de fotos da FJU Night não devem republicar o álbum da Love Walk.
     buildFilter:
       ignoredPaths:
         - fjnight/**
@@ -16,7 +16,8 @@ services:
       - key: ADMIN_TOKEN
         generateValue: true
 
-  # FJ Night — A Noite da Herança (aplicação independente na pasta fjnight/)
+  # FJU Night — A Noite da Herança (aplicação independente na pasta fjnight/).
+  # Caminhos de buildFilter são relativos à raiz do repositório.
   - type: web
     name: fjnight-a-noite-da-heranca
     runtime: python
@@ -27,18 +28,39 @@ services:
     buildFilter:
       paths:
         - fjnight/**
-    # O build gera miniaturas, versões de exibição e o índice facial cifrado.
+      ignoredPaths:
+        - fjnight/tests/**
+        - fjnight/**/*.md
+    # Gera miniaturas e versões de exibição. O índice facial só é criado se a busca
+    # estiver formalmente autorizada no painel (desligada por padrão).
     buildCommand: "pip install -r requirements.txt && python -m models.download_models && python -m backend.build"
-    startCommand: "uvicorn backend.main:app --host 0.0.0.0 --port $PORT --proxy-headers --forwarded-allow-ips '*'"
-    healthCheckPath: /api/status
+    startCommand: "uvicorn backend.main:app --host 0.0.0.0 --port $PORT"
+    healthCheckPath: /api/health
     envVars:
+      - key: APP_ENV
+        value: production
       - key: PYTHON_VERSION
         value: 3.12.8
       - key: ADMIN_TOKEN
         generateValue: true
+      # Cifra dados faciais. Gerada uma vez; NUNCA altere depois de registrar oposições.
       - key: FACE_DATA_KEY
         generateValue: true
       - key: FACE_SEARCH_ENABLED
-        value: "true"
+        value: "false"
       - key: FACE_DATA_RETENTION_DAYS
         value: "90"
+      - key: TRUSTED_PROXY_HOPS
+        value: "1"
+      # Banco durável (PostgreSQL). Use a URL EXTERNA: o build também precisa acessá-lo.
+      - key: DATABASE_URL
+        sync: false
+      # Cloudflare R2 (opcional: sem R2_BUCKET, as fotos vêm da pasta fjnight/fotos do Git).
+      - key: R2_ACCOUNT_ID
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_BUCKET
+        sync: false

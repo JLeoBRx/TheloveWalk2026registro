@@ -219,6 +219,9 @@ async function refreshStatus() {
     check(f.key.configured && f.key.matches, f.key.configured ? (f.key.matches ? "Chave de cifragem configurada e consistente." :
       "Chave de cifragem diferente da usada nos registros!") : "FACE_DATA_KEY não configurada (necessária só para a busca facial).", !f.key.configured),
   );
+  const n = s.network;
+  $("persistence").append(check(n.https, `Conexão ${n.https ? "HTTPS" : "sem HTTPS"} · IP que o servidor vê para você: ${n.client_ip_seen} ` +
+    `(compare com o seu IP real; se for diferente, ajuste TRUSTED_PROXY_HOPS ou CLIENT_IP_HEADER — cabeçalhos presentes: ${n.headers_present.join(", ") || "nenhum"}).`, !n.https));
   msg("persistenceMsg", p.admin_writes_allowed ? "" : "Modo somente leitura: a galeria funciona normalmente.", p.admin_writes_allowed ? "" : "error");
   $("stats").replaceChildren(
     stat("Publicadas", fmt.format(c.public)), stat("Ocultas", fmt.format(c.hidden)),

@@ -41,12 +41,29 @@ ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp"}
 # ---------------------------------------------------------------------------
 def client_ip(request: Request) -> str:
     direct = request.client.host if request.client else "desconhecido"
+    if settings.client_ip_header:
+        value = request.headers.get(settings.client_ip_header, "").strip()
+        if value:
+            return value
     hops = settings.trusted_proxy_hops
     if hops <= 0:
         return direct
     forwarded = [p.strip() for p in request.headers.get("x-forwarded-for", "").split(",") if p.strip()]
     # O proxy confiável mais próximo acrescenta o IP real no fim da lista.
     return forwarded[-hops] if len(forwarded) >= hops else direct
+
+
+def network_diagnostics(request: Request) -> dict:
+    """Ajuda a calibrar TRUSTED_PROXY_HOPS/CLIENT_IP_HEADER (mostrado só no painel)."""
+    forwarded = [p.strip() for p in request.headers.get("x-forwarded-for", "").split(",") if p.strip()]
+    return {
+        "client_ip_seen": client_ip(request),
+        "forwarded_for_entries": len(forwarded),
+        "trusted_proxy_hops": settings.trusted_proxy_hops,
+        "client_ip_header": settings.client_ip_header or None,
+        "headers_present": [h for h in ("cf-connecting-ip", "true-client-ip", "x-real-ip") if h in request.headers],
+        "https": is_https(request),
+    }
 
 
 def is_https(request: Request) -> bool:

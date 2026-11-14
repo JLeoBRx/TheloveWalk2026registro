@@ -96,7 +96,10 @@ def test_production_requires_durable_db_and_env_key():
     set_setting("face_search_enabled", True)
     write_privacy(PRIVACY_FILLED)
     status = faces.authorization_status()
-    assert status["checks"]["durable_storage"] is False          # SQLite sem disco persistente declarado
+    if settings.database_kind == "sqlite":
+        assert status["checks"]["durable_storage"] is False      # SQLite sem disco persistente declarado
+    else:
+        assert status["checks"]["durable_storage"] is True       # PostgreSQL é durável
     set_setting("sqlite_is_durable", True)
     set_setting("face_data_key", "")
     simulate_restart()
@@ -106,6 +109,7 @@ def test_production_requires_durable_db_and_env_key():
     simulate_restart()
 
 
+@pytest.mark.skipif(settings.database_kind != "sqlite", reason="cenário de SQLite em disco efêmero")
 def test_non_durable_production_blocks_admin_writes_but_gallery_works():
     set_setting("app_env", "production")
     put_original("a.jpg", jpeg())
@@ -263,9 +267,10 @@ def test_raw_original_and_camera_jpeg_downloads():
     assert item["original"] and item["original_label"] == "CR2" and item["download_label"] == "JPEG da câmera"
     from io import BytesIO
     from PIL import Image
-    r = c.get(item["download"], follow_redirects=True)
-    assert r.headers["content-type"] == "image/jpeg" and max(Image.open(BytesIO(r.content)).size) >= 5000
-    original = c.get(item["original"], follow_redirects=True).content
+    from support import fetch_download
+    content, ctype = fetch_download(c, item["download"])
+    assert ctype == "image/jpeg" and max(Image.open(BytesIO(content)).size) >= 5000
+    original, _ = fetch_download(c, item["original"])
     assert original == (SAMPLES / "IMG_0042.CR2").read_bytes()      # RAW intacto, byte a byte
     disp = c.get(item["display"]).content
     assert max(Image.open(BytesIO(disp)).size) == settings.display_size

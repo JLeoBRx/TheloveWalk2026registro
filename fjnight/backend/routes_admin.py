@@ -86,7 +86,7 @@ def revoke_all_sessions() -> JSONResponse:
 # Situação e histórico
 # ---------------------------------------------------------------------------
 @router.get("/status")
-def admin_status() -> JSONResponse:
+def admin_status(request: Request) -> JSONResponse:
     rows, effs = catalog.all_rows()
     visible = [r for r in rows if not effs[r["id"]].hidden]
     pending_review = sum(1 for r in rows if effs[r["id"]].reason == catalog.REVIEW_REASON and effs[r["id"]].hidden)
@@ -121,6 +121,7 @@ def admin_status() -> JSONResponse:
         },
         "job": jobs.STATUS,
         "review_mode": settings.new_photos_require_review,
+        "network": security.network_diagnostics(request),
     })
 
 

@@ -6,7 +6,7 @@ from PIL import Image
 
 from backend import catalog, storage
 from backend.config import settings
-from support import (client, jpeg, put_original, read_original, remove_original, reset_everything, simulate_new_deploy,
+from support import (client, fetch_download, jpeg, put_original, read_original, remove_original, reset_everything, simulate_new_deploy,
                      sync, admin_client)
 
 
@@ -79,13 +79,9 @@ def test_derivatives_and_original_download_are_byte_identical():
     assert max(Image.open(io.BytesIO(thumb.content)).size) <= settings.thumb_size
     display = c.get(item["display"])
     assert max(Image.open(io.BytesIO(display.content)).size) <= settings.display_size
-    r = c.get(item["download"], follow_redirects=False)
-    if storage.store().kind == "r2":
-        assert r.status_code == 302 and "X-Amz-Signature" in r.headers["location"]
-        body = c.get(r.headers["location"]).content
-    else:
-        assert "attachment" in r.headers["content-disposition"]
-        body = r.content
+    if storage.store().kind == "local":
+        assert "attachment" in c.get(item["download"]).headers["content-disposition"]
+    body, _ = fetch_download(c, item["download"])
     assert body == read_original("01 - Chegada/a.jpg")
 
 

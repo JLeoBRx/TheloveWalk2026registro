@@ -97,6 +97,8 @@ class Settings:
     login_lockout_minutes: int = field(default_factory=lambda: _int("ADMIN_LOGIN_LOCKOUT_MINUTES", 15))
     # Quantos proxies reversos confiáveis existem antes da aplicação (Render = 1).
     trusted_proxy_hops: int = field(default_factory=lambda: _int("TRUSTED_PROXY_HOPS", 0))
+    # Alternativa: cabeçalho que a borda (ex.: Cloudflare) sempre sobrescreve, como cf-connecting-ip.
+    client_ip_header: str = field(default_factory=lambda: _str("CLIENT_IP_HEADER").lower())
     cors_origins: tuple[str, ...] = field(default_factory=lambda: tuple(
         s.strip() for s in os.getenv("CORS_ORIGINS", "").split(",") if s.strip()
     ))
