@@ -7,3 +7,4 @@ data/
 fotos/
 tests/
 models/*.part
+postgres/

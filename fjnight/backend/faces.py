@@ -582,10 +582,15 @@ def search_state() -> tuple[bool, str]:
         return False, "expired"
     if not authorization_status()["authorized"]:
         return False, "disabled"
-    if not settings.faces_db.exists() or local_stats()["photos_indexed"] == 0:
-        rows, effs = catalog.visible_rows()
-        if any(effs[r["id"]].face_search for r in rows):
-            return False, "indexing"
+    from . import jobs  # importação tardia: jobs depende deste módulo
+
+    rows, effs = catalog.visible_rows()
+    eligible = sum(1 for r in rows if effs[r["id"]].face_search)
+    indexed = local_stats()["photos_indexed"] if settings.faces_db.exists() else 0
+    if eligible and indexed == 0:
+        return False, "indexing"
+    if jobs.STATUS["running"] and jobs.STATUS["phase"] == "faces" and indexed < eligible:
+        return False, "indexing"  # índice parcial daria resultados incompletos
     return True, "ready"
 
 

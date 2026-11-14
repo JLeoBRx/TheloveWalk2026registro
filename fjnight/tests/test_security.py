@@ -203,3 +203,20 @@ def test_no_secrets_in_public_responses():
     for path in ("/api/status", "/api/event", "/api/privacy", "/api/faces/status", "/api/playlist"):
         body = c.get(path).text
         assert TOKEN not in body and os.environ["FACE_DATA_KEY"] not in body and "DATABASE" not in body
+
+
+def test_client_ip_header_when_edge_overwrites_it():
+    from starlette.requests import Request
+    set_setting("client_ip_header", "cf-connecting-ip")
+    try:
+        scope = {"type": "http", "client": ("10.0.0.5", 1),
+                 "headers": [(b"cf-connecting-ip", b"177.10.20.30"), (b"x-forwarded-for", b"6.6.6.6, 1.2.3.4")]}
+        assert security.client_ip(Request(scope)) == "177.10.20.30"
+    finally:
+        set_setting("client_ip_header", "")
+
+
+def test_admin_status_shows_network_diagnostics():
+    c, _ = admin_client()
+    n = c.get("/api/admin/status", headers={"X-Forwarded-For": "177.1.1.1"}).json()["network"]
+    assert n["client_ip_seen"] == "177.1.1.1" and n["trusted_proxy_hops"] == 1

@@ -10,6 +10,7 @@ let sessionTimer = 0;
 let idleExpiresAt = 0;
 let importPayload = null;
 let lastJobRunning = false;
+let sessionGeneration = 0;   // respostas de antes do login não podem encerrar a sessão nova
 
 const ERR = {
   admin_unauthorized: "Token inválido.",
@@ -52,7 +53,8 @@ class ApiError extends Error {
   constructor(code, status) { super(code); this.code = code; this.status = status; }
 }
 
-async function api(path, { method = "GET", json, body, headers = {} } = {}) {
+async function api(path, { method = "GET", json, body, headers = {}, probe = false } = {}) {
+  const generation = sessionGeneration;
   const h = { Accept: "application/json", ...headers };
   if (method !== "GET") h["X-CSRF-Token"] = csrf;
   let payload = body;
@@ -67,7 +69,9 @@ async function api(path, { method = "GET", json, body, headers = {} } = {}) {
   try { data = await res.json(); } catch { /* sem corpo */ }
   if (!res.ok) {
     const code = data.detail || data.code || `http_${res.status}`;
-    if (res.status === 401 && path !== "/api/admin/login") showLogin(ERR.admin_session_required);
+    if (res.status === 401 && !probe && path !== "/api/admin/login" && generation === sessionGeneration) {
+      showLogin(ERR.admin_session_required);
+    }
     throw new ApiError(typeof code === "string" ? code : `http_${res.status}`, res.status);
   }
   touchSession();
@@ -158,6 +162,7 @@ function showLogin(message = "") {
 }
 
 function startSession(info) {
+  sessionGeneration += 1;
   csrf = info.csrf;
   touchSession.idle = info.idle_minutes || 30;
   idleExpiresAt = info.idle_expires_at || Date.now() / 1000 + touchSession.idle * 60;
@@ -368,10 +373,12 @@ async function loadFaces() {
     privacy_unchanged: "Texto de privacidade igual ao autorizado", within_retention: "Dentro do prazo de retenção",
     models_available: "Modelos faciais presentes",
   };
-  $("faceChecks").replaceChildren(...Object.entries(a.checks).map(([k, ok]) => {
-    const pending = a.pending.find((p) => p.code === k);
-    return check(ok || (k === "privacy_unchanged" && !a.checks.authorized), pending ? pending.message : labels[k]);
-  }));
+  $("faceChecks").replaceChildren(...Object.entries(a.checks)
+    .filter(([k]) => k !== "privacy_unchanged" || a.checks.authorized)   // só faz sentido com autorização
+    .map(([k, ok]) => {
+      const pending = a.pending.find((p) => p.code === k);
+      return check(ok, pending ? pending.message : labels[k]);
+    }));
   $("privacyPreview").replaceChildren(...Object.entries(PRIVACY_LABELS).map(([k, label]) =>
     el("div", {}, el("dt", { text: label }), el("dd", { class: a.privacy[k] ? "" : "is-missing", text: a.privacy[k] || "Não preenchido" }))));
   const list = $("authChecklist");
@@ -554,11 +561,14 @@ async function loadHistory() {
 }
 
 // ---------------- Início ----------------
+// Verifica se já existe sessão e só então libera o formulário (evita corrida com o login).
 (async () => {
   try {
-    const info = await api("/api/admin/session");
+    const info = await api("/api/admin/session", { probe: true });
     startSession(info);
   } catch {
     showLogin("");
+  } finally {
+    $("loginBtn").disabled = false;
   }
 })();

@@ -3,10 +3,28 @@ services:
     build: .
     restart: unless-stopped
     env_file: .env
+    environment:
+      DATABASE_URL: postgresql://fjnight:${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}@db:5432/fjnight
     ports:
       - "8000:8000"
     volumes:
       - ./fotos:/app/fotos:ro
       - ./data:/app/data
-    # Em produção, publique atrás de um proxy reverso com HTTPS:
-    # a câmera do celular só funciona em conexões seguras.
+    depends_on:
+      db:
+        condition: service_healthy
+    # Publique atrás de um proxy reverso com HTTPS (a câmera do celular exige HTTPS)
+    # e ajuste TRUSTED_PROXY_HOPS=1 no .env.
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: fjnight
+      POSTGRES_DB: fjnight
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fjnight"]
+      interval: 5s
+      retries: 10
