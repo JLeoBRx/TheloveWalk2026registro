@@ -1,4 +1,4 @@
-# FJ Night — A Noite da Herança · dependências do servidor (Python 3.12)
+# FJU Night — A Noite da Herança · dependências de produção (Python 3.12)
 fastapi==0.115.12
 uvicorn[standard]==0.34.0
 python-multipart==0.0.20
@@ -10,6 +10,8 @@ numpy==2.2.6
 opencv-python-headless==4.11.0.86
 cryptography==44.0.2
 requests==2.32.3
-# Testes
-pytest==8.3.5
-httpx==0.28.1
+# Persistência durável (PostgreSQL em produção; SQLite em desenvolvimento)
+SQLAlchemy==2.0.40
+psycopg[binary]==3.2.6
+# Armazenamento de fotos no Cloudflare R2 (API compatível com S3)
+boto3==1.37.38

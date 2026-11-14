@@ -1,16 +1,21 @@
-"""Busca de fotografias por reconhecimento facial (selfie do próprio visitante)."""
+"""Busca de fotografias por reconhecimento facial (selfie do próprio visitante).
+
+A imagem chega como corpo bruto (image/jpeg, image/png ou image/webp) e é lida
+somente em memória — não há multipart, arquivo temporário ou gravação em disco.
+O consentimento vai nos cabeçalhos X-Consent e X-Consent-Version.
+"""
 from __future__ import annotations
 
-from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile
+from fastapi import APIRouter, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 from starlette.concurrency import run_in_threadpool
 
 from . import catalog, faces, imaging
 from .config import face_data_expires_at, settings
-from .security import RateLimiter, client_key
+from .security import ALLOWED_IMAGE_TYPES, RateLimiter, client_ip, read_limited_body
 
 router = APIRouter()
-CONSENT_VERSION = "2026-11-v1"
+CONSENT_VERSION = "2026-11-v2"
 limiter = RateLimiter(settings.search_rate_limit, settings.search_rate_window)
 NO_STORE = {"Cache-Control": "no-store", "Pragma": "no-cache"}
 
@@ -21,7 +26,7 @@ def _error(code: str, status: int, **extra) -> JSONResponse:
 
 @router.get("/api/faces/status")
 def face_status() -> JSONResponse:
-    available, reason = faces.search_available()
+    available, reason = faces.search_state()
     return JSONResponse({
         "available": available,
         "reason": reason,
@@ -45,51 +50,40 @@ def _run_search(data: bytes, face_index: int | None) -> dict:
         del vec, bgr
     finally:
         img.close()
-    if not ranked:
-        return {"status": "ok", "total": 0, "items": []}
-    threshold = settings.face_match_threshold
+    high = settings.face_match_threshold + settings.face_high_margin
     items = []
     for pid, sim in ranked:
         found = catalog.get_photo(pid)
         if not found:
             continue
-        row, eff = found
-        item = catalog.public_payload(row, eff)
-        # Somente uma faixa qualitativa; a pontuação exata não é exposta.
-        item["match"] = "alta" if sim >= threshold + 0.12 else "provavel"
+        item = catalog.public_payload(*found)
+        item["match"] = "alta" if sim >= high else "provavel"   # nunca a pontuação exata
         items.append(item)
     return {"status": "ok", "total": len(items), "items": items}
 
 
 @router.post("/api/faces/search")
-async def face_search(
-    request: Request,
-    image: UploadFile = File(...),
-    consent: str = Form(...),
-    consent_version: str = Form(""),
-    face: int | None = Form(None),
-) -> JSONResponse:
-    available, reason = faces.search_available()
+async def face_search(request: Request, face: int | None = Query(None, ge=0, le=50)) -> JSONResponse:
+    available, reason = faces.search_state()
     if not available:
         return _error(f"face_search_{reason}", 410 if reason == "expired" else 503)
-    if consent.strip().lower() != "true" or consent_version != CONSENT_VERSION:
+    if request.headers.get("x-consent", "").lower() != "true" or \
+            request.headers.get("x-consent-version", "") != CONSENT_VERSION:
         return _error("consent_required", 400)
-    wait = limiter.check(client_key(request))
+    wait = limiter.check(client_ip(request))
     if wait:
         return JSONResponse({"status": "error", "code": "too_many_searches", "retry_after": wait},
                             status_code=429, headers={**NO_STORE, "Retry-After": str(wait)})
-    data = await image.read(settings.max_upload_bytes + 1)
-    await image.close()
-    if len(data) > settings.max_upload_bytes:
-        return _error("file_too_large", 413)
+    try:
+        data = await read_limited_body(request, settings.max_upload_bytes, ALLOWED_IMAGE_TYPES)
+    except HTTPException as exc:
+        return _error("file_too_large" if exc.status_code == 413 else "invalid_image", exc.status_code)
     try:
         result = await run_in_threadpool(_run_search, data, face)
     except imaging.ImageError:
         return _error("invalid_image", 400)
     except faces.FaceSearchError as exc:
         return _error(exc.code, exc.status)
-    except HTTPException:
-        raise
     except Exception as exc:  # nunca registra conteúdo da imagem
         print(f"[busca-facial] falha: {type(exc).__name__}", flush=True)
         return _error("face_search_failed", 500)

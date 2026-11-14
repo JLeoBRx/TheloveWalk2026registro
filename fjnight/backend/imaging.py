@@ -1,5 +1,7 @@
 """Leitura de fotografias (JPEG/PNG/WebP/RAW) e geração de versões otimizadas.
 
+Nenhuma função deste módulo grava sobre o arquivo original.
+
 Os originais nunca são alterados. Para cada fotografia são criadas:
 - miniatura WebP (mosaico);
 - versão de exibição WebP (visualização ampliada);
@@ -177,13 +179,12 @@ def average_color(img: Image.Image) -> str:
     return "#{:02x}{:02x}{:02x}".format(int(r * 0.55), int(g * 0.5), int(b * 0.45))
 
 
-def save_webp(img: Image.Image, out: Path, max_side: int, quality: int) -> None:
-    out.parent.mkdir(parents=True, exist_ok=True)
+def encode_webp(img: Image.Image, max_side: int, quality: int) -> bytes:
     copy = img.copy()
     copy.thumbnail((max_side, max_side), Image.Resampling.LANCZOS)
-    tmp = out.with_suffix(".tmp")
-    copy.save(tmp, "WEBP", quality=quality, method=4)
-    tmp.replace(out)
+    buf = io.BytesIO()
+    copy.save(buf, "WEBP", quality=quality, method=4)
+    return buf.getvalue()
 
 
 def decode_upload(data: bytes, max_side: int = 1600) -> Image.Image:
