@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 
-from backend.main import app
+from backend.main import INDEX_STATUS, app
 
 client = TestClient(app)
 
@@ -13,7 +13,15 @@ def test_health_returns_album_state():
     assert "admin_configured" in data
     assert "models_ready" not in data
 
-def test_gallery_is_paginated_and_empty_safe():
+def test_gallery_is_paginated_and_empty_safe(monkeypatch):
+    # The gallery refuses to serve a partial count until every photo is indexed.
+    monkeypatch.setitem(INDEX_STATUS, "complete", False)
+    response = client.get("/api/gallery?page=1&page_size=24")
+    assert response.status_code == 503
+    assert response.json()["detail"] == "gallery_indexing"
+
+    # Once indexing has finished, the paginated gallery is served.
+    monkeypatch.setitem(INDEX_STATUS, "complete", True)
     response = client.get("/api/gallery?page=1&page_size=24")
     assert response.status_code == 200
     data = response.json()
@@ -30,7 +38,9 @@ def test_frontend_pages_are_served():
     assert home.status_code == 200
     assert "Álbum de Fotografias" in home.text
     assert "Caminhada do Amor" in home.text
-    assert "youtube-nocookie.com/embed/HBCcpKBPhYM" in home.text
+    # openMusic() builds the embed URL in JS from the playlist track id.
+    assert "youtube-nocookie.com/embed/" in home.text
+    assert "HBCcpKBPhYM" in home.text
     assert client.get("/admin.html").status_code == 200
     assert client.get("/privacy.html").status_code == 200
 
