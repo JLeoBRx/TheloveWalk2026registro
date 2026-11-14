@@ -13,6 +13,7 @@ export class Lightbox {
     this.countEl = document.getElementById("lbCount");
     this.catEl = document.getElementById("lbCat");
     this.download = document.getElementById("lbDownload");
+    this.original = document.getElementById("lbOriginal");
     this.prevBtn = document.getElementById("lbPrev");
     this.nextBtn = document.getElementById("lbNext");
     this.source = null;
@@ -102,16 +103,25 @@ export class Lightbox {
     if (item.download) {
       this.download.hidden = false;
       this.download.href = item.download;
+      this.download.setAttribute("aria-label", `Baixar fotografia em alta qualidade (${item.download_label || "original"})`);
     } else {
       this.download.hidden = true;
       this.download.removeAttribute("href");
+    }
+    if (item.original) {
+      this.original.hidden = false;
+      this.original.href = item.original;
+      document.getElementById("lbOriginalLabel").textContent = `${item.original_label || "RAW"} original`;
+    } else {
+      this.original.hidden = true;
+      this.original.removeAttribute("href");
     }
     const token = ++this.token;
     this.frame.classList.remove("has-image");
     this.img.classList.remove("is-loaded");
     this.thumb.src = item.thumb;
     this.thumb.alt = "";
-    this.img.alt = `Fotografia ${this.index + 1} de ${total} — FJ Night, A Noite da Herança`;
+    this.img.alt = `Fotografia ${this.index + 1} de ${total} — FJU Night, A Noite da Herança`;
     this.el.classList.add("is-loading");
     const loader = new Image();
     loader.decoding = "async";
@@ -149,7 +159,7 @@ export class Lightbox {
     const url = `${location.origin}/#foto=${item.id}`;
     try {
       if (navigator.share) {
-        await navigator.share({ title: "FJ Night · A Noite da Herança", url });
+        await navigator.share({ title: "FJU Night · A Noite da Herança", url });
         return;
       }
       await navigator.clipboard.writeText(url);

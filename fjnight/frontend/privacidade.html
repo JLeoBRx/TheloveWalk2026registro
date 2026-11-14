@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#050403">
 <meta name="color-scheme" content="dark">
-<title>Privacidade e dados pessoais · FJ Night — A Noite da Herança</title>
-<meta name="description" content="Como o álbum oficial da FJ Night trata fotografias e dados biométricos, conforme a LGPD.">
+<title>Privacidade e dados pessoais · FJU Night — A Noite da Herança</title>
+<meta name="description" content="Como o álbum oficial da FJU Night trata fotografias e dados pessoais, conforme a LGPD.">
 <link rel="icon" href="/assets/img/favicon.svg?v=__V__" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/css/app.css?v=__V__">
 <link rel="stylesheet" href="/assets/css/pages.css?v=__V__">
@@ -14,79 +14,92 @@
 </head>
 <body class="page">
 <header class="topbar is-solid">
-  <a class="wordmark wordmark--nav" href="/" aria-label="FJ Night, voltar ao álbum"><span class="wordmark__fj">FJ</span><span class="wordmark__night">NIGHT</span></a>
+  <a class="wordmark wordmark--nav" href="/" aria-label="FJU Night, voltar ao álbum"><span class="wordmark__fj">FJU</span><span class="wordmark__night">NIGHT</span></a>
   <a class="btn btn--ghost btn--sm" href="/">Voltar ao álbum</a>
 </header>
 <main class="doc">
   <p class="eyebrow">Privacidade · LGPD</p>
   <h1 class="section-title">Suas fotos, <em>seus dados</em></h1>
-  <p class="doc__lead">Este álbum foi feito para você reviver a FJ Night — A Noite da Herança. Aqui explicamos, de forma direta, quais dados pessoais são tratados, por quê, por quanto tempo e como você exerce seus direitos, conforme a Lei Geral de Proteção de Dados (Lei nº 13.709/2018).</p>
+  <p class="doc__lead">Este álbum guarda as memórias da FJU Night — A Noite da Herança. Aqui explicamos quais dados pessoais são tratados, por quê, por quanto tempo e como exercer seus direitos, conforme a Lei Geral de Proteção de Dados (Lei nº 13.709/2018).</p>
 
   <div class="doc__summary">
-    <div><strong>Selfie não armazenada</strong><span>A imagem enviada na busca é analisada em memória e descartada ao fim da requisição.</span></div>
-    <div><strong>Nada facial é público</strong><span>Os vetores faciais ficam cifrados no servidor e nunca são exibidos ou entregues pela API.</span></div>
-    <div><strong>Prazo definido</strong><span>Todo dado facial é apagado automaticamente em <b data-expiry>—</b>.</span></div>
+    <div><strong>Busca facial</strong><span id="faceState">Verificando…</span></div>
+    <div><strong>Selfie não armazenada</strong><span>Quando a busca está ativa, a imagem enviada é analisada só na memória do servidor e descartada ao fim da busca.</span></div>
+    <div><strong>Nada facial é público</strong><span>Dados faciais ficam cifrados no servidor e nunca são exibidos ou entregues a visitantes.</span></div>
   </div>
 
-  <h2>1. Quem é o responsável</h2>
-  <p>Controlador: <strong data-event="controller" data-fallback="[nome da organização responsável — a preencher]">[nome da organização responsável — a preencher]</strong>.<br>
-  Contato para privacidade e pedidos de remoção: <strong data-event="privacy_contact" data-fallback="[e-mail ou canal de contato — a preencher]">[e-mail ou canal de contato — a preencher]</strong>.</p>
+  <h2>1. Quem é o responsável (controlador)</h2>
+  <dl class="doc__facts">
+    <div><dt>Controlador</dt><dd data-privacy="controller"></dd></div>
+    <div><dt>CNPJ/CPF</dt><dd data-privacy="controller_document"></dd></div>
+    <div><dt>Contato</dt><dd data-privacy="contact"></dd></div>
+    <div><dt>Encarregado (DPO)</dt><dd data-privacy="dpo"></dd></div>
+  </dl>
 
   <h2>2. Quais dados tratamos</h2>
   <ul>
-    <li><strong>Fotografias do evento</strong>: imagens registradas durante a FJ Night e publicadas no álbum com as autorizações aplicáveis.</li>
-    <li><strong>Índice facial das fotografias</strong>: para permitir a busca, o servidor calcula um vetor numérico (128 valores) para cada rosto detectado nas fotos publicadas. Esse vetor é um dado biométrico e, portanto, dado pessoal sensível.</li>
-    <li><strong>Selfie ou foto enviada na busca</strong>: usada apenas para calcular o vetor do seu rosto e compará-lo com o índice. Não é gravada em disco, em banco de dados nem em registros (logs).</li>
-    <li><strong>Dados técnicos</strong>: o endereço IP é mantido apenas em memória, por até 10 minutos, para limitar o número de buscas e evitar abusos. A hospedagem pode registrar dados técnicos de acesso em seus próprios logs de operação.</li>
+    <li><strong>Fotografias do evento</strong>, publicadas no álbum. A imagem de uma pessoa é dado pessoal.</li>
+    <li><strong>Somente se a busca facial estiver ativa:</strong> um vetor numérico (128 valores) calculado para cada rosto das fotos publicadas — dado biométrico, portanto sensível — e, durante a busca, a imagem enviada pelo visitante.</li>
+    <li><strong>Pedidos de oposição à busca facial:</strong> o vetor do rosto de quem pediu para não ser localizado(a), cifrado, guardado apenas para continuar cumprindo o pedido, e um número de protocolo.</li>
+    <li><strong>Dados técnicos:</strong> o endereço IP fica só na memória do servidor, por até 10 minutos, para limitar abusos. A hospedagem pode registrar dados técnicos de acesso em seus próprios logs.</li>
   </ul>
 
   <h2>3. Para que usamos</h2>
   <ul>
     <li>Exibir o álbum oficial e permitir o download das fotografias autorizadas.</li>
-    <li>Localizar, a seu pedido, as fotografias em que você aparece.</li>
-    <li>Proteger o serviço contra uso abusivo.</li>
+    <li>Quando ativa, localizar a pedido do próprio visitante as fotos em que ele aparece.</li>
+    <li>Cumprir pedidos de oposição e de remoção, e proteger o serviço contra uso abusivo.</li>
   </ul>
-  <p>Não usamos dados biométricos para nenhuma outra finalidade: não há identificação de pessoas por nome, publicidade, perfilamento nem compartilhamento com terceiros.</p>
+  <p>Não há identificação de pessoas por nome, publicidade, perfilamento nem venda ou compartilhamento de dados com terceiros.</p>
 
-  <h2>4. Base legal</h2>
-  <p>A busca facial só acontece com o seu <strong>consentimento específico e destacado</strong> (art. 11, I, da LGPD), registrado na tela antes de qualquer envio de imagem. Você declara que a foto enviada é do seu próprio rosto ou de pessoa sob sua responsabilidade legal. A publicação das fotografias segue as autorizações de uso de imagem aplicáveis ao evento.</p>
+  <h2>4. Bases legais</h2>
+  <dl class="doc__facts doc__facts--wide">
+    <div><dt>Publicação das fotografias</dt><dd data-privacy="legal_basis_publication"></dd></div>
+    <div><dt>Índice facial das fotos do evento</dt><dd data-privacy="legal_basis_face_index"></dd></div>
+    <div><dt>Busca com a selfie do visitante</dt><dd data-privacy="legal_basis_face_search"></dd></div>
+    <div><dt>Como os participantes foram informados</dt><dd data-privacy="attendees_notice"></dd></div>
+  </dl>
+  <p>O consentimento dado por quem envia uma selfie vale somente para a busca dessa pessoa. Ele não autoriza, por si só, o tratamento dos rostos das demais pessoas fotografadas — por isso a busca facial só pode ser ativada depois que o controlador registra a base legal acima e confirma os procedimentos de privacidade.</p>
 
   <h2>5. Por quanto tempo guardamos</h2>
   <ul>
-    <li><strong>Selfie enviada</strong>: não é armazenada — descartada imediatamente após a busca.</li>
-    <li><strong>Resultados da busca</strong>: existem apenas na tela do seu aparelho e são apagados ao fechar o painel.</li>
-    <li><strong>Índice facial das fotografias</strong>: eliminado automaticamente em <b data-expiry>—</b>. Depois disso, a busca facial é encerrada e o álbum continua disponível normalmente.</li>
-    <li><strong>Fotografias</strong>: permanecem publicadas enquanto o álbum estiver no ar, salvo pedido de remoção.</li>
+    <li><strong>Imagem enviada na busca:</strong> não é armazenada; existe apenas durante o processamento.</li>
+    <li><strong>Resultados da busca:</strong> ficam só na tela do aparelho e são apagados ao fechar o painel.</li>
+    <li><strong>Índice facial e pedidos de oposição:</strong> eliminados automaticamente em <b data-expiry>—</b>; a eliminação gera um registro verificável.</li>
+    <li><strong>Fotografias:</strong> permanecem publicadas enquanto o álbum estiver no ar, salvo pedido de remoção.</li>
   </ul>
 
   <h2>6. Como protegemos</h2>
   <ul>
-    <li>Vetores faciais cifrados com AES-256-GCM e guardados separadamente do catálogo de fotos.</li>
-    <li>Nenhuma API pública devolve vetores, posições de rostos ou pontuações de semelhança das fotos do evento.</li>
-    <li>Os resultados mostram somente fotografias que já estão públicas no álbum.</li>
-    <li>Limite de buscas por origem, conexão HTTPS e área administrativa protegida por token.</li>
+    <li>Vetores faciais cifrados com AES-256-GCM; a chave fica apenas na configuração do servidor.</li>
+    <li>Nenhuma interface pública devolve vetores, posições de rostos ou pontuações de semelhança.</li>
+    <li>Resultados mostram somente fotografias que já estão públicas no álbum.</li>
+    <li>Conexão HTTPS, limite de buscas e área administrativa com sessão protegida, expiração e histórico de operações.</li>
   </ul>
 
   <h2>7. Crianças e adolescentes</h2>
-  <p>A busca envolvendo o rosto de crianças e adolescentes deve ser feita por pai, mãe ou responsável legal, no melhor interesse da criança ou do adolescente (art. 14 da LGPD).</p>
+  <p>Buscas envolvendo o rosto de crianças e adolescentes devem ser feitas por pai, mãe ou responsável legal, no melhor interesse deles (art. 14 da LGPD).</p>
 
-  <h2>8. Seus direitos</h2>
-  <p>Você pode, a qualquer momento, pedir confirmação e acesso aos dados, correção, eliminação, informação sobre compartilhamento e <strong>revogar o consentimento</strong> (art. 18 da LGPD). Também pode pedir:</p>
+  <h2>8. Seus direitos e como exercê-los</h2>
+  <p>Você pode pedir confirmação e acesso aos dados, correção, eliminação, informação sobre compartilhamento, revogação do consentimento e <strong>oposição</strong> (art. 18 da LGPD), incluindo:</p>
   <ul>
-    <li><strong>Para não ser localizado(a) pela busca facial</strong>: seu rosto é excluído do índice e bloqueado para futuras buscas.</li>
-    <li><strong>A remoção de uma fotografia</strong> em que você aparece.</li>
+    <li><strong>não ser localizado(a) pela busca facial</strong> — seu rosto é removido do índice e bloqueado em buscas futuras;</li>
+    <li><strong>remover uma fotografia</strong> em que você aparece.</li>
   </ul>
-  <p>Envie o pedido pelo canal informado no item 1. Responderemos dentro dos prazos legais.</p>
+  <dl class="doc__facts doc__facts--wide">
+    <div><dt>Canal de atendimento</dt><dd data-privacy="requests_channel"></dd></div>
+    <div><dt>Prazo de resposta</dt><dd data-privacy="response_time"></dd></div>
+  </dl>
 
   <h2>9. Alterações</h2>
-  <p>Esta política pode ser atualizada para refletir mudanças no álbum. A versão vigente é sempre a publicada nesta página.</p>
-  <p class="doc__meta">Versão do consentimento: 2026-11-v1 · Última atualização: novembro de 2026.</p>
+  <p>Esta política pode ser atualizada. A versão vigente é sempre a publicada nesta página; qualquer mudança exige nova autorização antes de a busca facial continuar ativa.</p>
+  <p class="doc__meta">Versão do consentimento da busca: 2026-11-v2.</p>
 </main>
 <footer class="footer">
   <div class="footer__inner">
-    <a class="wordmark wordmark--footer" href="/"><span class="wordmark__fj">FJ</span><span class="wordmark__night">NIGHT</span></a>
+    <a class="wordmark wordmark--footer" href="/"><span class="wordmark__fj">FJU</span><span class="wordmark__night">NIGHT</span></a>
     <p class="footer__note">A Noite da Herança · álbum oficial de memórias.</p>
-    <p class="footer__sign"><span data-event="institution">Jesus Cristo é o Senhor</span> · <span data-event="institution_brand">Universal</span></p>
+    <p class="footer__sign">Jesus Cristo é o Senhor · Universal</p>
   </div>
 </footer>
 </body>

@@ -202,7 +202,7 @@ export class Gallery {
     box.querySelector("h3").textContent = indexing ? "Revelando as fotografias…" : "As memórias estão a caminho";
     box.querySelector("p").textContent = indexing
       ? "As fotografias da noite estão sendo preparadas. Em instantes elas aparecerão aqui."
-      : "As fotografias da FJ Night serão publicadas aqui assim que forem selecionadas. Volte em breve para reviver a Noite da Herança.";
+      : "As fotografias da FJU Night serão publicadas aqui assim que forem selecionadas. Volte em breve para reviver a Noite da Herança.";
     this.mosaic.replaceChildren(box);
   }
 }

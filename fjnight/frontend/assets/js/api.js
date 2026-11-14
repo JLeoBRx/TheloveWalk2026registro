@@ -55,8 +55,13 @@ export const api = {
     return request(`/api/photos?${qs}`);
   },
   photo: (id) => request(`/api/photos/${encodeURIComponent(id)}`),
+  playlist: () => request("/api/playlist", { retries: 1 }),
   faceStatus: () => request("/api/faces/status", { retries: 1 }),
-  faceSearch: (form) => request("/api/faces/search", { method: "POST", body: form, timeout: 60000, retries: 0 }),
+  // A imagem vai como corpo bruto: o servidor a lê só em memória, sem arquivo temporário.
+  faceSearch: (blob, { consentVersion, face } = {}) => request(
+    `/api/faces/search${face != null ? `?face=${encodeURIComponent(face)}` : ""}`,
+    { method: "POST", body: blob, timeout: 60000, retries: 0,
+      headers: { "Content-Type": blob.type || "image/jpeg", "X-Consent": "true", "X-Consent-Version": consentVersion || "" } }),
 };
 
 export const fmt = new Intl.NumberFormat("pt-BR");

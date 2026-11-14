@@ -15,7 +15,8 @@ const ERRORS = {
   consent_required: ["Autorização necessária", "Confirme as duas autorizações para continuar."],
   face_search_expired: ["Busca encerrada", "O prazo de uso dos dados faciais terminou e eles foram apagados. Você ainda pode navegar pelo álbum completo."],
   face_search_disabled: ["Busca indisponível", "A busca por reconhecimento facial está desativada no momento. Navegue pelo álbum completo."],
-  face_search_models_unavailable: ["Busca em preparação", "O reconhecimento facial ainda está sendo configurado. Tente novamente mais tarde."],
+  face_search_indexing: ["Busca em preparação", "Estamos preparando o reconhecimento facial das fotos. Tente novamente em alguns minutos."],
+  unsupported_media_type: ["Imagem não reconhecida", "Envie uma foto em JPG, PNG ou WebP."],
   network_error: ["Sem conexão", "Verifique sua internet e tente novamente."],
   timeout: ["A busca demorou demais", "A conexão está lenta. Tente novamente."],
 };
@@ -227,13 +228,8 @@ export class FaceSearch {
     if (!this.blob) return;
     document.getElementById("scanPreview").src = this.blobUrl;
     this.show("processing");
-    const form = new FormData();
-    form.append("image", this.blob, "selfie.jpg");
-    form.append("consent", "true");
-    form.append("consent_version", this.status?.consent_version || "");
-    if (faceIndex != null) form.append("face", String(faceIndex));
     try {
-      const data = await api.faceSearch(form);
+      const data = await api.faceSearch(this.blob, { consentVersion: this.status?.consent_version, face: faceIndex });
       if (data.status === "choose_face") return this.chooseFace(data.faces);
       this.renderResults(data.items || []);
     } catch (error) {

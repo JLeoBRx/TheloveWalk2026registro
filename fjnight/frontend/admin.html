@@ -2,11 +2,11 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#050403">
 <meta name="color-scheme" content="dark">
-<title>Administração · FJ Night — A Noite da Herança</title>
+<title>Administração · FJU Night — A Noite da Herança</title>
 <link rel="icon" href="/assets/img/favicon.svg?v=__V__" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/css/app.css?v=__V__">
 <link rel="stylesheet" href="/assets/css/pages.css?v=__V__">
@@ -14,81 +14,202 @@
 </head>
 <body class="page">
 <header class="topbar is-solid">
-  <a class="wordmark wordmark--nav" href="/"><span class="wordmark__fj">FJ</span><span class="wordmark__night">NIGHT</span></a>
-  <span class="eyebrow" style="margin:0">Administração</span>
+  <a class="wordmark wordmark--nav" href="/"><span class="wordmark__fj">FJU</span><span class="wordmark__night">NIGHT</span></a>
+  <div class="admin-session" id="sessionBox" hidden>
+    <span class="admin-session__time" id="sessionTime"></span>
+    <button class="btn btn--ghost btn--sm" type="button" id="logout">Sair</button>
+  </div>
 </header>
-<main class="admin">
-  <p class="eyebrow">Álbum oficial</p>
-  <h1 class="section-title">Painel do <em>álbum</em></h1>
-  <p class="admin__lead">Sincronize as fotografias, defina o que é publicado e baixado, e gerencie os dados faciais. O token fica somente nesta aba do navegador.</p>
 
-  <section class="panel">
-    <h2>Acesso</h2>
-    <form class="row" id="loginForm">
-      <input class="field" id="token" type="password" autocomplete="current-password" placeholder="Token administrativo (ADMIN_TOKEN)" required>
-      <button class="btn btn--gold btn--sm" type="submit">Conectar</button>
-      <button class="btn btn--ghost btn--sm" type="button" id="logout" hidden>Sair</button>
+<main class="admin">
+  <p class="eyebrow">Álbum oficial · Administração</p>
+  <h1 class="section-title">Painel do <em>álbum</em></h1>
+
+  <section class="panel" id="loginPanel">
+    <h2>Entrar</h2>
+    <p>Use o ADMIN_TOKEN configurado no servidor. Ele é trocado por uma sessão protegida e não fica salvo no navegador.</p>
+    <form class="row" id="loginForm" autocomplete="off">
+      <label class="visually-hidden" for="token">Token administrativo</label>
+      <input class="field" id="token" type="password" autocomplete="current-password" placeholder="Token administrativo" required>
+      <button class="btn btn--gold btn--sm" type="submit">Entrar</button>
     </form>
-    <p class="msg" id="loginMsg"></p>
+    <p class="msg" id="loginMsg" role="alert"></p>
   </section>
 
-  <div id="authed" hidden>
-    <section class="panel">
-      <h2>Situação</h2>
-      <div class="stats" id="stats"></div>
-      <div class="progress" id="progress" hidden><span id="progressBar"></span></div>
-      <p class="msg" id="jobMsg"></p>
+  <div id="app" hidden>
+    <nav class="admin-tabs" aria-label="Seções do painel">
+      <button type="button" data-tab="overview" aria-selected="true">Situação</button>
+      <button type="button" data-tab="photos">Fotos</button>
+      <button type="button" data-tab="faces">Busca facial</button>
+      <button type="button" data-tab="music">Trilha</button>
+      <button type="button" data-tab="config">Configurações</button>
+      <button type="button" data-tab="history">Histórico</button>
+    </nav>
+
+    <!-- SITUAÇÃO -->
+    <section class="tab" data-panel="overview">
+      <div class="panel">
+        <h2>Persistência</h2>
+        <div class="checks" id="persistence"></div>
+        <p class="msg" id="persistenceMsg"></p>
+      </div>
+      <div class="panel">
+        <h2>Álbum</h2>
+        <div class="stats" id="stats"></div>
+        <p class="admin-note" id="lastSync"></p>
+      </div>
+      <div class="panel">
+        <h2>Sincronizar fotografias</h2>
+        <p>Lê a pasta de originais (ou o bucket R2), gera miniaturas e versões de exibição, detecta duplicatas e arquivos com problema e — se autorizado — atualiza o índice facial. Regras já definidas nunca são apagadas.</p>
+        <label class="check-inline"><input type="checkbox" id="syncConfirm"><span>Confirmo que as fotografias têm autorização de uso de imagem para publicação.</span></label>
+        <div class="row">
+          <button class="btn btn--gold btn--sm" type="button" id="syncBtn" disabled>Sincronizar agora</button>
+          <button class="btn btn--ghost btn--sm" type="button" id="publishPending" hidden>Publicar fotos em revisão</button>
+        </div>
+        <div class="job" id="job" hidden>
+          <p class="job__label" id="jobLabel"></p>
+          <div class="progress"><span id="progressBar"></span></div>
+        </div>
+        <p class="msg" id="syncMsg" role="status"></p>
+      </div>
     </section>
 
-    <section class="panel">
-      <h2>Sincronizar fotografias</h2>
-      <p>Coloque as fotos em <code>fjnight/fotos/</code> (subpastas viram filtros, ex.: <code>01 - Chegada</code>). A sincronização cria miniaturas, versões de exibição e atualiza o índice facial.</p>
-      <label class="check-inline"><input type="checkbox" id="syncConfirm"><span>Confirmo que as fotografias têm autorização para publicação neste álbum.</span></label>
-      <div class="row">
-        <button class="btn btn--gold btn--sm" id="syncBtn" disabled>Sincronizar álbum</button>
-        <button class="btn btn--ghost btn--sm" id="exportRules">Exportar regras (photo-rules.json)</button>
+    <!-- FOTOS -->
+    <section class="tab" data-panel="photos" hidden>
+      <div class="panel">
+        <h2>Fotografias</h2>
+        <div class="row">
+          <input class="field" id="search" type="search" placeholder="Filtrar pelo nome do arquivo" aria-label="Filtrar pelo nome do arquivo">
+          <select class="field" id="categoryFilter" aria-label="Momento"><option value="">Todos os momentos</option></select>
+          <select class="field" id="onlyFilter" aria-label="Situação">
+            <option value="">Todas</option>
+            <option value="hidden">Ocultas</option>
+            <option value="pending">Em revisão</option>
+            <option value="no_download">Sem download</option>
+            <option value="no_face_search">Fora da busca facial</option>
+          </select>
+        </div>
+        <div class="admin-grid" id="photoGrid"></div>
+        <div class="pager"><button class="btn btn--ghost btn--sm" type="button" id="prevPage">Anterior</button><span id="pageInfo"></span><button class="btn btn--ghost btn--sm" type="button" id="nextPage">Próxima</button></div>
       </div>
-      <p class="msg" id="syncMsg"></p>
+      <div class="panel">
+        <h2>Arquivos com problema</h2>
+        <p>Arquivos que não entraram no álbum: ilegíveis ou cópias de outra foto.</p>
+        <ul class="issue-list" id="issues"></ul>
+      </div>
     </section>
 
-    <section class="panel">
-      <h2>Fotografias</h2>
-      <div class="row">
-        <input class="field" id="search" type="search" placeholder="Filtrar por nome do arquivo">
-        <select class="field" id="categoryFilter"><option value="">Todas as categorias</option></select>
-        <select class="field" id="onlyFilter">
-          <option value="">Todas</option>
-          <option value="hidden">Somente ocultas</option>
-          <option value="no_download">Somente sem download</option>
-          <option value="no_face_search">Somente fora da busca facial</option>
-        </select>
+    <!-- BUSCA FACIAL -->
+    <section class="tab" data-panel="faces" hidden>
+      <div class="panel">
+        <h2>Situação da busca facial</h2>
+        <p class="admin-note" id="faceSummary"></p>
+        <div class="checks" id="faceChecks"></div>
       </div>
-      <div class="admin-grid" id="photoGrid"></div>
-      <div class="pager"><button class="btn btn--ghost btn--sm" id="prevPage">Anterior</button><span id="pageInfo"></span><button class="btn btn--ghost btn--sm" id="nextPage">Próxima</button></div>
+      <div class="panel">
+        <h2>Autorização do responsável</h2>
+        <p>A busca facial indexa o rosto de <strong>todas</strong> as pessoas fotografadas. Ela só pode ser ativada depois que o controlador revisar a base legal e os procedimentos de privacidade. Esta autorização fica registrada e vale apenas para a versão atual de <code>config/privacy.json</code>.</p>
+        <dl class="doc__facts" id="privacyPreview"></dl>
+        <form id="authForm" class="auth-form">
+          <div class="row">
+            <input class="field" id="authName" required maxlength="200" placeholder="Nome de quem autoriza" aria-label="Nome de quem autoriza">
+            <input class="field" id="authRole" required maxlength="200" placeholder="Cargo ou função" aria-label="Cargo ou função">
+          </div>
+          <div id="authChecklist"></div>
+          <div class="row">
+            <button class="btn btn--gold btn--sm" type="submit" id="authBtn" disabled>Registrar autorização</button>
+            <button class="btn btn--danger btn--sm" type="button" id="revokeBtn" hidden>Revogar autorização</button>
+          </div>
+        </form>
+        <p class="msg" id="authMsg" role="status"></p>
+        <h3 class="admin-sub">Registros</h3>
+        <ul class="issue-list" id="authHistory"></ul>
+      </div>
+      <div class="panel">
+        <h2>Pedido de oposição (LGPD)</h2>
+        <p>Quando alguém pedir para não ser localizado, envie uma foto do rosto da pessoa. O rosto é removido do índice e bloqueado em buscas futuras; o registro fica no banco durável (cifrado) e vale após reinicializações e novos deploys. A foto enviada não é armazenada.</p>
+        <div class="row">
+          <input class="field" id="optoutFile" type="file" accept="image/jpeg,image/png,image/webp" aria-label="Foto do rosto da pessoa">
+          <button class="btn btn--gold btn--sm" type="button" id="optoutBtn">Registrar oposição</button>
+        </div>
+        <div class="row" id="optoutFaces"></div>
+        <p class="msg" id="optoutMsg" role="status"></p>
+        <h3 class="admin-sub">Oposições registradas</h3>
+        <ul class="issue-list" id="optoutList"></ul>
+      </div>
+      <div class="panel danger">
+        <h2>Dados faciais</h2>
+        <p>Reconstruir apaga o índice e o recalcula a partir das fotos publicadas (só com autorização). Apagar elimina o índice imediatamente; marcando a opção abaixo, também elimina as oposições e revoga a autorização — use apenas ao encerrar definitivamente a busca.</p>
+        <div class="row">
+          <button class="btn btn--ghost btn--sm" type="button" id="reindexBtn">Reconstruir índice facial</button>
+          <button class="btn btn--danger btn--sm" type="button" id="purgeBtn">Apagar dados faciais</button>
+        </div>
+        <label class="check-inline"><input type="checkbox" id="purgeOptouts"><span>Apagar também as oposições e revogar a autorização.</span></label>
+        <p class="msg" id="facesMsg" role="status"></p>
+        <p class="admin-note" id="retentionReceipt"></p>
+      </div>
     </section>
 
-    <section class="panel">
-      <h2>Pedido de oposição (LGPD)</h2>
-      <p>Quando alguém pedir para não ser localizado pela busca facial, envie uma foto do rosto dessa pessoa. O rosto é removido do índice e bloqueado em buscas futuras. A foto enviada não é armazenada.</p>
-      <div class="row">
-        <input class="field" id="optoutFile" type="file" accept="image/jpeg,image/png,image/webp">
-        <button class="btn btn--gold btn--sm" id="optoutBtn">Registrar oposição</button>
+    <!-- TRILHA -->
+    <section class="tab" data-panel="music" hidden>
+      <div class="panel">
+        <h2>Trilha da noite</h2>
+        <p>Playlist exclusiva da FJU Night. Use somente vídeos oficiais do YouTube cuja incorporação seja permitida pelo titular. Cole o link ou o ID do vídeo.</p>
+        <div id="tracks" class="tracks"></div>
+        <div class="row">
+          <button class="btn btn--ghost btn--sm" type="button" id="addTrack">Adicionar faixa</button>
+          <button class="btn btn--gold btn--sm" type="button" id="saveTracks">Salvar playlist</button>
+        </div>
+        <p class="msg" id="musicMsg" role="status"></p>
       </div>
-      <div class="row" id="optoutFaces" style="margin-top:10px"></div>
-      <p class="msg" id="optoutMsg"></p>
     </section>
 
-    <section class="panel danger">
-      <h2>Dados faciais</h2>
-      <p>Reconstruir apaga o índice e o recalcula a partir das fotos publicadas. Apagar elimina imediatamente todos os vetores faciais (a busca fica sem resultados até nova sincronização). A eliminação automática acontece na data exibida em “Situação”.</p>
-      <div class="row">
-        <button class="btn btn--ghost btn--sm" id="reindexBtn">Reconstruir índice facial</button>
-        <button class="btn btn--danger btn--sm" id="purgeBtn">Apagar todos os dados faciais</button>
+    <!-- CONFIGURAÇÕES -->
+    <section class="tab" data-panel="config" hidden>
+      <div class="panel">
+        <h2>Exportar configurações</h2>
+        <p>Baixa um arquivo com as regras de cada foto (ocultar, download, busca facial) e a playlist. Não contém dados faciais nem segredos. Guarde-o como cópia de segurança ou salve em <code>config/photo-rules.json</code> para versionar no Git.</p>
+        <button class="btn btn--gold btn--sm" type="button" id="exportBtn">Exportar</button>
       </div>
-      <label class="check-inline"><input type="checkbox" id="purgeOptouts"><span>Apagar também os registros de oposição (somente ao encerrar definitivamente a busca facial).</span></label>
-      <p class="msg" id="facesMsg"></p>
+      <div class="panel">
+        <h2>Restaurar configurações</h2>
+        <p>Envie um arquivo exportado. Primeiro mostramos o que será restaurado; nada muda até você confirmar.</p>
+        <div class="row">
+          <input class="field" id="importFile" type="file" accept="application/json,.json" aria-label="Arquivo de configurações">
+          <button class="btn btn--ghost btn--sm" type="button" id="importCheck">Conferir arquivo</button>
+          <button class="btn btn--gold btn--sm" type="button" id="importApply" disabled>Restaurar</button>
+        </div>
+        <p class="msg" id="importMsg" role="status"></p>
+      </div>
+      <div class="panel">
+        <h2>Sessões</h2>
+        <p>Encerra todas as sessões administrativas abertas, inclusive esta.</p>
+        <button class="btn btn--ghost btn--sm" type="button" id="revokeSessions">Encerrar todas as sessões</button>
+      </div>
+    </section>
+
+    <!-- HISTÓRICO -->
+    <section class="tab" data-panel="history" hidden>
+      <div class="panel">
+        <h2>Histórico de operações</h2>
+        <div class="table-wrap"><table class="history"><thead><tr><th>Quando</th><th>Operação</th><th>Resultado</th><th>Detalhes</th></tr></thead><tbody id="historyBody"></tbody></table></div>
+      </div>
     </section>
   </div>
 </main>
+
+<div class="modal" id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" hidden>
+  <div class="modal__panel">
+    <h2 id="confirmTitle"></h2>
+    <p id="confirmText"></p>
+    <label class="field-label" id="confirmTypeLabel" for="confirmType" hidden></label>
+    <input class="field" id="confirmType" autocomplete="off" hidden>
+    <div class="row">
+      <button class="btn btn--ghost btn--sm" type="button" id="confirmCancel">Cancelar</button>
+      <button class="btn btn--danger btn--sm" type="button" id="confirmOk">Confirmar</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 </body>
 </html>

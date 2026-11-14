@@ -1,4 +1,4 @@
-/* FJ Night — A Noite da Herança · identidade visual do álbum oficial */
+/* FJU Night — A Noite da Herança · identidade visual do álbum oficial */
 
 @font-face{font-family:"Bebas Neue";src:url("../fonts/bebas-neue-latin-400-normal.woff2") format("woff2");font-weight:400;font-display:swap}
 @font-face{font-family:"Kaushan Script";src:url("../fonts/kaushan-script-latin-400-normal.woff2") format("woff2");font-weight:400;font-display:swap}
@@ -382,4 +382,39 @@ body.no-scroll{overflow:hidden}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
   .hero__dust{display:none}
+}
+
+/* ---------- Busca facial só quando autorizada ---------- */
+body[data-face="off"] [data-open-face],
+body[data-face="off"] [data-face-only]{display:none!important}
+body[data-face="on"] [data-face-fallback]{display:none!important}
+.face-note{max-width:calc(var(--max) + 2 * var(--gutter));margin:20px auto 0;padding:0 var(--gutter);color:var(--muted);font-size:.86rem;text-align:center}
+.topbar__actions{display:flex;align-items:center;gap:8px}
+.lb__btn--ghost{border:1px solid var(--line-2);color:var(--gold-100);padding:0 14px;font-size:.66rem}
+.lb__btn--ghost:hover{background:rgba(60,36,12,.6)}
+
+/* ---------- Trilha da noite ---------- */
+.music{position:fixed;left:max(14px,env(safe-area-inset-left));bottom:calc(14px + var(--safe-b));z-index:70;width:min(380px,calc(100vw - 28px));max-height:calc(100svh - var(--header-h) - 40px);overflow:auto;padding:16px;border-radius:22px;border:1px solid var(--line-2);background:linear-gradient(180deg,rgba(30,18,8,.97),rgba(10,7,4,.98));box-shadow:0 30px 90px rgba(0,0,0,.65);backdrop-filter:blur(14px)}
+.music__head{display:flex;align-items:center;justify-content:space-between}
+.music__head .eyebrow{margin:0}
+.music__close{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:var(--text-2)}
+.music__close:hover{background:rgba(255,255,255,.07);color:var(--gold-100)}
+.music__video{position:relative;width:100%;min-height:200px;aspect-ratio:16/9;margin-top:8px;border-radius:12px;overflow:hidden;background:#000}
+.music__video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.music__title{margin:12px 0 0;font:400 1.35rem/1.1 var(--font-display);letter-spacing:.04em;color:var(--gold-100)}
+.music__status{margin:4px 0 0;min-height:1.3em;color:var(--muted);font-size:.78rem}
+.music__controls{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:8px}
+.music__btn{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;color:var(--gold-100);border:1px solid var(--line-2)}
+.music__btn:hover{background:rgba(60,36,12,.6)}
+.music__btn--main{width:58px;height:58px;background:var(--gold-btn);color:#2a1606;border:0;box-shadow:0 8px 24px rgba(240,160,50,.3)}
+.music__btn--main:hover{background:var(--gold-btn);filter:brightness(1.07)}
+.music__list{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:4px;max-height:150px;overflow:auto}
+.music__list button{width:100%;display:flex;gap:10px;align-items:center;padding:8px 10px;border-radius:10px;text-align:left;color:var(--text-2);font-size:.82rem}
+.music__list button:hover,.music__list button[aria-current="true"]{background:rgba(255,190,90,.1);color:var(--gold-100)}
+.music__list small{color:var(--muted)}
+.music__note{margin:10px 0 0;color:var(--muted);font-size:.7rem;line-height:1.4}
+@media (max-width:640px){
+  .music{left:8px;right:8px;width:auto;bottom:calc(8px + var(--safe-b))}
+  .music-launch span{display:none}
+  .music-launch{padding:0 12px}
 }

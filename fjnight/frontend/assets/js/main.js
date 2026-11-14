@@ -1,10 +1,11 @@
-// FJ Night — A Noite da Herança · orquestração da página.
+// FJU Night — A Noite da Herança · orquestração da página.
 import { api, fmt } from "./api.js";
 import { runIntro } from "./intro.js";
 import { startDust } from "./particles.js";
 import { Gallery } from "./gallery.js";
 import { Lightbox } from "./lightbox.js";
 import { FaceSearch } from "./facesearch.js";
+import { Music } from "./music.js";
 
 const deepLink = (location.hash.match(/^#foto=([a-f0-9]{20})$/i) || [])[1];
 let knownVersion = null;
@@ -15,6 +16,8 @@ const gallery = new Gallery({
   onVersion: () => showUpdateNotice(),
 });
 new FaceSearch({ lightbox });
+const music = new Music();
+let playlistLoaded = false;
 
 // A abertura roda em paralelo: os dados e as primeiras miniaturas já carregam por trás.
 const introDone = runIntro({ skip: Boolean(deepLink) });
@@ -45,6 +48,10 @@ async function loadEvent({ quiet = false } = {}) {
     applyEvent(data.event || {});
     document.getElementById("factCount").textContent = data.photos_total ? fmt.format(data.photos_total) : "—";
     applyFaceStatus(data.face_search || {});
+    if (!playlistLoaded && data.playlist && data.playlist.tracks > 0) {
+      playlistLoaded = true;
+      api.playlist().then((p) => music.setTracks(p.tracks)).catch(() => {});
+    }
     if (knownVersion && data.catalog_version !== knownVersion && quiet) showUpdateNotice();
     knownVersion = data.catalog_version;
     if (!quiet) {
@@ -70,22 +77,19 @@ function applyEvent(event) {
 }
 
 function applyFaceStatus(face) {
+  // A busca facial só aparece quando o servidor confirma que está autorizada e pronta.
+  document.body.dataset.face = face.available ? "on" : "off";
   if (face.expires_at) {
     const date = new Date(`${face.expires_at}T12:00:00`);
     document.getElementById("faceExpiry").textContent = date.toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" });
   }
-  const note = document.getElementById("faceUnavailable");
+  const note = document.getElementById("faceNote");
   const messages = {
-    expired: "O prazo da busca por reconhecimento facial terminou e os dados faciais foram apagados. O álbum completo continua disponível.",
-    disabled: "A busca por reconhecimento facial está desativada no momento. O álbum completo continua disponível.",
-    models_unavailable: "A busca por reconhecimento facial está em preparação. Tente novamente mais tarde.",
+    indexing: "A busca de fotos por reconhecimento facial está sendo preparada e ficará disponível em instantes.",
+    expired: "O período da busca por reconhecimento facial terminou e os dados faciais foram apagados. O álbum completo continua disponível.",
   };
-  if (face.available === false && messages[face.reason]) {
-    note.textContent = messages[face.reason];
-    note.hidden = false;
-  } else {
-    note.hidden = true;
-  }
+  note.textContent = messages[face.reason] || "";
+  note.hidden = !messages[face.reason];
 }
 
 function showUpdateNotice() {

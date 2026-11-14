@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#050403">
 <meta name="color-scheme" content="dark">
-<title>FJ Night · A Noite da Herança — Álbum oficial</title>
-<meta name="description" content="Álbum oficial de fotografias da FJ Night — A Noite da Herança. Reviva a noite, encontre suas fotos com uma selfie e guarde suas memórias.">
+<title>FJU Night · A Noite da Herança — Álbum oficial</title>
+<meta name="description" content="Álbum oficial de fotografias da FJU Night — A Noite da Herança. Reviva a noite, encontre suas fotos com uma selfie e guarde suas memórias.">
 <meta property="og:type" content="website">
-<meta property="og:title" content="FJ Night · A Noite da Herança">
+<meta property="og:title" content="FJU Night · A Noite da Herança">
 <meta property="og:description" content="Álbum oficial de memórias da noite. Encontre-se nas fotografias.">
 <meta property="og:image" content="/assets/img/og-fjnight.jpg">
 <link rel="icon" href="/assets/img/favicon.svg?v=__V__" type="image/svg+xml">
@@ -18,7 +18,7 @@
 <link rel="stylesheet" href="/assets/css/app.css?v=__V__">
 <script type="module" src="/assets/js/main.js?v=__V__"></script>
 </head>
-<body class="has-intro">
+<body class="has-intro" data-face="off">
 <a class="skip-link" href="#album">Pular para o álbum</a>
 
 <svg class="sprite" width="0" height="0" aria-hidden="true" focusable="false">
@@ -56,6 +56,11 @@
 <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-6.5-6.2-6.5-11.2a6.5 6.5 0 0113 0C18.5 14.8 12 21 12 21z" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="9.8" r="2.4" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
 <symbol id="i-live" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.4" fill="currentColor"/><path d="M7.8 7.8a6 6 0 000 8.4M16.2 7.8a6 6 0 010 8.4M5 5a10 10 0 000 14M19 5a10 10 0 010 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
 <symbol id="i-images" viewBox="0 0 24 24"><rect x="3.5" y="6" width="14" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M7 3.5h11.5a2 2 0 012 2V17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M5.5 16.5l3.5-4 3 3 2-2 2.5 3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+<symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V6l10-2v12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="6.5" cy="18" r="2.5" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="16.5" cy="16" r="2.5" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></symbol>
+<symbol id="i-pause" viewBox="0 0 24 24"><path d="M7.5 5h3v14h-3zM13.5 5h3v14h-3z" fill="currentColor"/></symbol>
+<symbol id="i-skip-next" viewBox="0 0 24 24"><path d="M6 6l8.5 6L6 18zM16.5 6h2v12h-2z" fill="currentColor"/></symbol>
+<symbol id="i-skip-prev" viewBox="0 0 24 24"><path d="M18 6l-8.5 6L18 18zM5.5 6h2v12h-2z" fill="currentColor"/></symbol>
 <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M19 12a7 7 0 11-2.1-5M19 4v4h-4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 </svg>
 
@@ -66,7 +71,7 @@
   <div class="intro__clouds" aria-hidden="true"></div>
   <div class="intro__content">
     <svg class="intro__dove" viewBox="0 0 240 200" aria-hidden="true"><use href="#i-dove"/></svg>
-    <p class="wordmark wordmark--intro" aria-label="FJ Night"><span class="wordmark__fj">FJ</span><span class="wordmark__night">NIGHT</span></p>
+    <p class="wordmark wordmark--intro" aria-label="FJU Night"><span class="wordmark__fj">FJU</span><span class="wordmark__night">NIGHT</span></p>
     <svg class="intro__crown" viewBox="0 -14 240 156" aria-hidden="true"><use href="#i-crown"/></svg>
     <h1 class="title title--intro" id="introTitle"><span class="title__small">A noite da</span><span class="title__brush"><span>Herança</span></span></h1>
     <p class="intro__date"><span data-event="date_label">13 de novembro</span> <i aria-hidden="true">◆</i> <span data-event="time">23h</span></p>
@@ -77,15 +82,19 @@
 
 <!-- ============ CABEÇALHO ============ -->
 <header class="topbar" id="topbar">
-  <a class="wordmark wordmark--nav" href="#inicio" aria-label="FJ Night, início"><span class="wordmark__fj">FJ</span><span class="wordmark__night">NIGHT</span></a>
+  <a class="wordmark wordmark--nav" href="#inicio" aria-label="FJU Night, início"><span class="wordmark__fj">FJU</span><span class="wordmark__night">NIGHT</span></a>
   <nav class="topnav" aria-label="Seções">
     <a href="#album">Álbum</a>
-    <a href="#encontre">Encontre-se</a>
+    <a href="#encontre" data-face-only>Encontre-se</a>
     <a href="#evento">A noite</a>
   </nav>
-  <button class="btn btn--gold btn--sm topbar__cta" type="button" data-open-face>
-    <svg class="ico" aria-hidden="true"><use href="#i-face"/></svg><span>Minhas fotos</span>
-  </button>
+  <div class="topbar__actions">
+    <button class="btn btn--ghost btn--sm music-launch" type="button" id="musicLaunch" hidden aria-label="Ouvir a trilha da noite"><svg class="ico" aria-hidden="true"><use href="#i-music"/></svg><span>Trilha</span></button>
+    <button class="btn btn--gold btn--sm topbar__cta" type="button" data-open-face>
+      <svg class="ico" aria-hidden="true"><use href="#i-face"/></svg><span>Minhas fotos</span>
+    </button>
+    <a class="btn btn--gold btn--sm topbar__cta topbar__cta--album" href="#album" data-face-fallback><svg class="ico" aria-hidden="true"><use href="#i-images"/></svg><span>Ver o álbum</span></a>
+  </div>
 </header>
 
 <main id="conteudo">
@@ -102,7 +111,7 @@
     <svg class="hero__dove" viewBox="0 0 240 200" aria-hidden="true"><use href="#i-dove"/></svg>
     <svg class="hero__crown" viewBox="0 -14 240 156" aria-hidden="true"><use href="#i-crown"/></svg>
     <h2 class="title" id="heroTitle"><span class="title__small">A noite da</span><span class="title__brush"><span>Herança</span></span></h2>
-    <p class="hero__brand"><span class="wordmark wordmark--inline"><span class="wordmark__fj">FJ</span><span class="wordmark__night">NIGHT</span></span><span class="hero__brand-sep" aria-hidden="true"></span>Álbum oficial de memórias</p>
+    <p class="hero__brand"><span class="wordmark wordmark--inline"><span class="wordmark__fj">FJU</span><span class="wordmark__night">NIGHT</span></span><span class="hero__brand-sep" aria-hidden="true"></span>Álbum oficial de memórias</p>
     <p class="hero__lead">Reviva cada momento da noite. Encontre suas fotos com uma selfie e guarde as memórias que ficaram.</p>
     <div class="hero__actions">
       <a class="btn btn--gold" href="#album"><svg class="ico" aria-hidden="true"><use href="#i-images"/></svg>Ver as fotografias</a>
@@ -118,7 +127,7 @@
 </section>
 
 <!-- ============ ENCONTRE-SE ============ -->
-<section class="find" id="encontre" aria-labelledby="findTitle">
+<section class="find" id="encontre" aria-labelledby="findTitle" data-face-only>
   <div class="find__card">
     <div class="find__visual" aria-hidden="true">
       <div class="find__frame">
@@ -131,7 +140,7 @@
     <div class="find__text">
       <p class="eyebrow">Reconhecimento facial</p>
       <h2 class="section-title" id="findTitle">Encontre-se na <em>Noite da Herança</em></h2>
-      <p class="find__lead">Tire uma selfie ou envie uma foto do seu rosto. Procuramos você entre todas as fotografias publicadas do evento.</p>
+      <p class="find__lead">Tire uma selfie ou envie uma foto do seu rosto. Procuramos você entre as fotografias publicadas do evento.</p>
       <ul class="trust">
         <li><svg class="ico" aria-hidden="true"><use href="#i-shield"/></svg>Sua selfie é analisada só para a busca e descartada em seguida — não fica armazenada.</li>
         <li><svg class="ico" aria-hidden="true"><use href="#i-images"/></svg>Os resultados mostram apenas fotos que já estão públicas no álbum.</li>
@@ -141,10 +150,11 @@
         <button class="btn btn--gold" type="button" data-open-face><svg class="ico" aria-hidden="true"><use href="#i-face"/></svg>Encontrar minhas fotos</button>
         <a class="link" href="/privacidade">Como protegemos seus dados</a>
       </div>
-      <p class="find__unavailable" id="faceUnavailable" hidden></p>
     </div>
   </div>
 </section>
+
+<p class="face-note" id="faceNote" hidden></p>
 
 <!-- ============ ÁLBUM ============ -->
 <section class="album" id="album" aria-labelledby="albumTitle">
@@ -173,7 +183,7 @@
   <div class="event__bg" aria-hidden="true"></div>
   <div class="event__grid">
     <figure class="event__poster">
-      <img src="/assets/img/convite-oficial.webp" width="843" height="1264" loading="lazy" decoding="async" alt="Convite oficial: A Noite da Herança, FJ Night, 13 de novembro às 23h, Av. Wild José de Souza, 175 — Centro. Com transmissão para todo o Brasil.">
+      <img src="/assets/img/convite-oficial.webp" width="843" height="1264" loading="lazy" decoding="async" alt="Convite oficial: A Noite da Herança, FJU Night, 13 de novembro às 23h, Av. Wild José de Souza, 175 — Centro. Com transmissão para todo o Brasil.">
       <figcaption>Convite oficial</figcaption>
     </figure>
     <div class="event__info">
@@ -196,7 +206,7 @@
 <footer class="footer">
   <div class="footer__inner">
     <div>
-      <a class="wordmark wordmark--footer" href="#inicio" aria-label="FJ Night, voltar ao início"><span class="wordmark__fj">FJ</span><span class="wordmark__night">NIGHT</span></a>
+      <a class="wordmark wordmark--footer" href="#inicio" aria-label="FJU Night, voltar ao início"><span class="wordmark__fj">FJU</span><span class="wordmark__night">NIGHT</span></a>
       <p class="footer__theme">A Noite da Herança · <span data-event="date_label">13 de novembro</span></p>
     </div>
     <p class="footer__note">Fotografias publicadas conforme as autorizações aplicáveis. Pedidos de remoção e dúvidas sobre dados pessoais: veja a <a href="/privacidade">Política de Privacidade</a>.</p>
@@ -212,6 +222,7 @@
     <p class="lb__cat" id="lbCat"></p>
     <div class="lb__actions">
       <button class="lb__btn" type="button" id="lbShare" aria-label="Compartilhar link da fotografia"><svg class="ico" aria-hidden="true"><use href="#i-share"/></svg></button>
+      <a class="lb__btn lb__btn--ghost" id="lbOriginal" href="#" download hidden aria-label="Baixar o arquivo RAW original da câmera"><span id="lbOriginalLabel">RAW</span></a>
       <a class="lb__btn lb__btn--gold" id="lbDownload" href="#" download aria-label="Baixar fotografia em alta qualidade"><svg class="ico" aria-hidden="true"><use href="#i-download"/></svg><span>Baixar</span></a>
       <button class="lb__btn" type="button" id="lbClose" aria-label="Fechar visualização"><svg class="ico" aria-hidden="true"><use href="#i-close"/></svg></button>
     </div>
@@ -309,6 +320,24 @@
     </section>
   </div>
 </div>
+
+<!-- ============ TRILHA DA NOITE ============ -->
+<section class="music" id="music" aria-label="Trilha sonora da FJU Night" hidden>
+  <div class="music__head">
+    <p class="eyebrow">Trilha da noite</p>
+    <button class="music__close" type="button" id="musicClose" aria-label="Parar a música e fechar o player"><svg class="ico" aria-hidden="true"><use href="#i-close"/></svg></button>
+  </div>
+  <div class="music__video" id="musicVideo"></div>
+  <p class="music__title" id="musicTitle" aria-live="polite"></p>
+  <p class="music__status" id="musicStatus" role="status"></p>
+  <div class="music__controls">
+    <button class="music__btn" type="button" id="musicPrev" aria-label="Faixa anterior"><svg class="ico" aria-hidden="true"><use href="#i-skip-prev"/></svg></button>
+    <button class="music__btn music__btn--main" type="button" id="musicToggle" aria-label="Tocar"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg></button>
+    <button class="music__btn" type="button" id="musicNext" aria-label="Próxima faixa"><svg class="ico" aria-hidden="true"><use href="#i-skip-next"/></svg></button>
+  </div>
+  <ol class="music__list" id="musicList"></ol>
+  <p class="music__note">Vídeos oficiais incorporados do YouTube. Os direitos pertencem aos titulares.</p>
+</section>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <noscript><p class="noscript">Ative o JavaScript para navegar pelo álbum.</p></noscript>
