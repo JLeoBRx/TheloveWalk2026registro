@@ -34,6 +34,7 @@ ENV = {
     "INDEX_ON_STARTUP": "false",
     "TRUSTED_PROXY_HOPS": "1",
     "ADMIN_LOGIN_MAX_FAILURES": "3",
+    "CATEGORIES_FROM_FOLDERS": "true",   # os testes de categorias usam subpastas; o padrão é álbum único
 }
 
 MOTO_SERVER = None

@@ -110,6 +110,8 @@ class Settings:
     downloads_default: bool = field(default_factory=lambda: _bool("DOWNLOADS_DEFAULT", True))
     raw_original_downloads: bool = field(default_factory=lambda: _bool("RAW_ORIGINAL_DOWNLOADS", True))
     new_photos_require_review: bool = field(default_factory=lambda: _bool("NEW_PHOTOS_REQUIRE_REVIEW", False))
+    # Padrão: um único álbum, mesmo que existam subpastas. Com true, cada subpasta vira um filtro.
+    categories_from_folders: bool = field(default_factory=lambda: _bool("CATEGORIES_FROM_FOLDERS", False))
 
     # Reconhecimento facial — DESLIGADO por padrão. Ligar a variável não basta:
     # é preciso também o registro de autorização feito no painel (ver faces.authorization()).
