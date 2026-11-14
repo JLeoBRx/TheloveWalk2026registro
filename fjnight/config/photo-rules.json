@@ -1,0 +1,6 @@
+{
+  "_leia_me": "Regras permanentes por arquivo (caminho relativo à pasta fotos/, aceita curingas como 'Bastidores/*'). 'ocultas' não aparecem no álbum; 'sem_download' não podem ser baixadas; 'sem_busca_facial' não entram no índice facial.",
+  "ocultas": [],
+  "sem_download": [],
+  "sem_busca_facial": []
+}

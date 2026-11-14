@@ -5,9 +5,40 @@ services:
     plan: free
     branch: main
     autoDeploy: true
+    # Envios de fotos da FJ Night não devem republicar o álbum da Love Walk.
+    buildFilter:
+      ignoredPaths:
+        - fjnight/**
     buildCommand: "pip install -r requirements.txt && python -m backend.build_gallery"
     startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /api/health
     envVars:
       - key: ADMIN_TOKEN
         generateValue: true
+
+  # FJ Night — A Noite da Herança (aplicação independente na pasta fjnight/)
+  - type: web
+    name: fjnight-a-noite-da-heranca
+    runtime: python
+    plan: free
+    branch: main
+    autoDeploy: true
+    rootDir: fjnight
+    buildFilter:
+      paths:
+        - fjnight/**
+    # O build gera miniaturas, versões de exibição e o índice facial cifrado.
+    buildCommand: "pip install -r requirements.txt && python -m models.download_models && python -m backend.build"
+    startCommand: "uvicorn backend.main:app --host 0.0.0.0 --port $PORT --proxy-headers --forwarded-allow-ips '*'"
+    healthCheckPath: /api/status
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      - key: ADMIN_TOKEN
+        generateValue: true
+      - key: FACE_DATA_KEY
+        generateValue: true
+      - key: FACE_SEARCH_ENABLED
+        value: "true"
+      - key: FACE_DATA_RETENTION_DAYS
+        value: "90"

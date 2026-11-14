@@ -1,0 +1,15 @@
+# FJ Night — A Noite da Herança · dependências do servidor (Python 3.12)
+fastapi==0.115.12
+uvicorn[standard]==0.34.0
+python-multipart==0.0.20
+python-dotenv==1.0.1
+Pillow==11.1.0
+rawpy==0.27.1
+numpy==2.2.6
+# OpenCV 4.x: YuNet 2023mar (entrada fixa) e SFace funcionam no motor DNN clássico.
+opencv-python-headless==4.11.0.86
+cryptography==44.0.2
+requests==2.32.3
+# Testes
+pytest==8.3.5
+httpx==0.28.1

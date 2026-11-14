@@ -1,0 +1,12 @@
+services:
+  fjnight:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./fotos:/app/fotos:ro
+      - ./data:/app/data
+    # Em produção, publique atrás de um proxy reverso com HTTPS:
+    # a câmera do celular só funciona em conexões seguras.
