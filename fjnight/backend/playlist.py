@@ -1,7 +1,7 @@
 """Playlist da FJU Night: independente da Love Walk.
 
 Fonte: banco durável (editada no painel) ou, se vazia, config/playlist.json.
-Só aceita identificadores de vídeos do YouTube; nada é baixado ou hospedado.
+Aceita vídeos ou playlists do YouTube (ex.: do canal oficial da FJU); nada é baixado ou hospedado.
 """
 from __future__ import annotations
 
@@ -14,6 +14,7 @@ from . import durable
 from .config import settings
 
 YOUTUBE_ID = re.compile(r"^[A-Za-z0-9_-]{11}$")
+YOUTUBE_LIST = re.compile(r"^(PL|OL|UU|FL|LL)[A-Za-z0-9_-]{10,62}$")
 MAX_TRACKS = 40
 
 
@@ -40,6 +41,24 @@ def parse_youtube_id(value: str) -> str | None:
     return candidate if candidate and YOUTUBE_ID.fullmatch(candidate) else None
 
 
+def parse_youtube_list(value: str) -> str | None:
+    """Aceita o ID de uma playlist (PL...) ou um link youtube.com/playlist?list=..."""
+    value = (value or "").strip()
+    if YOUTUBE_LIST.fullmatch(value):
+        return value
+    try:
+        url = urlparse(value)
+    except ValueError:
+        return None
+    host = (url.hostname or "").lower()
+    if not (host.endswith("youtube.com") or host.endswith("youtube-nocookie.com")):
+        return None
+    if url.path not in ("/playlist", "/embed/videoseries"):
+        return None  # links de vídeo dentro de uma playlist valem como vídeo único
+    candidate = (parse_qs(url.query).get("list") or [None])[0]
+    return candidate if candidate and YOUTUBE_LIST.fullmatch(candidate) else None
+
+
 def validate(entries: list) -> list[dict]:
     if not isinstance(entries, list):
         raise ValueError("playlist_invalid")
@@ -47,11 +66,15 @@ def validate(entries: list) -> list[dict]:
     for e in entries[:MAX_TRACKS]:
         if not isinstance(e, dict):
             raise ValueError("playlist_invalid")
-        vid = parse_youtube_id(str(e.get("youtube_id") or e.get("url") or ""))
+        raw = str(e.get("youtube_id") or e.get("list_id") or e.get("url") or "")
+        vid = parse_youtube_id(raw)
+        lst = None if vid else parse_youtube_list(raw)
         title = str(e.get("title") or "").strip()[:120]
-        if not vid or not title:
+        if not (vid or lst) or not title:
             raise ValueError("playlist_track_invalid")
-        out.append({"title": title, "artist": str(e.get("artist") or "").strip()[:120], "youtube_id": vid})
+        item = {"title": title, "artist": str(e.get("artist") or "").strip()[:120]}
+        item.update({"youtube_id": vid} if vid else {"list_id": lst})
+        out.append(item)
     return out
 
 

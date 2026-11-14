@@ -30,8 +30,9 @@ export class Music {
 
     this.launch.addEventListener("click", () => (this.el.hidden ? this.open(this.index) : this.close()));
     document.getElementById("musicClose").addEventListener("click", () => this.close());
-    document.getElementById("musicPrev").addEventListener("click", () => this.step(-1));
-    document.getElementById("musicNext").addEventListener("click", () => this.step(1));
+    // Numa playlist do YouTube, anterior/próxima navegam dentro dela.
+    document.getElementById("musicPrev").addEventListener("click", () => (this.isList() ? this.command("previousVideo") : this.step(-1)));
+    document.getElementById("musicNext").addEventListener("click", () => (this.isList() ? this.command("nextVideo") : this.step(1)));
     this.toggle.addEventListener("click", () => this.command(this.playing ? "pauseVideo" : "playVideo"));
     this.list.addEventListener("click", (e) => {
       const b = e.target.closest("[data-track]");
@@ -40,8 +41,11 @@ export class Music {
     window.addEventListener("message", (e) => this.onMessage(e));
   }
 
+  isList() { return Boolean(this.tracks[this.index]?.list_id); }
+
   setTracks(tracks) {
-    this.tracks = Array.isArray(tracks) ? tracks.filter((t) => /^[A-Za-z0-9_-]{11}$/.test(t.youtube_id)) : [];
+    this.tracks = Array.isArray(tracks) ? tracks.filter((t) =>
+      /^[A-Za-z0-9_-]{11}$/.test(t.youtube_id || "") || /^(PL|OL|UU|FL|LL)[A-Za-z0-9_-]{10,62}$/.test(t.list_id || "")) : [];
     this.launch.hidden = this.tracks.length === 0;
     this.list.replaceChildren(...this.tracks.map((t, i) => {
       const li = document.createElement("li");
@@ -51,7 +55,7 @@ export class Music {
       const n = document.createElement("small");
       n.textContent = String(i + 1).padStart(2, "0");
       const label = document.createElement("span");
-      label.textContent = t.artist ? `${t.title} — ${t.artist}` : t.title;
+      label.textContent = (t.artist ? `${t.title} — ${t.artist}` : t.title) + (t.list_id ? " (playlist)" : "");
       b.append(n, label);
       li.append(b);
       return li;
@@ -93,7 +97,8 @@ export class Music {
       enablejsapi: "1", playsinline: "1", rel: "0", autoplay: "1", origin: location.origin,
     });
     const frame = document.createElement("iframe");
-    frame.src = `${ORIGIN}/embed/${track.youtube_id}?${params}`;
+    if (track.list_id) params.set("list", track.list_id);
+    frame.src = track.list_id ? `${ORIGIN}/embed/videoseries?${params}` : `${ORIGIN}/embed/${track.youtube_id}?${params}`;
     frame.title = `${track.title} — vídeo do YouTube`;
     frame.allow = "autoplay; encrypted-media; picture-in-picture";
     frame.referrerPolicy = "strict-origin-when-cross-origin";
@@ -137,9 +142,16 @@ export class Music {
 
   onState(state) {
     // -1 não iniciado, 0 terminou, 1 tocando, 2 pausado, 3 carregando, 5 pronto
-    if (state === 1) { this.playing = true; this.failures = 0; this.setStatus(`Faixa ${this.index + 1} de ${this.tracks.length}`); }
+    if (state === 1) {
+      this.playing = true;
+      this.failures = 0;
+      this.setStatus(this.isList() ? "Tocando a playlist do YouTube" : `Faixa ${this.index + 1} de ${this.tracks.length}`);
+    }
     else if (state === 2) { this.playing = false; this.setStatus("Pausado"); }
-    else if (state === 0) { this.playing = false; this.step(1); return; }
+    else if (state === 0) {
+      this.playing = false;
+      if (!this.isList()) { this.step(1); return; }   // a playlist do YouTube avança sozinha
+    }
     this.renderToggle();
   }
 

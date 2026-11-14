@@ -479,7 +479,8 @@ function trackRow(t = {}) {
   const row = el("div", { class: "track-row" },
     el("input", { class: "field", placeholder: "Título", maxlength: "120", "aria-label": "Título", value: t.title || "" }),
     el("input", { class: "field", placeholder: "Artista (opcional)", maxlength: "120", "aria-label": "Artista", value: t.artist || "" }),
-    el("input", { class: "field", placeholder: "Link ou ID do YouTube", "aria-label": "Link ou ID do YouTube", value: t.youtube_id || "" }),
+    el("input", { class: "field", placeholder: "Link do vídeo ou da playlist no YouTube", "aria-label": "Link do vídeo ou da playlist no YouTube",
+      value: t.youtube_id || (t.list_id ? `https://www.youtube.com/playlist?list=${t.list_id}` : "") }),
     el("button", { class: "btn btn--ghost btn--sm", type: "button", text: "Remover", onclick: () => row.remove() }));
   return row;
 }

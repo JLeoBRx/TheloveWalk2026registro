@@ -25,6 +25,26 @@ def test_youtube_id_parsing(value, expected):
     assert playlist.parse_youtube_id(value) == expected
 
 
+@pytest.mark.parametrize("value,expected", [
+    ("https://www.youtube.com/playlist?list=PLabcdefghijklmnop", "PLabcdefghijklmnop"),
+    ("PLabcdefghijklmnop", "PLabcdefghijklmnop"),
+    ("https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=PLabcdefghijklmnop", None),   # vale como vídeo
+    ("https://evil.example/playlist?list=PLabcdefghijklmnop", None),
+    ("PL<script>", None),
+])
+def test_youtube_playlist_parsing(value, expected):
+    assert playlist.parse_youtube_list(value) == expected
+
+
+def test_playlist_accepts_whole_youtube_playlist():
+    tracks = playlist.validate([
+        {"title": "Playlist oficial", "url": "https://www.youtube.com/playlist?list=PLabcdefghijklmnop"},
+        {"title": "Vídeo", "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=PLabcdefghijklmnop"},
+    ])
+    assert tracks[0]["list_id"] == "PLabcdefghijklmnop" and "youtube_id" not in tracks[0]
+    assert tracks[1]["youtube_id"] == "dQw4w9WgXcQ"
+
+
 def test_playlist_starts_empty_and_does_not_reuse_love_walk():
     c = client()
     assert c.get("/api/playlist").json()["tracks"] == []
