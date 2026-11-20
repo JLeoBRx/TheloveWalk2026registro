@@ -138,8 +138,7 @@
         innerR = R * 0.54;
         out += circle(0, 0, innerR, `fill="none" stroke="${line}" stroke-width="0.18"`);
       }
-      const mono = monogram(st, s.initials, innerR * 1.45, innerR * 0.95);
-      out += relief(ctx, mono.d, R, "deep");
+      out += center(ctx, st, innerR, R, 1.45, 0.95);
       return out;
     }
 
@@ -187,9 +186,20 @@
       const ln = ctx.foil ? "#FFFFFF" : P.color.darken(c.goldDark, 0.2);
       out += circle(0, 0, innerR, `fill="none" stroke="${ln}" stroke-width="0.16"`);
     }
-    const mono = monogram(st, s.initials, innerR * 1.42, innerR * 0.92);
-    out += relief(ctx, mono.d, R, "deep");
+    out += center(ctx, st, innerR, R, 1.42, 0.92);
     return out;
+  }
+
+  /* Centro do selo: iniciais, símbolo da galeria ou imagem enviada. */
+  function center(ctx, st, innerR, R, kw, kh) {
+    const em = P.emblem && P.emblem.active(st);
+    if (!em) return relief(ctx, monogram(st, st.seal.initials, innerR * kw, innerR * kh).d, R, "deep");
+    const box = innerR * 1.3;
+    if (em.type === "image") {
+      if (ctx.foil) return "";
+      return P.emblem.image(em, 0, 0, box, box);
+    }
+    return relief(ctx, P.emblem.pathAt(em, 0, 0, box, box), R, "deep");
   }
 
   P.seal = { render, monogram, palette };

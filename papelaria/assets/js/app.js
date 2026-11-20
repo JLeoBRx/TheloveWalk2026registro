@@ -48,16 +48,29 @@
     }
     return P.defaults();
   }
-  let saveTimer = null;
+  let saveTimer = null, quotaWarned = false;
   function persist() {
     clearTimeout(saveTimer);
-    saveTimer = setTimeout(() => store(KEY, JSON.stringify(state)), 300);
+    saveTimer = setTimeout(() => {
+      try {
+        localStorage.setItem(KEY, JSON.stringify(state));
+      } catch (e) {
+        // sem espaço para a imagem enviada: guarda o resto e avisa uma vez
+        store(KEY, JSON.stringify(Object.assign({}, state, { assets: { upload: null } })));
+        if (!quotaWarned && state.assets && state.assets.upload) {
+          quotaWarned = true;
+          toast("A imagem é grande demais para ficar guardada no navegador. Use Salvar projeto para não perdê-la.", 7000);
+        }
+      }
+    }, 300);
   }
 
   /* ---------- desfazer / refazer ---------- */
   const hist = { stack: [], i: -1, timer: null };
+  // o histórico guarda tudo, menos a imagem enviada (pesada), que continua a atual
+  const snapshot = () => JSON.stringify(Object.assign({}, state, { assets: undefined }));
   function pushNow() {
-    const s = JSON.stringify(state);
+    const s = snapshot();
     if (s === hist.stack[hist.i]) return;
     hist.stack = hist.stack.slice(0, hist.i + 1);
     hist.stack.push(s);
@@ -82,7 +95,9 @@
   }
   function restore(i) {
     hist.i = i;
-    state = P.mergeDefaults(P.defaults(), JSON.parse(hist.stack[i]));
+    const snap = JSON.parse(hist.stack[i]);
+    snap.assets = state.assets;
+    state = P.mergeDefaults(P.defaults(), snap);
     sync();
     render();
     persist();
@@ -107,6 +122,7 @@
     pct: (v) => `${Math.round(v * 100)}%`,
     mm: (v) => `${P.mmLabel(v)} mm`,
     deg: (v) => `${Math.round(v)}°`,
+    int: (v) => `${Math.round(v)}`,
     sidemm: () => `${P.mmLabel(P.envelope.geometry(state, 0).s)} mm`,
     clearance: (v) => `${P.mmLabel(v, 0)} mm (${P.mmLabel(v / 2)} por lado)`,
   };
@@ -131,6 +147,7 @@
     if (/^colors\.gold/.test(path)) state.colors.goldTone = "custom";
     if (path === "card.background") P.autoCardText(state);
     if (path === "colors.waxColor") state.colors.sealMode = "wax";
+    if (path === "seal.uploadTol") scheduleReprocess();
     changed();
   }
 
@@ -239,6 +256,8 @@
     for (const s of $$("#golds .chip")) s.classList.toggle("on", s.dataset.key === state.colors.goldTone);
     for (const s of $$("#waxes .chip")) s.classList.toggle("on", s.dataset.color.toLowerCase() === String(state.colors.waxColor).toLowerCase());
     for (const s of $$("#baseSwatches button")) s.classList.toggle("on", s.dataset.base.toLowerCase() === String(state.colors.base).toLowerCase());
+    for (const b of $$("#symbols button")) b.classList.toggle("on", b.dataset.icon === state.seal.icon);
+    uploadUI();
     sizeInfo();
     histButtons();
   }
@@ -369,6 +388,126 @@
       `<div>Envelope fechado: <b>${P.mmLabel(geo.W)} × ${P.mmLabel(geo.H)} mm</b> (o convite entra deitado)</div>` +
       `<div>Molde aberto: <b>${P.mmLabel(geo.bbox.w)} × ${P.mmLabel(geo.bbox.h)} mm</b></div>` +
       `<div>Convite: <b>${P.mmLabel(cw)} × ${P.mmLabel(ch)} mm</b> · folga ${P.mmLabel((geo.W - Math.max(cw, ch)) / 2)} mm por lado</div>`;
+  }
+
+  /* ---------- símbolos e imagem enviada ---------- */
+  function buildSymbols() {
+    const box = $("#symbols");
+    if (!box || !P.SYMBOLS) return;
+    box.innerHTML = P.SYMBOL_ORDER.map((k) => {
+      const s = P.SYMBOLS[k];
+      return `<button type="button" data-icon="${k}" title="${P.esc(s.label)}"><svg viewBox="0 0 ${s.w} ${s.h}" aria-hidden="true"><path d="${s.d}"/></svg><span>${P.esc(s.label)}</span></button>`;
+    }).join("");
+    box.addEventListener("click", (ev) => {
+      const b = ev.target.closest("button[data-icon]");
+      if (!b) return;
+      state.seal.icon = b.dataset.icon;
+      state.seal.emblem = "icon";
+      changed();
+    });
+  }
+
+  /* Processa a imagem nos dois modos (metal e cores originais) de uma vez. */
+  async function processUpload(src, tol) {
+    const metal = await P.imagetools.process(src, "metal", tol);
+    let original = null;
+    try {
+      original = await P.imagetools.process(src, "original", tol);
+    } catch (e) {
+      original = null;
+    }
+    return Object.assign({}, metal, original ? { png: original.png, pw: original.pw, ph: original.ph } : {}, { tol });
+  }
+
+  async function handleFile(file) {
+    const drop = $("#dropZone");
+    drop.classList.add("busy");
+    toast("Tirando o fundo e preparando o símbolo…");
+    try {
+      const ing = await P.imagetools.ingest(file);
+      const res = await processUpload(ing.src, state.seal.uploadTol);
+      state.assets.upload = Object.assign({ name: ing.name, src: ing.src }, res);
+      state.seal.emblem = "upload";
+      changed();
+      toast("Pronto: fundo retirado. Ajuste a remoção do fundo se precisar.", 4500);
+    } catch (e) {
+      console.error(e);
+      toast(e.message || "Não foi possível usar esta imagem.", 7000, true);
+    } finally {
+      drop.classList.toggle("busy", false);
+    }
+  }
+
+  let reprocessTimer = null, reprocessSeq = 0;
+  function scheduleReprocess() {
+    const up = state.assets && state.assets.upload;
+    if (!up || !up.src) return;
+    clearTimeout(reprocessTimer);
+    reprocessTimer = setTimeout(async () => {
+      const seq = ++reprocessSeq;
+      const tol = state.seal.uploadTol;
+      try {
+        const res = await processUpload(up.src, tol);
+        if (seq !== reprocessSeq || state.assets.upload !== up) return;
+        state.assets.upload = Object.assign({ name: up.name, src: up.src }, res);
+        sync();
+        schedule();
+        persist();
+      } catch (e) {
+        toast(e.message, 5000, true);
+      }
+    }, 220);
+  }
+
+  function bindUpload() {
+    const input = $("#symbolFile"), drop = $("#dropZone");
+    if (!input || !drop) return;
+    input.addEventListener("change", () => {
+      if (input.files[0]) handleFile(input.files[0]);
+      input.value = "";
+    });
+    ["dragenter", "dragover"].forEach((t) =>
+      drop.addEventListener(t, (ev) => {
+        ev.preventDefault();
+        drop.classList.add("over");
+      })
+    );
+    ["dragleave", "drop"].forEach((t) => drop.addEventListener(t, () => drop.classList.toggle("over", false)));
+    drop.addEventListener("drop", (ev) => {
+      ev.preventDefault();
+      const f = ev.dataTransfer && ev.dataTransfer.files && ev.dataTransfer.files[0];
+      if (f) handleFile(f);
+    });
+    $("#removeUpload").addEventListener("click", () => {
+      state.assets.upload = null;
+      if (state.seal.emblem === "upload") state.seal.emblem = "initials";
+      changed();
+    });
+  }
+
+  let lastUpload, lastLook = "";
+  function uploadUI() {
+    const up = state.assets && state.assets.upload;
+    const look = state.seal.uploadLook;
+    if (up === lastUpload && look === lastLook) return;
+    lastUpload = up;
+    lastLook = look;
+    const box = $("#uploadResult");
+    if (!box) return;
+    $("#dropTitle").textContent = up ? "Trocar imagem" : "Enviar imagem ou logotipo";
+    $("#removeUpload").hidden = !up;
+    box.hidden = !up;
+    if (!up) return;
+    $("#upOriginal").innerHTML = `<img src="${up.src}" alt="Imagem enviada">`;
+    const c = state.colors;
+    if (look === "original" && up.png) {
+      $("#upResult").innerHTML = `<img src="${up.png}" alt="Imagem sem fundo">`;
+    } else if (up.d) {
+      $("#upResult").innerHTML =
+        `<svg viewBox="0 0 ${up.vw} ${up.vh}" aria-label="Imagem sem fundo"><defs><linearGradient id="upg" x1="0" y1="0" x2="1" y2="1">` +
+        `<stop offset="0" stop-color="${c.goldDark}"/><stop offset=".45" stop-color="${c.gold}"/><stop offset=".6" stop-color="${c.goldLight}"/><stop offset="1" stop-color="${c.goldDark}"/>` +
+        `</linearGradient></defs><path d="${up.d}" fill="url(#upg)"/></svg>`;
+    } else $("#upResult").innerHTML = "";
   }
 
   /* ---------- seções ---------- */
@@ -685,6 +824,8 @@
     buildColorPickers();
     buildTemplates();
     buildSizeSliders();
+    buildSymbols();
+    bindUpload();
     bind();
     bindColorFields();
     showPane(read(PANE_KEY) || "cores");
@@ -778,7 +919,9 @@
         return;
       }
       disarm();
+      const keep = state.assets;
       state = P.defaults();
+      state.assets = keep; // a imagem enviada continua disponível
       changed();
       render();
       toast("Tudo restaurado para o padrão. Use desfazer para voltar.", 4000);

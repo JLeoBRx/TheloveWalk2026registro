@@ -52,6 +52,7 @@
    */
   function divider(ctx, cx, cy, w, style) {
     if (!style || style === "none") return "";
+    if (style === "symbol") return symbolDivider(ctx, cx, cy, w);
     const half = w / 2;
     const fill = ctx.gold(cx - half, cy - 2, cx + half, cy + 2);
     const line = ctx.goldLine();
@@ -150,8 +151,31 @@
     } else {
       inner = D * 0.95;
     }
-    const mono = P.seal.monogram(st, st.seal.initials, inner * 0.72, inner * 0.54);
-    out += `<g transform="translate(${P.n(cx)} ${P.n(cy)})"><path d="${mono.d}" fill="${gFill}"/></g>`;
+    const em = P.emblem && P.emblem.active(st);
+    if (em) {
+      const box = inner * 0.66;
+      out += P.emblem.svg(ctx, em, cx, cy, box, box, gFill);
+    } else {
+      const mono = P.seal.monogram(st, st.seal.initials, inner * 0.72, inner * 0.54);
+      out += `<g transform="translate(${P.n(cx)} ${P.n(cy)})"><path d="${mono.d}" fill="${gFill}"/></g>`;
+    }
+    return out;
+  }
+
+  /* Divisor com o símbolo (ou as iniciais) no centro. */
+  function symbolDivider(ctx, cx, cy, w, size) {
+    const st = ctx.state;
+    const half = w / 2, s = size || 5.6;
+    const fill = ctx.gold(cx - half, cy - s, cx + half, cy + s);
+    const line = ctx.goldLine();
+    let out = `<path d="M${P.n(cx - half)} ${P.n(cy)}H${P.n(cx - s / 2 - 2.4)}M${P.n(cx + s / 2 + 2.4)} ${P.n(cy)}H${P.n(cx + half)}" stroke="${line}" stroke-width="0.24" fill="none"/>`;
+    out += `<path d="${diamond(cx - s / 2 - 1.3, cy, 0.5)}${diamond(cx + s / 2 + 1.3, cy, 0.5)}" fill="${fill}"/>`;
+    const em = P.emblem && P.emblem.active(st);
+    if (em) out += P.emblem.svg(ctx, em, cx, cy, s, s, fill);
+    else {
+      const mono = P.seal.monogram(st, st.seal.initials, s * 1.5, s * 0.8);
+      out += `<g transform="translate(${P.n(cx)} ${P.n(cy)})"><path d="${mono.d}" fill="${fill}"/></g>`;
+    }
     return out;
   }
 

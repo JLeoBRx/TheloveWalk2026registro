@@ -203,15 +203,16 @@
               <button type="button" data-value="flourish">Arabesco</button>
               <button type="button" data-value="dots">Pontos</button>
               <button type="button" data-value="line">Filete</button>
+              <button type="button" data-value="symbol">Símbolo</button>
               <button type="button" data-value="none">Sem</button>
             </div>
           </div>
-          <label class="toggle"><input type="checkbox" id="t-mono" data-bind="card.showMonogram"><span>Monograma no topo</span></label>
+          <label class="toggle"><input type="checkbox" id="t-mono" data-bind="card.showMonogram"><span>Monograma ou símbolo no topo</span></label>
           <div class="field" data-show-if="card.showMonogram=true"><span>Estilo do monograma</span>
             <div class="seg" data-bind="card.monogramStyle">
               <button type="button" data-value="circle">Círculo</button>
               <button type="button" data-value="laurel">Coroa de louros</button>
-              <button type="button" data-value="plain">Só as letras</button>
+              <button type="button" data-value="plain">Sem moldura</button>
             </div>
           </div>
           <div class="toggles">
@@ -234,7 +235,7 @@
           <div class="toggles">
             <label class="toggle"><input type="checkbox" id="t-frame" data-bind="envelope.frontFrame"><span>Moldura</span></label>
             <label class="toggle"><input type="checkbox" id="t-orn" data-bind="envelope.frontOrnament"><span>Ornamento</span></label>
-            <label class="toggle"><input type="checkbox" id="t-fmono" data-bind="envelope.frontMonogram"><span>Monograma no lugar do ornamento</span></label>
+            <label class="toggle"><input type="checkbox" id="t-fmono" data-bind="envelope.frontMonogram"><span>Monograma ou símbolo no lugar do ornamento</span></label>
           </div>
         </div>
         <div class="block">
@@ -277,21 +278,50 @@
 
       <!-- SELO -->
       <section class="pane" data-pane="selo">
-        <header class="pane-head"><h2>Selo</h2><p>Monograma do selo da aba, do convite e dos adesivos. A cor fica em Cores.</p></header>
+        <header class="pane-head"><h2>Selo e símbolo</h2><p>O centro do selo da aba, do monograma do convite, da frente do envelope e dos selos adesivos. A cor fica em Cores.</p></header>
         <div class="block">
-          <div class="row">
-            <label class="field"><span>Iniciais <em>ex.: H&amp;R, A·B, M</em></span><input type="text" id="f-initials" maxlength="7" data-bind="seal.initials"></label>
-            <div class="field"><span>Estilo</span>
-              <div class="seg" data-bind="seal.style">
-                <button type="button" data-value="wax">Lacre</button>
-                <button type="button" data-value="medallion">Medalhão</button>
+          <h3>Centro do selo</h3>
+          <div class="seg" data-bind="seal.emblem">
+            <button type="button" data-value="initials">Iniciais</button>
+            <button type="button" data-value="icon">Símbolo</button>
+            <button type="button" data-value="upload">Minha imagem</button>
+          </div>
+          <label class="field" data-show-if="seal.emblem=initials"><span>Iniciais <em>ex.: H&amp;R, A·B, M</em></span><input type="text" id="f-initials" maxlength="7" data-bind="seal.initials"></label>
+          <div class="field" data-show-if="seal.emblem=initials"><span>Fonte das iniciais</span><div class="fontpick" data-font="monogram" data-cats="caps,serif" data-sample="H R"></div></div>
+          <div class="symbols" id="symbols" data-show-if="seal.emblem=icon"></div>
+          <div class="upload" data-show-if="seal.emblem=upload">
+            <label class="drop" id="dropZone" for="symbolFile">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4m0 0L7.5 8.5M12 4l4.5 4.5"/><path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15"/></svg>
+              <b id="dropTitle">Enviar imagem ou logotipo</b>
+              <span>Arraste aqui ou clique · PNG, JPG, WEBP ou SVG</span>
+            </label>
+            <input type="file" id="symbolFile" accept="image/png,image/jpeg,image/webp,image/svg+xml,image/gif" hidden>
+            <div class="upload-result" id="uploadResult" hidden>
+              <figure><div class="thumb checker" id="upOriginal"></div><figcaption>Imagem enviada</figcaption></figure>
+              <figure><div class="thumb checker" id="upResult"></div><figcaption>Sem fundo, no selo</figcaption></figure>
+            </div>
+            <div class="field"><span>Aparência</span>
+              <div class="seg" data-bind="seal.uploadLook">
+                <button type="button" data-value="metal">Metal, igual ao selo</button>
+                <button type="button" data-value="original">Cores originais</button>
               </div>
+            </div>
+            <label class="field range"><span>Remoção do fundo <output data-for="seal.uploadTol" data-format="int"></output></span><input type="range" id="tolRange" min="5" max="95" step="1" data-bind="seal.uploadTol"></label>
+            <p class="hint">Funciona melhor com logotipos em fundo liso (branco ou de uma cor só). Se sobrar fundo, aumente a remoção; se partes do desenho sumirem, diminua.</p>
+            <button type="button" class="link-btn" id="removeUpload">Remover a imagem enviada</button>
+          </div>
+        </div>
+        <div class="block">
+          <h3>Selo</h3>
+          <div class="field"><span>Estilo</span>
+            <div class="seg" data-bind="seal.style">
+              <button type="button" data-value="wax">Lacre</button>
+              <button type="button" data-value="medallion">Medalhão</button>
             </div>
           </div>
           <label class="field"><span>Texto do anel <em>vazio = sem texto</em></span><input type="text" id="f-ring" data-bind="seal.ring"></label>
           <label class="field range"><span>Diâmetro do selo na aba <output data-for="seal.diameter" data-format="mm"></output></span><input type="range" min="20" max="42" step="1" data-bind="seal.diameter"></label>
           <label class="field range"><span>Diâmetro dos selos adesivos <output data-for="stickers.diameter" data-format="mm"></output></span><input type="range" min="25" max="60" step="1" data-bind="stickers.diameter"></label>
-          <div class="field"><span>Fonte do monograma</span><div class="fontpick" data-font="monogram" data-cats="caps,serif" data-sample="H R"></div></div>
         </div>
       </section>
 
@@ -459,6 +489,8 @@
   <script src="assets/js/geometry.js"></script>
   <script src="assets/js/type.js"></script>
   <script src="assets/js/state.js"></script>
+  <script src="assets/js/symbols.js"></script>
+  <script src="assets/js/emblem.js"></script>
   <script src="assets/js/seal.js"></script>
   <script src="assets/js/ornaments.js"></script>
   <script src="assets/js/envelope.js"></script>
@@ -466,6 +498,7 @@
   <script src="assets/js/sheets.js"></script>
   <script src="assets/js/pdf.js"></script>
   <script src="assets/js/export.js"></script>
+  <script src="assets/js/imagetools.js"></script>
   <script src="assets/js/app.js"></script>
 </body>
 </html>

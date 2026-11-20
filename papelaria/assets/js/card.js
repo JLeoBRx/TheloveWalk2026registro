@@ -186,12 +186,13 @@
       blocks.push(paragraph(tx.subtitle, { font: f.text, variant: "italic", size: P.pt(12.5) * ts * s("subtitle") }, col.text, 1.3, maxW * 0.9, 2.6 * gs));
 
     if (card.divider && card.divider !== "none") {
-      const dh = card.divider === "flourish" ? 6 : 3;
+      const tall = card.divider === "flourish" || card.divider === "symbol";
+      const dh = tall ? 6.2 : 3;
       blocks.push({
         gap: 5 * gs,
         h: dh,
         draw(y) {
-          return P.orn.divider(ctx, cx, y + dh / 2, Math.min(card.divider === "flourish" ? 46 : 40, maxW * (card.divider === "flourish" ? 0.42 : 0.36)), card.divider);
+          return P.orn.divider(ctx, cx, y + dh / 2, Math.min(tall ? 46 : 40, maxW * (tall ? 0.42 : 0.36)), card.divider);
         },
       });
     }

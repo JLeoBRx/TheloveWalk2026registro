@@ -175,7 +175,7 @@
         frame: "classic", // classic | deco | fine | none
         showMonogram: true,
         monogramStyle: "circle", // circle | laurel | plain
-        divider: "diamond", // diamond | flourish | dots | line | none
+        divider: "diamond", // diamond | flourish | dots | line | symbol | none
         titleGold: true,
         signatureGold: true,
         dateStyle: "block", // block | line
@@ -225,7 +225,13 @@
         style: "wax", // wax | medallion
         ring: P.TEMPLATES.casamento.ring,
         diameter: 30,
+        emblem: "initials", // initials | icon | upload
+        icon: "cruz",
+        uploadLook: "metal", // metal (dourado, vetorizado) | original (cores da imagem)
+        uploadTol: 30,
       },
+      // dados pesados (imagem enviada); ficam fora do histórico de desfazer
+      assets: { upload: null },
       stickers: { diameter: 40 },
       colors: {
         theme: "azul-real",

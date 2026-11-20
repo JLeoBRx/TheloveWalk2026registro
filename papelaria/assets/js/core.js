@@ -200,7 +200,7 @@
   P.svgDoc = function (w, h, body, ctx, extra) {
     const attrs = extra || "";
     return (
-      `<svg xmlns="http://www.w3.org/2000/svg" width="${P.n(w)}mm" height="${P.n(h)}mm" ` +
+      `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${P.n(w)}mm" height="${P.n(h)}mm" ` +
       `viewBox="0 0 ${P.n(w)} ${P.n(h)}" ${attrs}>` +
       (ctx ? ctx.defsSvg() : "") +
       body +
