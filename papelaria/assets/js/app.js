@@ -10,6 +10,11 @@
   const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
   const PX_PER_MM = 96 / 25.4;
 
+  // Dentro do visualizador do claude.ai (versão online) a página roda num quadro
+  // protegido: downloads passam pela permissão "downloads" da plataforma.
+  const embedded = !!(window.claude && typeof window.claude.use === "function");
+  const downloadsReady = embedded ? window.claude.use("downloads").catch(() => null) : Promise.resolve(null);
+
   let state = load();
   let tab = "envelope";
   let ppmZoom = 0; // 0 = ajustar à área
@@ -122,6 +127,7 @@
       if (el.dataset.hideIf && evalCond(el.dataset.hideIf)) show = false;
       el.hidden = !show;
     }
+    if (embedded) for (const el of $$("[data-local-only]")) el.hidden = true;
     for (const el of $$("[data-tab-only]")) el.hidden = el.dataset.tabOnly !== tab;
     for (const pick of $$(".fontpick")) {
       const cur = state.fonts[pick.dataset.font];
@@ -402,45 +408,90 @@
     if (ms) toastTimer = setTimeout(() => t.classList.remove("show"), ms);
   }
 
+  /*
+   * Entrega um arquivo ao usuário. Localmente (file://) usa um link de download;
+   * online, pede ao visualizador para salvar (o usuário confirma nome e tamanho).
+   * Resolve true quando o arquivo foi entregue e false quando o usuário recusou.
+   */
+  async function saveFile(filename, blob) {
+    if (embedded) {
+      const dl = await downloadsReady;
+      if (!dl) throw { code: "unavailable" };
+      try {
+        await dl.save({ filename, data: blob });
+        return true;
+      } catch (e) {
+        if (e && e.code === "declined") return false;
+        throw e;
+      }
+    }
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      URL.revokeObjectURL(a.href);
+      a.parentNode.removeChild(a);
+    }, 1500);
+    return true;
+  }
+
+  function saveErrorMessage(e) {
+    const code = e && e.code;
+    if (code === "rate_limited") return "Já existe um pedido de download aberto. Responda a ele e tente de novo.";
+    if (code === "rejected_extension" || code === "extension_not_enabled")
+      return "Esta visualização não permite baixar este tipo de arquivo. Abra o editor pelo claude.ai ou use a versão local (papelaria/index.html).";
+    if (code === "too_large") return "O arquivo ficou grande demais para esta visualização. Exporte o envelope e o convite separadamente.";
+    if (code) return "Downloads não estão disponíveis nesta visualização. Abra o editor pelo claude.ai ou use a versão local (papelaria/index.html).";
+    return e && e.message ? e.message : String(e);
+  }
+
   async function doExport(kind) {
     if (busy) return;
     busy = true;
     const buttons = $$("[data-export]");
     buttons.forEach((b) => (b.disabled = true));
-    const open = state.view.exportAction === "open";
+    const open = !embedded && state.view.exportAction === "open";
     const win = open ? window.open("", "_blank") : null;
     toast("Gerando PDF vetorial…");
     await new Promise((r) => setTimeout(r, 30));
+    let res = null;
     try {
-      const res = await P.pdf.exportPdf(kind, state, {
-        open,
-        win,
-        onProgress: (i, n) => toast(`Gerando PDF… página ${i} de ${n}`),
-      });
-      toast(`PDF pronto: ${res.filename} (${res.pages.length} página${res.pages.length > 1 ? "s" : ""}). Imprima em tamanho real, escala 100%.`, 7000);
+      res = await P.pdf.exportPdf(kind, state, { onProgress: (i, n) => toast(`Gerando PDF… página ${i} de ${n}`) });
     } catch (e) {
       if (win) win.close();
       console.error(e);
       toast(`Não foi possível gerar o PDF: ${e.message}`, 9000, true);
-    } finally {
-      busy = false;
-      buttons.forEach((b) => (b.disabled = false));
     }
+    if (res) {
+      const done = `PDF pronto: ${res.filename} (${res.pages.length} página${res.pages.length > 1 ? "s" : ""}). Imprima em tamanho real, escala 100%.`;
+      try {
+        if (win) {
+          win.location.href = URL.createObjectURL(res.blob);
+          toast(done, 7000);
+        } else {
+          if (embedded) toast("PDF gerado. Confirme o download na janela que apareceu.");
+          const ok = await saveFile(res.filename, res.blob);
+          toast(ok ? done : "Download cancelado.", ok ? 7000 : 4000);
+        }
+      } catch (e) {
+        toast(saveErrorMessage(e), 9000, true);
+      }
+    }
+    busy = false;
+    buttons.forEach((b) => (b.disabled = false));
   }
 
   /* ---------- projeto ---------- */
-  function saveProject() {
+  async function saveProject() {
     const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "projeto-papelaria.json";
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => {
-      URL.revokeObjectURL(a.href);
-      a.remove();
-    }, 1000);
-    toast("Projeto salvo em projeto-papelaria.json", 4000);
+    try {
+      const ok = await saveFile("projeto-papelaria.json", blob);
+      toast(ok ? "Projeto salvo em projeto-papelaria.json" : "Download cancelado.", 4000);
+    } catch (e) {
+      toast(saveErrorMessage(e), 8000, true);
+    }
   }
 
   function loadProject(file) {
@@ -461,6 +512,19 @@
 
   /* ---------- início ---------- */
   function init() {
+    document.documentElement.lang = "pt-BR";
+    if (embedded) {
+      document.documentElement.classList.add("embedded");
+      downloadsReady.then((dl) => {
+        if (dl) return;
+        for (const b of $$("[data-export]")) {
+          b.disabled = true;
+          b.title = "Downloads não estão disponíveis nesta visualização";
+        }
+        const note = $("#exportNote");
+        if (note) note.hidden = false;
+      });
+    }
     buildSelects();
     buildFontPickers();
     buildSwatches();
@@ -500,12 +564,28 @@
       if (e.target.files[0]) loadProject(e.target.files[0]);
       e.target.value = "";
     });
-    $("#resetProject").addEventListener("click", () => {
-      if (!confirm("Restaurar todos os textos, cores e medidas para o padrão?")) return;
+    // confirmação em dois cliques, dentro da própria página
+    let resetArmed = null;
+    $("#resetProject").addEventListener("click", (ev) => {
+      const btn = ev.currentTarget;
+      const disarm = () => {
+        clearTimeout(resetArmed);
+        resetArmed = null;
+        btn.textContent = "Restaurar padrão";
+        btn.classList.remove("armed");
+      };
+      if (!resetArmed) {
+        btn.textContent = "Clique de novo para restaurar tudo";
+        btn.classList.add("armed");
+        resetArmed = setTimeout(disarm, 4000);
+        return;
+      }
+      disarm();
       state = P.defaults();
       sync();
       render();
       persist();
+      toast("Textos, cores e medidas restaurados para o padrão.", 4000);
     });
     let rz = null;
     window.addEventListener("resize", () => {

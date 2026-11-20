@@ -105,17 +105,11 @@
     return { doc, pages, filename: filename(kind, state) };
   }
 
+  /* Gera o PDF e devolve { blob, filename, pages }; quem chama decide como salvar. */
   async function exportPdf(kind, state, opts) {
     const o = opts || {};
     const res = await build(kind, state, o.onProgress);
-    if (o.open) {
-      const url = res.doc.output("bloburl");
-      if (o.win) o.win.location.href = url;
-      else window.open(url, "_blank");
-    } else {
-      res.doc.save(res.filename);
-    }
-    return res;
+    return { blob: res.doc.output("blob"), filename: res.filename, pages: res.pages };
   }
 
   P.pdf = { build, exportPdf, sheetsFor };

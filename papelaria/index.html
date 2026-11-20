@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Ateliê de Papelaria — Envelope e Convite</title>
+  <title>Ateliê de Papelaria</title>
   <meta name="description" content="Editor local de papelaria personalizada: envelope planificado e convite, com exportação em PDF vetorial em tamanho real.">
   <link rel="stylesheet" href="assets/css/editor.css">
 </head>
@@ -241,7 +241,7 @@
               <label class="toggle"><input type="checkbox" data-bind="print.ficha"><span>Ficha técnica e montagem</span></label>
             </div>
           </div>
-          <div class="field"><span>Ao exportar</span>
+          <div class="field" data-local-only><span>Ao exportar</span>
             <div class="seg" data-bind="view.exportAction">
               <button type="button" data-value="download">Baixar o arquivo</button>
               <button type="button" data-value="open">Abrir em nova aba</button>
@@ -252,6 +252,7 @@
             <button class="btn" data-export="card">PDF do convite</button>
             <button class="btn btn-gold" data-export="all">PDF completo para produção</button>
           </div>
+          <p class="note warn-note" id="exportNote" hidden>Downloads não estão disponíveis nesta visualização. Abra o editor pelo claude.ai ou use a versão local (<code>papelaria/index.html</code>).</p>
           <p class="note">Imprima sempre em <strong>tamanho real (100%)</strong>, sem “ajustar à página”. Cada folha traz uma régua de 50 mm para conferência.</p>
         </div>
       </details>

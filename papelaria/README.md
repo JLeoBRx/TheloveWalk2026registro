@@ -11,6 +11,8 @@ Os arquivos saem em **PDF vetorial, em milímetros, na escala 100%**, prontos pa
 
 Abra `papelaria/index.html` com um duplo clique. O editor funciona **offline e sem instalar nada**. Bibliotecas e fontes já estão na pasta.
 
+O mesmo editor também funciona publicado como página online (Artifact do claude.ai). Online, ao exportar, a plataforma mostra uma confirmação com o nome e o tamanho do arquivo antes de salvar.
+
 Use Chrome, Edge, Firefox ou Safari em versão recente. As alterações ficam salvas no navegador. Para guardar ou levar o projeto a outro computador, use **Salvar projeto** (gera um `.json`) e depois **Abrir projeto**.
 
 ## O que dá para personalizar
