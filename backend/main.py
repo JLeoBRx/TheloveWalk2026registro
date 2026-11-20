@@ -560,3 +560,15 @@ if (ROOT/"privacy.html").is_file():
     @app.get("/privacy.html")
     def privacy():
         return FileResponse(ROOT/"privacy.html")
+
+# Ateliê de Papelaria (editor de envelope e convite): mesmo domínio, em /papelaria/
+PAPELARIA_DIR = ROOT / "papelaria"
+if (PAPELARIA_DIR / "index.html").is_file():
+    from fastapi.responses import RedirectResponse
+    from fastapi.staticfiles import StaticFiles
+
+    @app.get("/papelaria", include_in_schema=False)
+    def papelaria_redirect():
+        return RedirectResponse("/papelaria/", status_code=308)
+
+    app.mount("/papelaria", StaticFiles(directory=PAPELARIA_DIR, html=True), name="papelaria")

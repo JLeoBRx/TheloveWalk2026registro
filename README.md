@@ -4,7 +4,7 @@
 
 > **Também neste repositório:** o álbum oficial da **FJ Night — A Noite da Herança**, uma aplicação independente com reconhecimento facial, na pasta [`fjnight/`](fjnight/README.md).
 >
-> **Papelaria para impressão:** editor local de **envelope planificado + convite** com exportação em PDF vetorial em tamanho real (mm, escala 100%), na pasta [`papelaria/`](papelaria/README.md). Basta abrir `papelaria/index.html` no navegador.
+> **Papelaria para impressão:** editor de **envelope planificado, convite, forro e selos** com exportação em PDF vetorial em tamanho real (mm, escala 100%), na pasta [`papelaria/`](papelaria/README.md). Publicado no mesmo site do álbum, no endereço **`/papelaria/`** (por exemplo `https://the-love-walk-2026-album.onrender.com/papelaria/`, ou o mesmo caminho no domínio próprio ligado a esse serviço). Também funciona abrindo `papelaria/index.html` direto no navegador.
 
 Site-álbum do The Love Walk 2026, com introdução editorial, trilha sonora da Banda Universos, galeria por categorias, miniaturas e visualização ampliada. O site não oferece reconhecimento facial nem processa dados biométricos.
 
