@@ -52,11 +52,18 @@
     const card = () => S.cardSheet(state, "art");
     if (kind === "envelope") pages.push(env());
     else if (kind === "card") pages.push(card());
+    else if (kind === "liner") pages.push(S.linerSheet(state, "art"));
+    else if (kind === "stickers") pages.push(S.stickerSheet(state, "art"));
     else {
       const e = env(), c = card();
       pages.push(e, c);
+      if (state.print.liner) pages.push(S.linerSheet(state, "art"));
+      if (state.print.stickers) pages.push(S.stickerSheet(state, "art"));
       if (state.print.dieline) pages.push(S.envelopeSheet(state, "dieline"));
-      if (state.print.foil) pages.push(S.envelopeSheet(state, "foil"), S.cardSheet(state, "foil"));
+      if (state.print.foil) {
+        pages.push(S.envelopeSheet(state, "foil"), S.cardSheet(state, "foil"));
+        if (state.print.stickers && state.colors.sealMode !== "wax") pages.push(S.stickerSheet(state, "foil"));
+      }
       if (state.print.ficha) pages.push(S.ficha(state, e, c));
     }
     const err = pages.find((p) => p.error);
@@ -77,6 +84,8 @@
       .slice(0, 40) || "papelaria";
     if (kind === "envelope") return `${slug}_envelope-planificado_${Math.round(W)}x${Math.round(H)}mm.pdf`;
     if (kind === "card") return `${slug}_convite_${Math.round(cw)}x${Math.round(ch)}mm.pdf`;
+    if (kind === "liner") return `${slug}_forro-do-envelope.pdf`;
+    if (kind === "stickers") return `${slug}_selos-adesivos.pdf`;
     return `${slug}_papelaria-completa_producao.pdf`;
   }
 
@@ -90,7 +99,7 @@
       compress: true,
       putOnlyUsedFonts: true,
     });
-    const titles = { envelope: "Envelope planificado", card: "Convite", all: "Papelaria completa — produção" };
+    const titles = { envelope: "Envelope planificado", card: "Convite", liner: "Forro do envelope", stickers: "Selos adesivos", all: "Papelaria completa — produção" };
     doc.setProperties({
       title: `${titles[kind]} — ${String(state.text.title || "").replace(/\n/g, " ")}`,
       subject: "Arquivo de impressão em tamanho real (escala 100%), medidas em milímetros",

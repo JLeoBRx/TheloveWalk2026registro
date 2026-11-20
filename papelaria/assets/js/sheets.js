@@ -277,11 +277,12 @@
     const pw = 210, ph = 297, m = 18;
     const ctx = new P.Ctx(state, "art", "fic");
     const c = state.colors;
+    const head = P.color.isDark(c.navy) ? c.navy : c.cardText;
     const geo = P.envelope.geometry(state, 0);
     let s = `<rect width="${pw}" height="${ph}" fill="#FFFFFF"/>`;
     let y = m + 8;
     const serif = (size, variant) => ({ font: "cormorant-garamond", variant: variant || "semibold", size: P.pt(size) });
-    s += text("Ficha técnica e montagem", m, y, serif(22), "start", c.navy).svg;
+    s += text("Ficha técnica e montagem", m, y, serif(22), "start", head).svg;
     y += 6.5;
     s += text(`${String(state.text.title || "").replace(/\n/g, " ")} — envelope planificado e convite`, m, y, sans(8, "light"), "start", "#4B5563").svg;
     y += 4;
@@ -300,6 +301,11 @@
       ["Abas", `superior ${P.mmLabel(geo.depth)} mm · inferior ${P.mmLabel(geo.hb)} mm · laterais ${P.mmLabel(geo.s)} mm`],
       ["Sangria", `${P.mmLabel(+state.print.bleed)} mm em todas as bordas externas`],
     ];
+    if (state.print.liner) {
+      const lg = P.envelope.liner(state, geo);
+      specs.push(["Forro do envelope", `${P.mmLabel(lg.bbox.w)} × ${P.mmLabel(lg.bbox.h)} mm · papel fino de 75 a 120 g/m²`]);
+    }
+    if (state.print.stickers) specs.push(["Selos adesivos", `Ø ${P.mmLabel(+state.stickers.diameter)} mm · papel adesivo (vinil ou couché)`]);
     for (const [k, v] of specs) {
       s += text(k.toUpperCase(), m, y, sans(6, "semibold", { tracking: 0.08 }), "start", "#6B7280").svg;
       s += text(v, m + 52, y, sans(8), "start", INK).svg;
@@ -308,7 +314,7 @@
     y += 4;
 
     const section = (title) => {
-      s += text(title, m, y, serif(13), "start", c.navy).svg;
+      s += text(title, m, y, serif(13), "start", head).svg;
       y += 5.5;
     };
     const para = (str, indent) => {
@@ -335,6 +341,10 @@
       "Dobre a aba inferior por cima das laterais e pressione. Insira o convite deitado, com a frente voltada para a frente do envelope.",
       "Feche a aba superior: o selo dourado fica de pé no verso. Para lacrar, use um ponto de fita dupla face sob a ponta da aba ou um adesivo transparente.",
     ];
+    if (state.print.liner)
+      steps.push("Forro: recorte, dobre na linha tracejada e encaixe a parte de baixo dentro do envelope. Cole apenas a parte da aba superior, alinhando a dobra do forro com a dobra da aba.");
+    if (state.print.stickers)
+      steps.push("Selos adesivos: imprima a folha em papel adesivo, recorte os círculos e use um selo para lacrar a ponta da aba superior.");
     // diagramas
     const dw = (pw - 2 * m - 3 * 6) / 4;
     const dh = 38;
@@ -347,7 +357,7 @@
     });
     y += dh + 7;
     steps.forEach((st, i) => {
-      s += text(`${i + 1}.`, m, y, sans(8, "semibold"), "start", c.navy).svg;
+      s += text(`${i + 1}.`, m, y, sans(8, "semibold"), "start", head).svg;
       para(st, 6);
     });
     y += 2;
@@ -364,7 +374,7 @@
     const c = ctx.state.colors;
     const { W, H } = geo;
     const flat = geo.bbox;
-    const navy = c.navy, light = "#E9EEF7", glue = "#F6E6B8";
+    const navy = P.color.isDark(c.navy) ? c.navy : c.cardText, light = "#E9EEF7", glue = "#F6E6B8";
     let sw = 0.25;
     const out = [];
     const fit = (bw, bh) => Math.min((dw - 4) / bw, (dh - 6) / bh);
@@ -416,5 +426,88 @@
     return out;
   }
 
-  P.sheets = { envelopeSheet, cardSheet, ficha, ruler };
+
+  /* Legenda simples para as folhas de peças extras. */
+  function simpleLegend(x, y, w, title, sub) {
+    let s = `<path d="M${P.n(x)} ${P.n(y)}H${P.n(x + w)}" stroke="#C9CDD4" stroke-width="0.15"/>`;
+    s += text(title, x, y + 4.2, sans(7, "semibold", { tracking: 0.06 })).svg;
+    const lines = T().wrap(sub, sans(5.6), Math.max(60, w - 58), false);
+    lines.forEach((ln, i) => (s += text(ln, x, y + 8 + i * 3.2, sans(5.6)).svg));
+    s += ruler(x + w - 50, y + 9.5, 50);
+    return { svg: s, h: 8 + lines.length * 3.2 + 3 };
+  }
+
+  /* ---------------- FORRO ---------------- */
+  function linerSheet(state, mode, overrides) {
+    const pr = Object.assign({}, state.print, overrides || {});
+    const b = mode === "dieline" ? 0 : +pr.bleed || 0;
+    const geo = P.envelope.geometry(state, 0);
+    const lg = P.envelope.liner(state, geo);
+    const bleedPoly = b ? P.geo.offset(lg.poly, b) : lg.poly;
+    const bb = P.geo.bbox([bleedPoly]);
+    const pad = pr.marks ? 8 : 0;
+    const legendH = pr.legend ? 18 : 0;
+    const margin = +pr.minMargin || 5;
+    const contentW = bb.w + 2 * pad, contentH = bb.h;
+    const f = fitPaper(P.PAPER_ORDER, contentW, contentH, contentH + legendH, margin);
+    if (!f) return { error: `O forro (${P.mmLabel(bb.w)} × ${P.mmLabel(bb.h)} mm) não cabe nos papéis disponíveis.` };
+    const pw = f.pw, ph = f.ph, legend = pr.legend && f.legend;
+    const top = Math.max(margin, (ph - contentH - (legend ? legendH : 0)) / 2);
+    const ox = (pw - contentW) / 2 + pad - bb.x, oy = top - bb.y;
+    const ctx = new P.Ctx(state, mode, "lin");
+    let body = `<rect width="${P.n(pw)}" height="${P.n(ph)}" fill="#FFFFFF"/><g transform="translate(${P.n(ox)} ${P.n(oy)})">`;
+    if (mode === "art") body += P.envelope.linerArt(ctx, lg, bleedPoly);
+    const dark = mode === "art" && P.color.isDark(state.liner.color || state.colors.royal);
+    const cut = mode === "art" ? (dark ? "#D3DCEA" : "#8E99A8") : "#000000";
+    body += `<path d="M${P.n(lg.xL)} 0H${P.n(lg.xR)}" stroke="${mode === "art" ? (dark ? "#FFFFFF" : "#6B7280") : "#000000"}" stroke-opacity="0.85" stroke-width="0.2" stroke-dasharray="2.4 1.6"/>`;
+    body += `<path d="${P.geo.d(lg.poly)}" fill="none" stroke="${cut}" stroke-width="0.22" stroke-linejoin="round"/>`;
+    if (pr.marks) body += `<path d="${cropMark(bb.x - 2, 0, bb.x - 7, 0)}${cropMark(bb.x1 + 2, 0, bb.x1 + 7, 0)}" stroke="#000" stroke-width="0.2" stroke-dasharray="1.2 0.8"/>`;
+    body += `</g>`;
+    if (legend) {
+      const lx = Math.max(margin, (pw - Math.max(contentW, 190)) / 2) + 2;
+      const lgnd = simpleLegend(
+        lx, top + contentH + 4, pw - 2 * lx,
+        `FORRO DO ENVELOPE · ${P.mmLabel(lg.bbox.w)} × ${P.mmLabel(lg.bbox.h)} mm`,
+        "Recorte na linha contínua e dobre na tracejada, junto com a aba superior. Cole só a parte da aba; a parte de baixo entra solta no envelope. Papel fino (75 a 120 g/m²) dobra melhor. Imprimir em tamanho real (100%)."
+      );
+      body += lgnd.svg;
+    }
+    return { w: pw, h: ph, paperKey: f.key, svg: P.svgDoc(pw, ph, body, ctx) };
+  }
+
+  /* ---------------- SELOS ADESIVOS ---------------- */
+  function stickerSheet(state, mode) {
+    const pr = state.print;
+    const D = P.clamp(+state.stickers.diameter || 40, 20, 80);
+    const rc = D / 2 + 1.2;
+    const pw = 210, ph = 297;
+    const m = Math.max(+pr.minMargin || 5, 8);
+    const gap = 5, legendH = 18;
+    const cell = 2 * rc + gap;
+    const cols = Math.max(1, Math.floor((pw - 2 * m + gap) / cell));
+    const rows = Math.max(1, Math.floor((ph - 2 * m - legendH + gap) / cell));
+    const gw = cols * cell - gap, gh = rows * cell - gap;
+    const x0 = (pw - gw) / 2 + rc, y0 = m + (ph - 2 * m - legendH - gh) / 2 + rc;
+    const ctx = new P.Ctx(state, mode, "stk");
+    ctx.dark = true;
+    let body = `<rect width="${pw}" height="${ph}" fill="#FFFFFF"/>`;
+    const skipArt = mode === "foil" && state.colors.sealMode === "wax";
+    let cuts = "";
+    for (let r = 0; r < rows; r++)
+      for (let c = 0; c < cols; c++) {
+        const cx = x0 + c * cell, cy = y0 + r * cell;
+        if (!skipArt && mode !== "dieline") body += `<g transform="translate(${P.n(cx)} ${P.n(cy)})">${P.seal.render(ctx, D)}</g>`;
+        cuts += `M${P.n(cx - rc)} ${P.n(cy)}a${P.n(rc)} ${P.n(rc)} 0 1 0 ${P.n(2 * rc)} 0a${P.n(rc)} ${P.n(rc)} 0 1 0 ${P.n(-2 * rc)} 0Z`;
+      }
+    body += `<path d="${cuts}" fill="none" stroke="${mode === "art" ? "#9AA3AF" : "#000000"}" stroke-width="0.2"/>`;
+    const lgnd = simpleLegend(
+      m, ph - m - legendH + 3, pw - 2 * m,
+      `SELOS ADESIVOS · Ø ${P.mmLabel(D)} mm · ${rows * cols} por folha${mode === "foil" ? " · HOT STAMPING (preto 100% = dourado)" : ""}`,
+      "Imprima em papel adesivo (vinil branco ou couché adesivo), recorte nos círculos e use um selo para lacrar a ponta da aba superior do envelope. Imprimir em tamanho real (100%)."
+    );
+    body += lgnd.svg;
+    return { w: pw, h: ph, paperKey: "A4", count: rows * cols, svg: P.svgDoc(pw, ph, body, ctx) };
+  }
+
+  P.sheets = { envelopeSheet, cardSheet, linerSheet, stickerSheet, ficha, ruler };
 })();

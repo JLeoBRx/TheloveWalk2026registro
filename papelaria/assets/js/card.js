@@ -36,15 +36,40 @@
 
   function colors(st) {
     const c = st.colors;
-    if (st.card.background === "blue") return { text: "#F3F6FC", accent: c.light, soft: P.color.mix(c.light, "#ffffff", 0.35) };
-    return { text: c.cardText, accent: c.cardAccent, soft: P.color.mix(c.cardText, c.pearl, 0.35) };
+    return { text: c.cardText, accent: c.cardAccent };
+  }
+
+  /* ---------- fundo ---------- */
+  function background(ctx, cw, ch, b) {
+    const st = ctx.state, c = st.colors;
+    let bg;
+    if (st.card.background === "envelope") {
+      bg =
+        c.gradient === "linear"
+          ? ctx.linear(P.smoothStops(c.navy, c.royal, P.ease.smooth, 9), 0, 0, cw, ch)
+          : ctx.radial(P.smoothStops(c.royal, c.navy, P.ease.smooth, 10), cw / 2, ch * 0.42, Math.hypot(cw / 2, ch * 0.6));
+    } else if (st.card.background === "custom") {
+      const k = c.cardColor;
+      bg = ctx.linear([[0, P.color.lighten(k, 0.09)], [0.5, k], [1, P.color.darken(k, 0.07)]], 0, 0, cw, ch);
+    } else {
+      bg = ctx.linear(
+        [
+          [0, P.color.lighten(c.pearl, 0.55)],
+          [0.42, c.pearl],
+          [0.78, P.color.mix(c.pearl, c.light, 0.08)],
+          [1, P.color.mix(c.pearl, "#E9DCC9", 0.3)],
+        ],
+        0, 0, cw, ch
+      );
+    }
+    return `<rect x="${P.n(-b)}" y="${P.n(-b)}" width="${P.n(cw + 2 * b)}" height="${P.n(ch + 2 * b)}" fill="${bg}"/>`;
   }
 
   /* ---------- moldura ---------- */
   function frame(ctx, cw, ch) {
-    const st = ctx.state;
-    const style = st.card.frame;
+    const style = ctx.state.card.frame;
     const m1 = Math.max(5.5, Math.min(cw, ch) * 0.042);
+    if (style === "none") return { svg: "", inner: m1 * 0.6 };
     const g = ctx.gold(0, 0, cw, ch);
     const gl = ctx.goldLine();
     let out = "";
@@ -76,19 +101,21 @@
     out += `<path d="${d}" fill="none" stroke="${gl}" stroke-width="0.4"/>`;
     const i = 1.7;
     out += rect(x0 + i, y0 + i, x1 - x0 - 2 * i, y1 - y0 - 2 * i, 0.16);
-    out += `<path d="${[[x0, y0], [x1, y0], [x1, y1], [x0, y1]].map(([x, y]) => P.envelope.diamond(x, y, 1.5)).join("")}" fill="${g}"/>`;
+    out += `<path d="${[[x0, y0], [x1, y0], [x1, y1], [x0, y1]].map(([x, y]) => P.orn.diamond(x, y, 1.5)).join("")}" fill="${g}"/>`;
     return { svg: out, inner: m1 + i };
   }
 
   /* ---------- blocos de conteúdo ---------- */
   function buildBlocks(ctx, cw, k, maxW) {
     const st = ctx.state, tx = st.text, f = st.fonts, card = st.card;
+    const sz = Object.assign({}, card.sizes || {});
     const col = colors(st);
     const ts = k * (+card.textScale || 1);
     const tts = k * (+card.titleScale || 1);
+    const gs = k * P.clamp(+card.spacing || 1, 0.5, 1.8);
+    const s = (key) => P.clamp(+sz[key] || 1, 0.5, 1.8);
     const blocks = [];
     const cx = cw / 2;
-    const fill = (c) => (ctx.foil ? null : c);
 
     const paragraph = (text, sp, color, lh, width, gap, isGold) => {
       const lines = T().wrap(text, sp, width, true);
@@ -100,44 +127,37 @@
         h,
         draw(y) {
           if (ctx.foil && !isGold) return "";
-          let s = "";
+          let out = "";
           lines.forEach((ln, i) => {
             const r = T().line(ln, cx, y + m.cap + i * step, sp, "middle");
             const paint = isGold ? ctx.gold(cx - width / 2, y, cx + width / 2, y + h) : color;
-            s += `<path d="${r.d}" fill="${paint}"/>`;
+            out += `<path d="${r.d}" fill="${paint}"/>`;
           });
-          return s;
+          return out;
         },
       };
     };
 
-    // monograma
+    // monograma emoldurado
     if (card.showMonogram && String(st.seal.initials || "").trim()) {
-      const D = 15 * k;
+      const laurel = card.monogramStyle === "laurel";
+      const D = (laurel ? 21 : 15) * k * s("monogram");
       blocks.push({
         gap: 0,
         h: D,
         draw(y) {
-          const cy = y + D / 2;
-          const g = ctx.gold(cx - D / 2, y, cx + D / 2, y + D);
-          const gl = ctx.goldLine();
-          const mono = P.seal.monogram(st, st.seal.initials, D * 0.56, D * 0.42);
-          return (
-            `<circle cx="${P.n(cx)}" cy="${P.n(cy)}" r="${P.n(D / 2)}" fill="none" stroke="${gl}" stroke-width="0.3"/>` +
-            `<circle cx="${P.n(cx)}" cy="${P.n(cy)}" r="${P.n(D / 2 - 1)}" fill="none" stroke="${gl}" stroke-width="0.12"/>` +
-            `<g transform="translate(${P.n(cx)} ${P.n(cy)})"><path d="${mono.d}" fill="${g}"/></g>`
-          );
+          return P.orn.badge(ctx, st, cx, y + D / 2, D, card.monogramStyle);
         },
       });
     }
 
     if (String(tx.eyebrow || "").trim())
-      blocks.push(paragraph(tx.eyebrow, { font: f.caps, variant: "regular", size: P.pt(7.4) * ts, tracking: 0.2, upper: true }, col.accent, 1.7, maxW * 0.92, 5.5 * k));
+      blocks.push(paragraph(tx.eyebrow, { font: f.caps, variant: "regular", size: P.pt(7.4) * ts * s("eyebrow"), tracking: 0.2, upper: true }, col.accent, 1.7, maxW * 0.92, 5.5 * gs));
 
     // título caligráfico (ajusta para caber na largura)
     if (String(tx.title || "").trim()) {
       const lines = String(tx.title).split(/\r?\n/).filter((l) => l.trim());
-      const base = { font: f.title, variant: "regular", size: P.pt(40) * tts };
+      const base = { font: f.title, variant: "regular", size: P.pt(40) * tts * s("title") };
       let size = base.size;
       for (const ln of lines) {
         const w = T().width(ln, Object.assign({}, base, { size }));
@@ -152,50 +172,51 @@
       const asc = Math.max(-top, capT);
       const h = asc + bottom;
       blocks.push({
-        gap: 3.2 * k,
+        gap: 3.2 * gs,
         h,
         draw(y) {
           if (ctx.foil && !card.titleGold) return "";
           const paint = card.titleGold ? ctx.gold(cx - maxW / 2, y, cx + maxW / 2, y + h) : col.text;
-          return lines
-            .map((ln, i) => `<path d="${T().line(ln, cx, y + asc + i * step, sp, "middle").d}" fill="${paint}"/>`)
-            .join("");
+          return lines.map((ln, i) => `<path d="${T().line(ln, cx, y + asc + i * step, sp, "middle").d}" fill="${paint}"/>`).join("");
         },
       });
     }
 
     if (String(tx.subtitle || "").trim())
-      blocks.push(paragraph(tx.subtitle, { font: f.text, variant: "italic", size: P.pt(12.5) * ts }, col.text, 1.3, maxW * 0.9, 2.6 * k));
+      blocks.push(paragraph(tx.subtitle, { font: f.text, variant: "italic", size: P.pt(12.5) * ts * s("subtitle") }, col.text, 1.3, maxW * 0.9, 2.6 * gs));
 
-    // ornamento
-    blocks.push({
-      gap: 5 * k,
-      h: 3,
-      draw(y) {
-        return P.envelope.divider(ctx, cx, y + 1.5, Math.min(40, maxW * 0.36));
-      },
-    });
+    if (card.divider && card.divider !== "none") {
+      const dh = card.divider === "flourish" ? 6 : 3;
+      blocks.push({
+        gap: 5 * gs,
+        h: dh,
+        draw(y) {
+          return P.orn.divider(ctx, cx, y + dh / 2, Math.min(card.divider === "flourish" ? 46 : 40, maxW * (card.divider === "flourish" ? 0.42 : 0.36)), card.divider);
+        },
+      });
+    }
 
     if (String(tx.message || "").trim())
-      blocks.push(paragraph(tx.message, { font: f.text, variant: "regular", size: P.pt(11.8) * ts }, col.text, 1.36, Math.min(maxW, 104 * k), 5 * k));
+      blocks.push(paragraph(tx.message, { font: f.text, variant: "regular", size: P.pt(11.8) * ts * s("message") }, col.text, 1.36, Math.min(maxW, 104 * k), 5 * gs));
 
     // data
     const dp = dateParts(tx);
+    const ds = s("date");
     if (card.dateStyle === "block" && dp.date && !String(tx.dateText || "").trim()) {
-      const capsSp = { font: f.caps, variant: "regular", size: P.pt(8.4) * ts, tracking: 0.2, upper: true };
-      const smallSp = { font: f.caps, variant: "regular", size: P.pt(7.6) * ts, tracking: 0.26, upper: true };
-      const daySp = { font: f.text, variant: "medium", size: P.pt(32) * ts };
-      const mCaps = T().metrics(capsSp), mSmall = T().metrics(smallSp), mDay = T().metrics(daySp);
+      const capsSp = { font: f.caps, variant: "regular", size: P.pt(8.4) * ts * ds, tracking: 0.2, upper: true };
+      const smallSp = { font: f.caps, variant: "regular", size: P.pt(7.6) * ts * ds, tracking: 0.26, upper: true };
+      const daySp = { font: f.text, variant: "medium", size: P.pt(32) * ts * ds };
+      const mSmall = T().metrics(smallSp);
       const dayInk = T().ink(dp.date.day, daySp);
       const dayH = -dayInk.y1;
-      const h = mSmall.cap + 2.6 * k + dayH + 2.8 * k + mSmall.cap;
-      const colW = Math.min(36 * k, maxW * 0.3);
+      const h = mSmall.cap + 2.6 * k * ds + dayH + 2.8 * k * ds + mSmall.cap;
+      const colW = Math.min(36 * k * ds, maxW * 0.3);
       blocks.push({
-        gap: 7 * k,
+        gap: 7 * gs,
         h,
         draw(y) {
           const g = ctx.gold(cx - maxW / 2, y, cx + maxW / 2, y + h);
-          let s = "";
+          let out = "";
           const midY = y + h / 2;
           const offX = Math.max(colW / 2 + 12 * k, (dayInk.x2 - dayInk.x1) / 2 + colW / 2 + 6 * k);
           const sideLabel = (txt, x) => {
@@ -203,39 +224,39 @@
             const w = T().width(txt, sp);
             if (w > colW) sp = Object.assign({}, sp, { size: (sp.size * colW) / w });
             const r = T().line(txt, x, midY + T().metrics(sp).cap / 2, sp, "middle");
-            const rule = `M${P.n(x - colW / 2)} ${P.n(midY - 5.2 * k)}H${P.n(x + colW / 2)}M${P.n(x - colW / 2)} ${P.n(midY + 5.2 * k)}H${P.n(x + colW / 2)}`;
+            const off = 5.2 * k * ds;
+            const rule = `M${P.n(x - colW / 2)} ${P.n(midY - off)}H${P.n(x + colW / 2)}M${P.n(x - colW / 2)} ${P.n(midY + off)}H${P.n(x + colW / 2)}`;
             return (ctx.foil ? "" : `<path d="${r.d}" fill="${col.text}"/>`) + `<path d="${rule}" stroke="${ctx.goldLine()}" stroke-width="0.24" fill="none"/>`;
           };
-          s += sideLabel(dp.date.weekday, cx - offX);
-          if (dp.time) s += sideLabel(dp.time, cx + offX);
+          out += sideLabel(dp.date.weekday, cx - offX);
+          if (dp.time) out += sideLabel(dp.time, cx + offX);
           if (!ctx.foil) {
-            s += `<path d="${T().line(dp.date.month, cx, y + mSmall.cap, smallSp, "middle").d}" fill="${col.accent}"/>`;
-            s += `<path d="${T().line(dp.date.year, cx, y + h, smallSp, "middle").d}" fill="${col.accent}"/>`;
+            out += `<path d="${T().line(dp.date.month, cx, y + mSmall.cap, smallSp, "middle").d}" fill="${col.accent}"/>`;
+            out += `<path d="${T().line(dp.date.year, cx, y + h, smallSp, "middle").d}" fill="${col.accent}"/>`;
           }
-          s += `<path d="${T().line(dp.date.day, cx, y + mSmall.cap + 2.6 * k + dayH, daySp, "middle").d}" fill="${g}"/>`;
-          void mCaps; void mDay;
-          return s;
+          out += `<path d="${T().line(dp.date.day, cx, y + mSmall.cap + 2.6 * k * ds + dayH, daySp, "middle").d}" fill="${g}"/>`;
+          return out;
         },
       });
     } else {
       const line = P.dateLine(tx);
       if (line)
-        blocks.push(paragraph(line, { font: f.caps, variant: "regular", size: P.pt(8.6) * ts, tracking: 0.16, upper: true }, col.text, 1.7, maxW, 7 * k));
+        blocks.push(paragraph(line, { font: f.caps, variant: "regular", size: P.pt(8.6) * ts * ds, tracking: 0.16, upper: true }, col.text, 1.7, maxW, 7 * gs));
     }
 
     // local
     if (String(tx.venue || "").trim())
-      blocks.push(paragraph(tx.venue, { font: f.caps, variant: "semibold", size: P.pt(8.8) * ts, tracking: 0.16, upper: true }, col.text, 1.6, maxW, 7 * k));
+      blocks.push(paragraph(tx.venue, { font: f.caps, variant: "semibold", size: P.pt(8.8) * ts * s("venue"), tracking: 0.16, upper: true }, col.text, 1.6, maxW, 7 * gs));
     if (String(tx.address || "").trim())
-      blocks.push(paragraph(tx.address, { font: f.text, variant: "italic", size: P.pt(10.8) * ts }, col.text, 1.3, maxW, 2.2 * k));
+      blocks.push(paragraph(tx.address, { font: f.text, variant: "italic", size: P.pt(10.8) * ts * s("venue") }, col.text, 1.3, maxW, 2.2 * gs));
 
     if (String(tx.info || "").trim())
-      blocks.push(paragraph(tx.info, { font: f.caps, variant: "regular", size: P.pt(6.9) * ts, tracking: 0.14, upper: true }, col.accent, 1.85, maxW, 6 * k));
+      blocks.push(paragraph(tx.info, { font: f.caps, variant: "regular", size: P.pt(6.9) * ts * s("info"), tracking: 0.14, upper: true }, col.accent, 1.85, maxW, 6 * gs));
 
     if (String(tx.signatureLead || "").trim())
-      blocks.push(paragraph(tx.signatureLead, { font: f.text, variant: "italic", size: P.pt(10.5) * ts }, col.text, 1.3, maxW, 7 * k));
+      blocks.push(paragraph(tx.signatureLead, { font: f.text, variant: "italic", size: P.pt(10.5) * ts * s("signature") }, col.text, 1.3, maxW, 7 * gs));
     if (String(tx.signature || "").trim()) {
-      const sp0 = { font: f.signature, variant: "regular", size: P.pt(23) * tts };
+      const sp0 = { font: f.signature, variant: "regular", size: P.pt(23) * tts * s("signature") };
       let sp = sp0;
       const w = T().width(tx.signature, sp0);
       if (w > maxW * 0.9) sp = Object.assign({}, sp0, { size: (sp0.size * maxW * 0.9) / w });
@@ -243,7 +264,7 @@
       const asc = Math.max(-ink.y1, T().metrics(sp).cap);
       const h = asc + Math.max(0, ink.y2);
       blocks.push({
-        gap: String(tx.signatureLead || "").trim() ? 1.6 * k : 7 * k,
+        gap: String(tx.signatureLead || "").trim() ? 1.6 * gs : 7 * gs,
         h,
         draw(y) {
           if (ctx.foil && !card.signatureGold) return "";
@@ -256,7 +277,7 @@
   }
 
   function stackHeight(blocks) {
-    return blocks.reduce((s, b, i) => s + b.h + (i ? b.gap : 0), 0);
+    return blocks.reduce((sum, b, i) => sum + b.h + (i ? b.gap : 0), 0);
   }
 
   /*
@@ -267,25 +288,10 @@
     const st = ctx.state;
     const cw = +st.card.width, ch = +st.card.height;
     const b = Math.max(0, +(o && o.bleed) || 0);
-    const c = st.colors;
     let out = "";
-    ctx.dark = st.card.background === "blue";
+    ctx.dark = P.cardIsDark(st);
 
-    if (ctx.art) {
-      let bg;
-      if (st.card.background === "blue") {
-        bg = ctx.radial(
-          [[0, c.royal], [0.55, P.color.mix(c.royal, c.navy, 0.5)], [1, c.navy]],
-          cw / 2, ch * 0.42, Math.hypot(cw / 2, ch * 0.6)
-        );
-      } else {
-        bg = ctx.linear(
-          [[0, P.color.lighten(c.pearl, 0.55)], [0.42, c.pearl], [0.78, P.color.mix(c.pearl, c.light, 0.1)], [1, P.color.mix(c.pearl, "#E9DCC9", 0.35)]],
-          0, 0, cw, ch
-        );
-      }
-      out += `<rect x="${P.n(-b)}" y="${P.n(-b)}" width="${P.n(cw + 2 * b)}" height="${P.n(ch + 2 * b)}" fill="${bg}"/>`;
-    }
+    if (ctx.art) out += background(ctx, cw, ch, b);
 
     const fr = frame(ctx, cw, ch);
     if (ctx.art || ctx.foil) out += fr.svg;
@@ -303,8 +309,7 @@
       let lo = sf * 0.5, hi = sf;
       for (let i = 0; i < 12; i++) {
         const mid = (lo + hi) / 2;
-        const bl = buildBlocks(ctx, cw, mid, maxW);
-        if (stackHeight(bl) <= availH) lo = mid;
+        if (stackHeight(buildBlocks(ctx, cw, mid, maxW)) <= availH) lo = mid;
         else hi = mid;
       }
       k = lo;
@@ -314,7 +319,7 @@
     }
     // espaço sobrando: abre um pouco os espaçamentos e centraliza
     const extra = Math.max(0, availH - total);
-    const gapsTotal = blocks.reduce((s, bl, i) => s + (i ? bl.gap : 0), 0) || 1;
+    const gapsTotal = blocks.reduce((sum, bl, i) => sum + (i ? bl.gap : 0), 0) || 1;
     const grow = Math.min(extra * 0.5, gapsTotal * 0.55);
     const factor = 1 + grow / gapsTotal;
     let y = padY + (extra - grow) / 2;

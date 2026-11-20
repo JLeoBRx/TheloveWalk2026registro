@@ -74,12 +74,22 @@
     return pts;
   }
 
+  /* Paleta do selo: o metal escolhido ou o lacre colorido (cera). */
+  function palette(st) {
+    const c = st.colors;
+    if (c.sealMode === "wax" && P.color.valid(c.waxColor)) {
+      const w = c.waxColor;
+      return { goldDark: P.color.mix(w, "#000000", 0.42), gold: w, goldLight: P.color.mix(w, "#FFFFFF", 0.42), wax: true };
+    }
+    return { goldDark: c.goldDark, gold: c.gold, goldLight: c.goldLight, wax: false };
+  }
+
   function relief(ctx, d, R, tone) {
-    const c = ctx.state.colors;
+    const c = palette(ctx.state);
     if (ctx.foil) return `<path d="${d}" fill="#FFFFFF"/>`;
     const shadow = P.color.darken(c.goldDark, 0.35);
     const hi = P.color.lighten(c.goldLight, 0.35);
-    const face = ctx.gold(-R * 0.6, -R * 0.6, R * 0.6, R * 0.6, tone);
+    const face = ctx.gold(-R * 0.6, -R * 0.6, R * 0.6, R * 0.6, tone, c);
     return (
       `<path d="${d}" fill="${shadow}" transform="translate(0.22 0.28)"/>` +
       `<path d="${d}" fill="${hi}" transform="translate(-0.14 -0.18)"/>` +
@@ -93,7 +103,7 @@
   function render(ctx, diameter) {
     const st = ctx.state;
     const s = st.seal;
-    const c = st.colors;
+    const c = palette(st);
     const R = diameter / 2;
     const ringText = String(s.ring || "").trim();
     let out = "";
@@ -182,5 +192,5 @@
     return out;
   }
 
-  P.seal = { render, monogram };
+  P.seal = { render, monogram, palette };
 })();

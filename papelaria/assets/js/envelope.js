@@ -129,10 +129,7 @@
 
   function flapGradient(ctx, x1, y1, x2, y2) {
     const c = ctx.state.colors;
-    return ctx.linear(
-      [[0, c.navy], [0.55, P.color.mix(c.navy, c.royal, 0.55)], [1, P.color.mix(c.navy, c.royal, 0.92)]],
-      x1, y1, x2, y2
-    );
+    return ctx.linear(P.smoothStops(c.navy, c.royal, (t) => 0.92 * P.ease.out(t), 8), x1, y1, x2, y2);
   }
 
   function bodyGradient(ctx, W, H) {
@@ -142,15 +139,12 @@
       const vx = Math.cos(a), vy = Math.sin(a);
       const L = Math.abs(W * vx) + Math.abs(H * vy);
       return ctx.linear(
-        [[0, c.navy], [0.5, P.color.mix(c.navy, c.royal, 0.6)], [1, c.royal]],
+        P.smoothStops(c.navy, c.royal, P.ease.smooth, 9),
         W / 2 - (vx * L) / 2, H / 2 - (vy * L) / 2, W / 2 + (vx * L) / 2, H / 2 + (vy * L) / 2
       );
     }
     const r = Math.hypot(W / 2, H * 0.56);
-    return ctx.radial(
-      [[0, c.royal], [0.5, P.color.mix(c.royal, c.navy, 0.42)], [1, c.navy]],
-      W / 2, H * 0.44, r
-    );
+    return ctx.radial(P.smoothStops(c.royal, c.navy, P.ease.smooth, 10), W / 2, H * 0.44, r);
   }
 
   function patternLayer(ctx, geo, clipPolys) {
@@ -192,21 +186,6 @@
     return G().d(off, false);
   }
 
-  function diamond(cx, cy, r) {
-    return `M${P.n(cx)} ${P.n(cy - r)}L${P.n(cx + r * 0.72)} ${P.n(cy)}L${P.n(cx)} ${P.n(cy + r)}L${P.n(cx - r * 0.72)} ${P.n(cy)}Z`;
-  }
-
-  /* Ornamento: filete – losango – filete. */
-  function divider(ctx, cx, cy, w, color) {
-    const half = w / 2;
-    const g = color || ctx.gold(cx - half, cy, cx + half, cy);
-    return (
-      `<path d="M${P.n(cx - half)} ${P.n(cy)}H${P.n(cx - 3.2)}M${P.n(cx + 3.2)} ${P.n(cy)}H${P.n(cx + half)}" stroke="${ctx.goldLine()}" stroke-width="0.25" fill="none"/>` +
-      `<path d="${diamond(cx, cy, 1.5)}" fill="${g}"/>` +
-      `<path d="${diamond(cx - 2.4, cy, 0.55)}${diamond(cx + 2.4, cy, 0.55)}" fill="${g}"/>`
-    );
-  }
-
   function fitLine(text, sp, maxW) {
     let w = T().width(text, sp);
     if (w <= maxW) return sp;
@@ -227,11 +206,19 @@
       }
       if (ctx.art || ctx.foil) {
         const g = ctx.goldFlat();
-        out += `<path d="${[[m, m], [W - m, m], [W - m, H - m], [m, H - m]].map(([x, y]) => diamond(x, y, 1.7)).join("")}" fill="${g}"/>`;
+        out += `<path d="${[[m, m], [W - m, m], [W - m, H - m], [m, H - m]].map(([x, y]) => P.orn.diamond(x, y, 1.7)).join("")}" fill="${g}"/>`;
       }
     }
     const cx = W / 2;
-    if (e.frontOrnament && (ctx.art || ctx.foil)) out += divider(ctx, cx, H * 0.3, Math.min(54, W * 0.26));
+    if (ctx.art || ctx.foil) {
+      const style = st.card.divider && st.card.divider !== "none" ? st.card.divider : "diamond";
+      if (e.frontMonogram && String(st.seal.initials || "").trim()) {
+        const D = Math.min(st.card.monogramStyle === "laurel" ? 30 : 22, H * 0.19);
+        out += P.orn.badge(ctx, st, cx, H * 0.27, D, st.card.monogramStyle);
+      } else if (e.frontOrnament) {
+        out += P.orn.divider(ctx, cx, H * 0.3, Math.min(style === "flourish" ? 60 : 54, W * 0.27), style);
+      }
+    }
 
     // destinatário
     const label = String(e.recipientLabel || "").trim();
@@ -306,7 +293,8 @@
       if (ctx.art)
         out += `<path d="${flapBorder(geo.flaps.top, 5.6, 2.6)}" fill="none" stroke="${c.light}" stroke-width="0.12" opacity="0.7"/>`;
     }
-    if (ctx.art || ctx.foil) {
+    // selo (lacre colorido não entra no arquivo de hot stamping)
+    if (ctx.art || (ctx.foil && st.colors.sealMode !== "wax")) {
       const sl = geo.seal;
       out += `<g transform="translate(${P.n(sl.x)} ${P.n(sl.y)}) rotate(180)">${P.seal.render(ctx, sl.r * 2)}</g>`;
     }
@@ -321,14 +309,17 @@
     const st = ctx.state;
     let out = "";
     const die = ctx.die;
-    const cutColor = die ? "#000000" : o.cutColor === "gold" ? st.colors.gold : CUT_COLORS[o.cutColor] || CUT_COLORS.silver;
+    const dark = ctx.dark !== false;
+    const silver = dark ? CUT_COLORS.silver : "#8E99A8";
+    const cutColor = die ? "#000000" : o.cutColor === "gold" ? ctx.goldLine() : o.cutColor === "silver" || !CUT_COLORS[o.cutColor] ? silver : CUT_COLORS[o.cutColor];
     const foldColor = die ? "#000000" : st.colors.light;
+    const mark = dark ? "#FFFFFF" : st.colors.light;
 
     if (o.glue) {
       for (const gz of geo.glue) {
         const segs = G().hatch(gz, 1.6, -45);
-        const hatchCol = die ? "#9AA3AF" : "#FFFFFF";
-        out += `<path d="${G().d(gz)}" fill="${die ? "#F1F3F6" : "#FFFFFF"}" fill-opacity="${die ? 1 : 0.08}" stroke="${hatchCol}" stroke-width="0.15" stroke-dasharray="1 0.8" stroke-opacity="${die ? 1 : 0.55}"/>`;
+        const hatchCol = die ? "#9AA3AF" : mark;
+        out += `<path d="${G().d(gz)}" fill="${die ? "#F1F3F6" : mark}" fill-opacity="${die ? 1 : 0.08}" stroke="${hatchCol}" stroke-width="0.15" stroke-dasharray="1 0.8" stroke-opacity="${die ? 1 : 0.55}"/>`;
         out += `<path d="${segs.map(([p, q]) => `M${P.n(p[0])} ${P.n(p[1])}L${P.n(q[0])} ${P.n(q[1])}`).join("")}" stroke="${hatchCol}" stroke-width="0.12" stroke-opacity="${die ? 1 : 0.35}" fill="none"/>`;
         const cc = G().centroid(gz);
         const bb = G().bbox([gz]);
@@ -336,7 +327,7 @@
         const tw = T().width("cola", sp);
         if (bb.h > tw + 4) {
           const r = T().line("cola", 0, T().metrics(sp).cap / 2, sp, "middle");
-          out += `<g transform="translate(${P.n(cc[0])} ${P.n(cc[1])}) rotate(-90)"><path d="${r.d}" fill="${die ? "#4B5563" : "#FFFFFF"}" fill-opacity="${die ? 1 : 0.6}"/></g>`;
+          out += `<g transform="translate(${P.n(cc[0])} ${P.n(cc[1])}) rotate(-90)"><path d="${r.d}" fill="${die ? "#4B5563" : mark}" fill-opacity="${die ? 1 : 0.6}"/></g>`;
         }
       }
     }
@@ -377,7 +368,7 @@
    * o = { cut, fold, glue, safe, cutColor }
    */
   function render(ctx, geo, o) {
-    ctx.dark = true;
+    ctx.dark = P.envelopeIsDark(ctx.state);
     let out = "";
     if (ctx.art) {
       out += sideArt(ctx, geo, "left") + sideArt(ctx, geo, "right");
@@ -392,12 +383,73 @@
     return out;
   }
 
+  /* ---------------- forro interno ---------------- */
+
   /*
-   * Prévia montada: frente e verso, com as abas dobradas.
-   * Retorna { front, back } em coordenadas do corpo (0..W, 0..H).
+   * Forro: cobre o lado de dentro da aba superior e desce pelo corpo do envelope
+   * até a profundidade escolhida. Fica 3,5 mm para dentro das bordas da aba, para
+   * não aparecer quando o envelope está fechado.
+   */
+  function liner(state, geo) {
+    const inset = 3.5;
+    const top = geo.flaps.top;
+    const dists = top.map((_, i) => (i === top.length - 1 ? 0 : -inset));
+    const off = G().offset(top, dists);
+    const Ld = P.clamp(+state.liner.depth || 0.4, 0.15, 0.75) * geo.H;
+    const xL = off[0][0], xR = off[off.length - 1][0];
+    const poly = off.concat([[xR, Ld], [xL, Ld]]);
+    return { poly, Ld, xL, xR, depth: geo.depth - inset, bbox: G().bbox([poly]) };
+  }
+
+  /* Arte do forro dentro de clipPoly (normalmente o forro com sangria). */
+  function linerArt(ctx, lg, clipPoly) {
+    const st = ctx.state, L = st.liner;
+    const bg = L.color || st.colors.royal;
+    ctx.dark = P.color.isDark(bg);
+    const id = ctx.uid("lin");
+    ctx.def(`<clipPath id="${id}"><path d="${G().d(clipPoly)}"/></clipPath>`);
+    const bb = G().bbox([clipPoly]);
+    let out = `<path d="${G().d(clipPoly)}" fill="${bg}"/>`;
+    const gl = ctx.goldLine();
+    let pat = "";
+    if (L.pattern === "lattice") {
+      const step = 9;
+      const span = bb.w + bb.h;
+      let d = "";
+      for (let v = -span; v <= span; v += step) {
+        d += `M${P.n(bb.x + v)} ${P.n(bb.y)}l${P.n(bb.h * 0.75)} ${P.n(bb.h)}`;
+        d += `M${P.n(bb.x + v)} ${P.n(bb.y)}l${P.n(-bb.h * 0.75)} ${P.n(bb.h)}`;
+      }
+      pat = `<path d="${d}" fill="none" stroke="${gl}" stroke-width="0.25" opacity="0.6"/>`;
+    } else if (L.pattern === "dots") {
+      let d = "";
+      const step = 6;
+      let row = 0;
+      for (let y = bb.y; y <= bb.y1; y += step * 0.866, row++)
+        for (let x = bb.x + (row % 2 ? step / 2 : 0); x <= bb.x1; x += step)
+          d += `M${P.n(x - 0.55)} ${P.n(y)}a0.55 0.55 0 1 0 1.1 0a0.55 0.55 0 1 0 -1.1 0Z`;
+      pat = `<path d="${d}" fill="${gl}" opacity="0.75"/>`;
+    } else if (L.pattern === "pinstripe") {
+      let d = "";
+      for (let x = bb.x; x <= bb.x1; x += 4.5) d += `M${P.n(x)} ${P.n(bb.y)}V${P.n(bb.y1)}`;
+      pat = `<path d="${d}" fill="none" stroke="${gl}" stroke-width="0.2" opacity="0.55"/>`;
+    }
+    out += `<g clip-path="url(#${id})">${pat}</g>`;
+    // filete dourado acompanhando a borda da aba
+    const inner = G().offset(lg.poly, lg.poly.map(() => -3));
+    out += `<path d="${G().d(inner)}" fill="none" stroke="${gl}" stroke-width="0.3"/>`;
+    return out;
+  }
+
+  /*
+   * Prévia montada. Retorna, em coordenadas do corpo (0..W, 0..H):
+   *  front  frente do envelope
+   *  back   verso fechado, com o selo
+   *  open   verso com a aba aberta, mostrando o forro (de y = -profundidade a H)
    */
   function mockup(ctx, geo) {
-    ctx.dark = true;
+    const st = ctx.state;
+    ctx.dark = P.envelopeIsDark(st);
     const { W, H } = geo;
     const clipFor = (poly) => {
       const id = ctx.uid("mk");
@@ -412,16 +464,32 @@
     const flap = (name, art, transform) =>
       `<g transform="${transform}" filter="url(#${shadowId})"><g ${clipFor(geo.flaps[name])}>${art}${pat(geo.flaps[name])}</g></g>`;
 
-    const back =
-      `<rect x="0" y="0" width="${P.n(W)}" height="${P.n(H)}" fill="#EDEBE6"/>` +
+    const pocket =
       flap("left", sideArt(ctx, geo, "left"), `translate(${P.n(W)} 0)`) +
       flap("right", sideArt(ctx, geo, "right"), `translate(${P.n(-W)} 0)`) +
-      flap("bottom", bottomArt(ctx, geo), `rotate(180 ${P.n(W / 2)} ${P.n(H)})`) +
+      flap("bottom", bottomArt(ctx, geo), `rotate(180 ${P.n(W / 2)} ${P.n(H)})`);
+    const back =
+      `<rect x="0" y="0" width="${P.n(W)}" height="${P.n(H)}" fill="#EDEBE6"/>` +
+      pocket +
       flap("top", topArt(ctx, geo), `rotate(180 ${P.n(W / 2)} 0)`);
+
     const bodyPoly = [[0, 0], [W, 0], [W, H], [0, H]];
     const front = `<g ${clipFor(bodyPoly)}>${frontArt(ctx, geo)}${pat(bodyPoly)}</g>`;
-    return { front, back };
+
+    // aberto: lado de dentro da aba (papel), forro e o bolso por cima
+    const lg = liner(st, geo);
+    const paper = "#F4F1EB";
+    const inside = ctx.linear([[0, "#E4E0D8"], [1, "#F2EFE9"]], 0, 0, 0, H * 0.6);
+    const lctx = ctx; // mesmo contexto: os IDs continuam únicos
+    const linerSvg = linerArt(lctx, lg, lg.poly);
+    ctx.dark = P.envelopeIsDark(st);
+    const open =
+      `<g filter="url(#${shadowId})"><path d="${G().d(geo.flaps.top)}" fill="${paper}"/></g>` +
+      `<rect x="0" y="0" width="${P.n(W)}" height="${P.n(H)}" fill="${inside}"/>` +
+      linerSvg +
+      pocket;
+    return { front, back, open, openTop: -geo.depth };
   }
 
-  P.envelope = { geometry, render, mockup, divider, diamond };
+  P.envelope = { geometry, render, mockup, liner, linerArt };
 })();
