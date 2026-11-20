@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ateliê de Papelaria — Envelope e Convite</title>
+  <meta name="description" content="Editor local de papelaria personalizada: envelope planificado e convite, com exportação em PDF vetorial em tamanho real.">
+  <link rel="stylesheet" href="assets/css/editor.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
+        <defs>
+          <linearGradient id="bm" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#F6E3A1"/><stop offset=".5" stop-color="#C9A24D"/><stop offset="1" stop-color="#8A672B"/>
+          </linearGradient>
+        </defs>
+        <circle cx="20" cy="20" r="19" fill="url(#bm)"/>
+        <circle cx="20" cy="20" r="14.5" fill="none" stroke="#7A5A22" stroke-width=".8"/>
+        <path d="M11 14h18v12H11z" fill="none" stroke="#3D2C0E" stroke-width="1.3" stroke-linejoin="round"/>
+        <path d="M11 14l9 7 9-7" fill="none" stroke="#3D2C0E" stroke-width="1.3" stroke-linejoin="round"/>
+      </svg>
+      <div>
+        <strong>Ateliê de Papelaria</strong>
+        <span>Envelope planificado e convite · arquivos para impressão em tamanho real</span>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button class="btn" data-export="envelope" title="Molde do envelope no papel escolhido, com corte, dobra e cola">PDF do envelope</button>
+      <button class="btn" data-export="card" title="Convite com sangria e marcas de corte">PDF do convite</button>
+      <button class="btn btn-gold" data-export="all" title="Envelope, convite, faca e ficha técnica em um único PDF">PDF completo para produção</button>
+    </div>
+  </header>
+
+  <main class="app">
+    <aside class="panel" id="panel" aria-label="Personalização">
+
+      <details class="group" open>
+        <summary><span class="num">1</span>Textos do convite</summary>
+        <div class="fields">
+          <label class="field"><span>Pré-título</span><input type="text" data-bind="text.eyebrow"></label>
+          <label class="field"><span>Título <em>Enter quebra em duas linhas</em></span><textarea rows="2" data-bind="text.title"></textarea></label>
+          <label class="field"><span>Subtítulo</span><input type="text" data-bind="text.subtitle"></label>
+          <label class="field"><span>Mensagem personalizada</span><textarea rows="4" data-bind="text.message"></textarea></label>
+          <div class="row">
+            <label class="field"><span>Frase da assinatura</span><input type="text" data-bind="text.signatureLead"></label>
+            <label class="field"><span>Assinatura</span><input type="text" data-bind="text.signature"></label>
+          </div>
+        </div>
+      </details>
+
+      <details class="group">
+        <summary><span class="num">2</span>Data, horário e local</summary>
+        <div class="fields">
+          <div class="row">
+            <label class="field"><span>Data</span><input type="date" data-bind="text.date"></label>
+            <label class="field"><span>Horário</span><input type="time" data-bind="text.time"></label>
+          </div>
+          <div class="field"><span>Apresentação da data</span>
+            <div class="seg" data-bind="card.dateStyle">
+              <button type="button" data-value="block">Bloco clássico</button>
+              <button type="button" data-value="line">Em linha</button>
+            </div>
+          </div>
+          <label class="field"><span>Data por extenso <em>opcional — substitui a data acima</em></span><input type="text" data-bind="text.dateText" placeholder="ex.: Sábado, 12 de setembro, às 19h30"></label>
+          <label class="field"><span>Local</span><input type="text" data-bind="text.venue"></label>
+          <label class="field"><span>Endereço</span><textarea rows="2" data-bind="text.address"></textarea></label>
+          <label class="field"><span>Informações adicionais</span><textarea rows="3" data-bind="text.info"></textarea></label>
+        </div>
+      </details>
+
+      <details class="group">
+        <summary><span class="num">3</span>Envelope</summary>
+        <div class="fields">
+          <div class="row">
+            <label class="field"><span>Rótulo da frente</span><input type="text" data-bind="envelope.recipientLabel"></label>
+            <label class="field"><span>Destinatário</span><input type="text" data-bind="envelope.recipient" placeholder="vazio = linha para escrever"></label>
+          </div>
+          <label class="field"><span>Remetente <em>verso, aba inferior</em></span><input type="text" data-bind="envelope.sender"></label>
+          <div class="field"><span>Formato da aba superior</span>
+            <div class="seg" data-bind="envelope.flapStyle">
+              <button type="button" data-value="v">Ponta</button>
+              <button type="button" data-value="curve">Curva</button>
+              <button type="button" data-value="straight">Reta</button>
+            </div>
+          </div>
+          <label class="field range"><span>Profundidade da aba superior <output data-for="envelope.flapDepth" data-format="pct"></output></span><input type="range" min="0.4" max="0.72" step="0.01" data-bind="envelope.flapDepth"></label>
+          <label class="field range"><span>Largura das abas laterais <output data-for="envelope.sideWidth" data-format="sidemm"></output></span><input type="range" min="0.07" max="0.2" step="0.005" data-bind="envelope.sideWidth"></label>
+          <label class="field range"><span>Sobreposição no fechamento <output data-for="envelope.overlap" data-format="mm"></output></span><input type="range" min="6" max="24" step="1" data-bind="envelope.overlap"></label>
+          <label class="field range"><span>Folga para o convite <output data-for="envelope.clearance" data-format="clearance"></output></span><input type="range" min="4" max="20" step="1" data-bind="envelope.clearance"></label>
+          <div class="toggles">
+            <label class="toggle"><input type="checkbox" data-bind="envelope.frontFrame"><span>Moldura na frente</span></label>
+            <label class="toggle"><input type="checkbox" data-bind="envelope.frontOrnament"><span>Ornamento na frente</span></label>
+            <label class="toggle"><input type="checkbox" data-bind="envelope.flapBorders"><span>Filetes nas abas</span></label>
+          </div>
+          <div class="field"><span>Textura discreta</span>
+            <div class="seg" data-bind="envelope.pattern">
+              <button type="button" data-value="none">Nenhuma</button>
+              <button type="button" data-value="lattice">Losangos</button>
+              <button type="button" data-value="pinstripe">Riscado</button>
+              <button type="button" data-value="dots">Poá</button>
+            </div>
+          </div>
+          <label class="field range" data-show-if="envelope.pattern!=none"><span>Intensidade da textura <output data-for="envelope.patternOpacity" data-format="pct"></output></span><input type="range" min="0.03" max="0.2" step="0.01" data-bind="envelope.patternOpacity"></label>
+        </div>
+      </details>
+
+      <details class="group">
+        <summary><span class="num">4</span>Selo dourado</summary>
+        <div class="fields">
+          <div class="row">
+            <label class="field"><span>Iniciais <em>ex.: H&amp;R, A·B, M</em></span><input type="text" maxlength="7" data-bind="seal.initials"></label>
+            <div class="field"><span>Estilo</span>
+              <div class="seg" data-bind="seal.style">
+                <button type="button" data-value="wax">Lacre</button>
+                <button type="button" data-value="medallion">Medalhão</button>
+              </div>
+            </div>
+          </div>
+          <label class="field"><span>Texto do anel <em>vazio = sem texto</em></span><input type="text" data-bind="seal.ring"></label>
+          <label class="field range"><span>Diâmetro do selo <output data-for="seal.diameter" data-format="mm"></output></span><input type="range" min="20" max="42" step="1" data-bind="seal.diameter"></label>
+          <div class="field"><span>Fonte do monograma</span><div class="fontpick" data-font="monogram" data-cats="caps,serif" data-sample="H R"></div></div>
+          <label class="toggle"><input type="checkbox" data-bind="card.showMonogram"><span>Repetir o monograma no topo do convite</span></label>
+        </div>
+      </details>
+
+      <details class="group">
+        <summary><span class="num">5</span>Cores e degradês</summary>
+        <div class="fields">
+          <div class="field"><span>Paletas azuis</span><div class="swatches" id="palettes"></div></div>
+          <div class="row three">
+            <label class="field color"><span>Marinho</span><input type="color" data-bind="colors.navy"></label>
+            <label class="field color"><span>Royal</span><input type="color" data-bind="colors.royal"></label>
+            <label class="field color"><span>Azul-claro</span><input type="color" data-bind="colors.light"></label>
+          </div>
+          <div class="field"><span>Degradê do envelope</span>
+            <div class="seg" data-bind="colors.gradient">
+              <button type="button" data-value="radial">Radial (luz central)</button>
+              <button type="button" data-value="linear">Linear</button>
+            </div>
+          </div>
+          <label class="field range" data-show-if="colors.gradient=linear"><span>Ângulo do degradê <output data-for="colors.angle" data-format="deg"></output></span><input type="range" min="0" max="180" step="5" data-bind="colors.angle"></label>
+          <div class="field"><span>Metal</span><div class="swatches" id="golds"></div></div>
+          <div class="row three">
+            <label class="field color"><span>Sombra</span><input type="color" data-bind="colors.goldDark"></label>
+            <label class="field color"><span>Médio</span><input type="color" data-bind="colors.gold"></label>
+            <label class="field color"><span>Brilho</span><input type="color" data-bind="colors.goldLight"></label>
+          </div>
+          <div class="field"><span>Fundo do convite</span>
+            <div class="seg" data-bind="card.background">
+              <button type="button" data-value="pearl">Branco perolado</button>
+              <button type="button" data-value="blue">Azul degradê</button>
+            </div>
+          </div>
+          <div class="row three" data-show-if="card.background=pearl">
+            <label class="field color"><span>Perolado</span><input type="color" data-bind="colors.pearl"></label>
+            <label class="field color"><span>Texto</span><input type="color" data-bind="colors.cardText"></label>
+            <label class="field color"><span>Destaques</span><input type="color" data-bind="colors.cardAccent"></label>
+          </div>
+          <div class="field"><span>Moldura do convite</span>
+            <div class="seg" data-bind="card.frame">
+              <button type="button" data-value="classic">Clássica</button>
+              <button type="button" data-value="deco">Art déco</button>
+              <button type="button" data-value="fine">Fina</button>
+            </div>
+          </div>
+          <div class="toggles">
+            <label class="toggle"><input type="checkbox" data-bind="card.titleGold"><span>Título em dourado</span></label>
+            <label class="toggle"><input type="checkbox" data-bind="card.signatureGold"><span>Assinatura em dourado</span></label>
+          </div>
+        </div>
+      </details>
+
+      <details class="group">
+        <summary><span class="num">6</span>Tipografia</summary>
+        <div class="fields">
+          <div class="field"><span>Título</span><div class="fontpick" data-font="title" data-cats="script,serif" data-sample="Helena"></div></div>
+          <div class="field"><span>Destaques em maiúsculas</span><div class="fontpick" data-font="caps" data-cats="caps,serif,sans" data-sample="Convite"></div></div>
+          <div class="field"><span>Texto corrido</span><div class="fontpick" data-font="text" data-cats="serif,sans" data-sample="Convite"></div></div>
+          <div class="field"><span>Assinatura</span><div class="fontpick" data-font="signature" data-cats="script" data-sample="Rafael"></div></div>
+          <label class="field range"><span>Tamanho do título e assinatura <output data-for="card.titleScale" data-format="pct"></output></span><input type="range" min="0.7" max="1.3" step="0.01" data-bind="card.titleScale"></label>
+          <label class="field range"><span>Tamanho dos textos <output data-for="card.textScale" data-format="pct"></output></span><input type="range" min="0.8" max="1.25" step="0.01" data-bind="card.textScale"></label>
+        </div>
+      </details>
+
+      <details class="group">
+        <summary><span class="num">7</span>Formato e medidas</summary>
+        <div class="fields">
+          <label class="field"><span>Tamanho do convite</span><select data-bind="card.preset" id="presetSelect"></select></label>
+          <div class="row">
+            <label class="field"><span>Largura do convite (mm)</span><input type="number" min="70" max="250" step="1" data-bind="card.width" data-custom-size></label>
+            <label class="field"><span>Altura do convite (mm)</span><input type="number" min="70" max="300" step="1" data-bind="card.height" data-custom-size></label>
+          </div>
+          <div class="infobox" id="sizeInfo"></div>
+        </div>
+      </details>
+
+      <details class="group">
+        <summary><span class="num">8</span>Impressão e exportação</summary>
+        <div class="fields">
+          <label class="field"><span>Papel do envelope</span><select data-bind="print.envPaper" id="envPaperSelect"></select></label>
+          <label class="field"><span>Papel do convite</span><select data-bind="print.cardPaper" id="cardPaperSelect"></select></label>
+          <div class="field" data-show-if="print.cardPaper!=fit" data-hide-if="print.cardPaper=exact"><span>Convites por folha</span>
+            <div class="seg" data-bind="print.cardUp">
+              <button type="button" data-value="max">O máximo possível</button>
+              <button type="button" data-value="one">Um por folha</button>
+            </div>
+          </div>
+          <div class="field"><span>Sangria</span>
+            <div class="seg" data-bind="print.bleed" data-type="number">
+              <button type="button" data-value="0">Sem</button>
+              <button type="button" data-value="2">2 mm</button>
+              <button type="button" data-value="3">3 mm</button>
+              <button type="button" data-value="5">5 mm</button>
+            </div>
+          </div>
+          <label class="field range"><span>Margem mínima da impressora <output data-for="print.minMargin" data-format="mm"></output></span><input type="range" min="3" max="12" step="0.5" data-bind="print.minMargin"></label>
+          <div class="field"><span>Marcações no envelope</span>
+            <div class="toggles">
+              <label class="toggle"><input type="checkbox" data-bind="print.cutLines"><span>Linha de corte</span></label>
+              <label class="toggle"><input type="checkbox" data-bind="print.foldLines"><span>Linhas de dobra</span></label>
+              <label class="toggle"><input type="checkbox" data-bind="print.glue"><span>Áreas de cola</span></label>
+              <label class="toggle"><input type="checkbox" data-bind="print.marks"><span>Marcas externas</span></label>
+              <label class="toggle"><input type="checkbox" data-bind="print.legend"><span>Legenda e régua</span></label>
+              <label class="toggle"><input type="checkbox" data-bind="print.safe"><span>Margem de segurança</span></label>
+            </div>
+          </div>
+          <div class="field"><span>Cor da linha de corte</span>
+            <div class="seg" data-bind="print.cutColor">
+              <button type="button" data-value="silver">Prata</button>
+              <button type="button" data-value="magenta">Magenta</button>
+              <button type="button" data-value="black">Preta</button>
+              <button type="button" data-value="gold">Dourada</button>
+            </div>
+          </div>
+          <div class="field"><span>O PDF completo também inclui</span>
+            <div class="toggles">
+              <label class="toggle"><input type="checkbox" data-bind="print.dieline"><span>Faca (somente linhas)</span></label>
+              <label class="toggle"><input type="checkbox" data-bind="print.foil"><span>Arquivos de hot stamping</span></label>
+              <label class="toggle"><input type="checkbox" data-bind="print.ficha"><span>Ficha técnica e montagem</span></label>
+            </div>
+          </div>
+          <div class="field"><span>Ao exportar</span>
+            <div class="seg" data-bind="view.exportAction">
+              <button type="button" data-value="download">Baixar o arquivo</button>
+              <button type="button" data-value="open">Abrir em nova aba</button>
+            </div>
+          </div>
+          <div class="export-stack">
+            <button class="btn" data-export="envelope">PDF do envelope</button>
+            <button class="btn" data-export="card">PDF do convite</button>
+            <button class="btn btn-gold" data-export="all">PDF completo para produção</button>
+          </div>
+          <p class="note">Imprima sempre em <strong>tamanho real (100%)</strong>, sem “ajustar à página”. Cada folha traz uma régua de 50 mm para conferência.</p>
+        </div>
+      </details>
+
+      <div class="project">
+        <button class="btn btn-ghost" id="saveProject" type="button">Salvar projeto</button>
+        <label class="btn btn-ghost" for="loadProject">Abrir projeto</label>
+        <input type="file" id="loadProject" accept="application/json,.json" hidden>
+        <button class="btn btn-ghost" id="resetProject" type="button">Restaurar padrão</button>
+      </div>
+    </aside>
+
+    <section class="stage" aria-label="Prévia">
+      <div class="stage-bar">
+        <div class="tabs" role="tablist">
+          <button role="tab" data-tab="envelope" class="active">Envelope aberto</button>
+          <button role="tab" data-tab="card">Convite</button>
+          <button role="tab" data-tab="mockup">Montado</button>
+        </div>
+        <div class="tools">
+          <label class="toggle small" data-tab-only="card"><input type="checkbox" id="cardSheetView"><span>Folha de impressão</span></label>
+          <label class="toggle small"><input type="checkbox" data-bind="view.guides"><span>Guias</span></label>
+          <div class="zoom">
+            <button type="button" data-zoom="out" aria-label="Diminuir zoom">−</button>
+            <button type="button" data-zoom="fit" class="zoom-label" id="zoomLabel">Ajustar</button>
+            <button type="button" data-zoom="in" aria-label="Aumentar zoom">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="canvas" id="canvas">
+        <div class="sheet" id="sheet"></div>
+      </div>
+      <div class="stage-foot">
+        <div class="dims" id="dims"></div>
+        <details class="checks" id="checks">
+          <summary id="checkSummary">Verificação de produção</summary>
+          <ul class="preflight" id="preflight"></ul>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="assets/js/vendor/jspdf.umd.min.js"></script>
+  <script src="assets/js/vendor/svg2pdf.umd.min.js"></script>
+  <script src="assets/js/vendor/opentype.min.js"></script>
+  <script src="assets/fonts/fonts-data.js"></script>
+  <script src="assets/js/core.js"></script>
+  <script src="assets/js/geometry.js"></script>
+  <script src="assets/js/type.js"></script>
+  <script src="assets/js/state.js"></script>
+  <script src="assets/js/seal.js"></script>
+  <script src="assets/js/envelope.js"></script>
+  <script src="assets/js/card.js"></script>
+  <script src="assets/js/sheets.js"></script>
+  <script src="assets/js/pdf.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

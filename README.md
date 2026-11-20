@@ -3,6 +3,8 @@
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https%3A%2F%2Fgithub.com%2FJLeoBRx%2FTheloveWalk2026registro)
 
 > **Também neste repositório:** o álbum oficial da **FJ Night — A Noite da Herança**, uma aplicação independente com reconhecimento facial, na pasta [`fjnight/`](fjnight/README.md).
+>
+> **Papelaria para impressão:** editor local de **envelope planificado + convite** com exportação em PDF vetorial em tamanho real (mm, escala 100%), na pasta [`papelaria/`](papelaria/README.md). Basta abrir `papelaria/index.html` no navegador.
 
 Site-álbum do The Love Walk 2026, com introdução editorial, trilha sonora da Banda Universos, galeria por categorias, miniaturas e visualização ampliada. O site não oferece reconhecimento facial nem processa dados biométricos.
 
