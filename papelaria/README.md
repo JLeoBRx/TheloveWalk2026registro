@@ -15,27 +15,48 @@ Abra `papelaria/index.html` com um duplo clique. O editor funciona **offline e s
 
 O mesmo editor também funciona publicado como página online (Artifact do claude.ai). Online, ao exportar, a plataforma mostra uma confirmação com o nome e o tamanho do arquivo antes de salvar.
 
-Use Chrome, Edge, Firefox ou Safari em versão recente. As alterações ficam salvas no navegador. Para guardar ou levar o projeto a outro computador, use **Salvar projeto** (gera um `.json`) e depois **Abrir projeto**. Projetos salvos na versão anterior abrem normalmente.
+Use Chrome, Edge, Firefox ou Safari em versão recente. As alterações ficam salvas no navegador. Para guardar ou levar o projeto a outro computador, use **Projeto › Salvar arquivo do projeto** (gera um `.json`) e depois **Projeto › Abrir arquivo do projeto**. Projetos salvos nas versões anteriores abrem normalmente.
 
-## Seções do editor
+## A interface
 
-| Seção | O que faz |
+A tela tem três áreas, como um pequeno estúdio:
+
+- **Etapas, no alto:** 1 Envelope aberto, 2 Convite, 3 Montagem (verso fechado com o selo, envelope aberto com o forro, frente e convite) e 4 Forro e selos. A etapa escolhida é o que aparece na área de trabalho.
+- **Ferramentas, à esquerda:** Cores, Modelos, Textos, Cartões, Envelope, Selo, Fontes, Medidas e Impressão. Cada uma abre só as próprias opções, em seções que abrem e fecham. Ao lado do título de cada seção aparece um resumo do que está escolhido.
+- **Área de trabalho, ao centro:** as peças aparecem como papel de verdade, com sombra suave. Dá para aproximar e afastar, ajustar à tela, ver em tamanho real aproximado, arrastar para mover, usar tela cheia, ligar ou desligar as guias e entrar no **modo visualização**, que esconde os painéis.
+
+**Edição direta:** clique em qualquer texto do convite (ou no destinatário e no remetente do envelope) e edite ali mesmo. Clicar no monograma abre o Selo; clicar no ornamento abre Cartões; clicar na data abre Data e horário.
+
+| Ferramenta | O que faz |
 |---|---|
-| **Cores** | 12 temas prontos, em várias cores e não só em azul. Uma **cor principal** gera a identidade inteira (bordas, centro do degradê, detalhes, textos e forro). Também há cores livres com código hexadecimal, degradê radial ou linear, metal (ouro, champanhe, ouro velho, rosé, cobre, prata), fundo do convite (perolado, cor do envelope ou outra cor), selo em metal ou **lacre colorido**, e cor do forro |
-| **Modelo** | textos prontos por ocasião: casamento, noivado, bodas, 15 anos, aniversário, batizado, formatura, gala corporativa, chá de bebê e evento especial. Data, horário e endereço são mantidos |
-| **Textos** | pré-título, título (aceita duas linhas), subtítulo, mensagem, data e horário (formatados em português), data por extenso, local, endereço, informações e assinatura |
-| **Convite** | moldura (clássica, art déco, filete ou sem), ornamento central (losango, arabesco, pontos, filete, **símbolo** ou sem), monograma (círculo, **coroa de louros** ou sem moldura), título e assinatura em metal, espaçamento |
-| **Envelope** | destinatário (em branco vira uma linha para escrever à mão), monograma ou ornamento na frente, remetente no verso, ponta da aba (em V, curva ou reta), profundidade e largura das abas, filetes, textura discreta, padrão e altura do forro |
-| **Selo e símbolo** | centro do selo e do monograma com **iniciais** (ex.: `H&R`, `A·B`, `M`), um dos **34 símbolos** da galeria (cruz, cruz com resplendor, pomba, Bíblia, mãos em oração, coração, alianças, coroa, estrela, louros, bolo, formatura e outros) ou **sua própria imagem**: envie PNG, JPG, WEBP ou SVG e o fundo é retirado automaticamente. A imagem pode ficar em **metal, igual ao selo** (vira desenho vetorial com relevo) ou nas **cores originais**. Também: estilo **lacre** ou **medalhão**, texto do anel e diâmetro do selo e dos adesivos |
-| **Fontes** | 13 famílias livres para título, destaques, texto e assinatura, tamanhos gerais e **ajuste fino de cada texto** |
-| **Medidas** | convite 15 × 21 cm, A5, 5 × 7", quadrado 14 × 14 cm, 10 × 15 cm ou medida livre; folga e sobreposição do envelope |
-| **Impressão** | papel do envelope e do convite, sangria, margem da impressora, marcações, cor da linha de corte, o que entra no PDF completo, exportação e projeto |
+| **Cores** | 12 temas prontos, em várias cores e não só em azul. Uma **cor principal** gera a identidade inteira (bordas, centro do degradê, detalhes, textos e forro). Cada cor abre um seletor com as cores do projeto, as **usadas recentemente**, sugestões, código hexadecimal e o seletor do sistema. Também: degradê radial ou linear, metal (ouro, champanhe, ouro velho, rosé, cobre, prata) e fundo do convite (perolado, cor do envelope ou outra cor) |
+| **Modelos** | galeria com miniaturas por ocasião (casamento, noivado, bodas, 15 anos, aniversário, chá de bebê, batizado, evento especial, formatura, gala corporativa), separada em categorias. Cada modelo abre uma prévia antes de ser aplicado; data, horário, local e endereço são mantidos |
+| **Textos** | pré-título, título (aceita duas linhas), subtítulo, mensagem, data e horário (formatados em português), data por extenso, local, endereço, informações, assinatura e textos do envelope. O botão **Aa** de cada texto abre fonte própria, estilo (peso ou itálico, conforme a fonte), cor (texto, destaque ou metal), **alinhamento**, tamanho, **espaço entre letras** e **entrelinha** |
+| **Cartões** | moldura (clássica, art déco, filete ou sem), ornamento central (losango, arabesco, pontos, filete, **símbolo** ou nenhum), monograma (círculo, louros ou simples), título e assinatura em metal, espaçamento entre blocos. As opções aparecem como miniaturas desenhadas com as suas cores |
+| **Envelope** | ponta da aba (em V, curva ou reta), profundidade e largura das abas, frente (rótulo, destinatário, moldura, ornamento ou monograma), verso (remetente e filetes), textura discreta e forro interno (cor, padrão e altura) |
+| **Selo** | prévia grande do selo como será impresso. Centro com **iniciais** (ex.: `H&R`, `A·B`, `M`) e a fonte delas, um dos **34 símbolos** da galeria (cruz, pomba, Bíblia, mãos em oração, coração, alianças, coroa, estrela, louros, bolo, formatura e outros) ou **sua própria imagem** com o fundo retirado automaticamente. Estilo **lacre** ou **medalhão**, metal ou **lacre colorido**, diâmetro do selo e dos adesivos e texto do anel |
+| **Fontes** | 13 famílias livres para título, destaques, texto corrido, assinatura e iniciais, com amostra no próprio texto do convite; tamanhos gerais e ajuste fino de cada texto |
+| **Medidas** | convite 15 × 21 cm, A5, 5 × 7 pol., quadrado 14 × 14 cm, 10 × 15 cm ou medida livre em mm; folga e sobreposição do envelope; ficha com envelope fechado, molde aberto, abas e folga; área imprimível e área segura |
+| **Impressão** | mostra **todas as folhas do PDF** lado a lado, em proporção (clique numa folha da lista para aproximar). Papel e **orientação** do envelope e do convite, convites por folha, sangria, margem da impressora, marcações, cor da linha de corte, o que entra no PDF completo e exportação |
 
-**Desfazer e refazer** ficam na barra superior (Ctrl+Z e Ctrl+Shift+Z).
+**Salvamento automático:** o indicador no alto mostra "Salvando…" e "Salvo". **Desfazer e refazer** ficam ao lado. Ações que apagam algo importante (restaurar o padrão, remover a imagem enviada, abrir outro projeto, aplicar um modelo) pedem confirmação, e o aviso que aparece depois oferece **Desfazer**.
 
-A prévia muda em tempo real e tem quatro abas: **Envelope aberto**, **Convite**, **Montado** (verso fechado com o selo, envelope aberto com o forro, frente e convite) e **Forro e selos**.
+Em telas menores o painel vira uma gaveta; no celular, as ferramentas ficam numa barra embaixo e o painel sobe como uma folha.
 
-A **Verificação de produção**, no rodapé, confere:
+### Atalhos
+
+| Tecla | Ação |
+|---|---|
+| Ctrl+Z · Ctrl+Shift+Z (ou Ctrl+Y) | desfazer · refazer |
+| + · − | aproximar · afastar |
+| 0 · 1 | ajustar à tela · tamanho real aproximado |
+| Ctrl + roda do mouse | zoom em torno do ponteiro |
+| V | modo visualização |
+| G | guias e áreas de segurança |
+| F | tela cheia |
+| Esc | fecha editor, seletor, menu ou janela; sai da tela cheia e da visualização |
+
+A **Verificação de produção**, no canto inferior esquerdo, fica verde quando está tudo pronto e mostra alertas ou problemas quando aparecem. Ela confere:
 
 - se o molde cabe no papel;
 - a folga do convite dentro do envelope;
@@ -46,7 +67,7 @@ A **Verificação de produção**, no rodapé, confere:
 
 ### Imagem própria no selo
 
-1. Em **Selo e símbolo**, escolha **Minha imagem** e envie o arquivo (ou arraste para a área indicada).
+1. Em **Selo › Centro**, escolha **Imagem** e envie o arquivo (ou arraste para a área indicada).
 2. O editor descobre a cor do fundo pelas bordas da imagem (ou usa a transparência do PNG) e retira esse fundo.
 3. Em **Metal, igual ao selo**, o desenho vira um contorno vetorial dourado, com o mesmo relevo das iniciais. Fica nítido em qualquer tamanho e entra no arquivo de hot stamping.
 4. Em **Cores originais**, a imagem é usada como está, só sem o fundo. Áreas claras dentro do desenho são mantidas.
@@ -114,7 +135,8 @@ As medidas das abas são calculadas para que o verso fique totalmente fechado. A
 ```
 papelaria/
 ├── index.html              editor
-├── assets/css/editor.css   interface
+├── assets/css/editor.css   interface (cores, tipografia, componentes e telas menores)
+├── assets/css/ui-fonts.css fontes da interface, embutidas (gerado por tools/build-ui-fonts.mjs)
 ├── assets/js/
 │   ├── core.js             utilitários, cores (HSL, contraste), contexto de desenho (arte / faca / hot stamping)
 │   ├── geometry.js         polígonos: arredondamento, sangria (offset), recorte, hachuras
@@ -130,10 +152,12 @@ papelaria/
 │   ├── sheets.js           folhas de impressão, marcas, legenda, régua, forro, selos e ficha técnica
 │   ├── pdf.js              exportação em PDF (jsPDF + svg2pdf.js)
 │   ├── export.js           cena montada e imagens PNG
-│   ├── app.js              interface, desfazer/refazer, prévia e verificação de produção
+│   ├── app.js              interface: etapas, ferramentas, seletor de cores, edição direta, zoom,
+│   │                       folhas de impressão, desfazer/refazer, salvamento e verificação
 │   └── vendor/             jsPDF, svg2pdf.js, opentype.js (licença MIT)
 ├── assets/fonts/           fontes embutidas (SIL Open Font License) e licenças
 ├── tools/build-fonts.mjs   regenera assets/fonts/fonts-data.js
+├── tools/build-ui-fonts.mjs regenera assets/css/ui-fonts.css
 └── tools/build-symbols.mjs regenera assets/js/symbols.js
 ```
 
@@ -142,5 +166,6 @@ Todo o desenho é feito em SVG com o `viewBox` em milímetros. O mesmo SVG alime
 ## Créditos
 
 - Ícones da galeria de símbolos: [Font Awesome Free](https://fontawesome.com) 6.7.2, por Fonticons, Inc., licença [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) (cópia em `assets/js/vendor/LICENSE-fontawesome-free.txt`). Alianças, cruz com resplendor, estrela-guia e louros são desenhos próprios.
-- Fontes: SIL Open Font License 1.1 (`assets/fonts/LICENSES-OFL.txt`).
+- Fontes das peças: SIL Open Font License 1.1 (`assets/fonts/LICENSES-OFL.txt`).
+- Fontes da interface: Manrope e EB Garamond, SIL Open Font License 1.1.
 - Bibliotecas: jsPDF, svg2pdf.js e opentype.js, licença MIT (`assets/js/vendor/`).

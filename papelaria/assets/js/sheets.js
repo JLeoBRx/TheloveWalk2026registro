@@ -38,16 +38,23 @@
     return `M${P.n(x1)} ${P.n(y1)}L${P.n(x2)} ${P.n(y2)}`;
   }
 
-  function fitPaper(candidates, needW, needH, needHLegend, margin) {
+  /* Orientações permitidas: auto (as duas), portrait (retrato) ou landscape (paisagem). */
+  function orientations(p, orient) {
+    if (orient === "portrait") return [[p.w, p.h]];
+    if (orient === "landscape") return [[p.h, p.w]];
+    return [[p.w, p.h], [p.h, p.w]];
+  }
+
+  function fitPaper(candidates, needW, needH, needHLegend, margin, orient) {
     for (const key of candidates) {
       const p = P.PAPERS[key];
-      for (const [pw, ph] of [[p.w, p.h], [p.h, p.w]]) {
+      for (const [pw, ph] of orientations(p, orient)) {
         if (needW + 2 * margin <= pw && needHLegend + 2 * margin <= ph) return { key, pw, ph, legend: true };
       }
     }
     for (const key of candidates) {
       const p = P.PAPERS[key];
-      for (const [pw, ph] of [[p.w, p.h], [p.h, p.w]]) {
+      for (const [pw, ph] of orientations(p, orient)) {
         if (needW + 2 * margin <= pw && needH + 2 * margin <= ph) return { key, pw, ph, legend: false };
       }
     }
@@ -75,10 +82,10 @@
       paperKey = "fit";
     } else {
       const cands = pr.envPaper === "auto" ? P.PAPER_ORDER : [pr.envPaper];
-      const f = fitPaper(cands, contentW, contentH, contentH + legendH, margin);
+      const f = fitPaper(cands, contentW, contentH, contentH + legendH, margin, pr.envOrient);
       if (!f) {
         // sem marcas externas?
-        const f2 = fitPaper(cands, bb.w, bb.h, bb.h, margin);
+        const f2 = fitPaper(cands, bb.w, bb.h, bb.h, margin, pr.envOrient);
         if (!f2) {
           return { error: `O molde aberto (${P.mmLabel(bb.w)} × ${P.mmLabel(bb.h)} mm com sangria) não cabe em ${pr.envPaper === "auto" ? "nenhum papel da lista" : P.PAPERS[pr.envPaper].label}.`, geo };
         }
@@ -93,6 +100,7 @@
     const oy = top + marksPad - bb.y;
 
     const ctx = new P.Ctx(state, mode, "env");
+    ctx.hits = !!pr.hits; // áreas clicáveis só na prévia do editor
     let body = "";
     if (mode === "art" || mode === "dieline" || mode === "foil") {
       body += `<g transform="translate(${P.n(ox)} ${P.n(oy)})">`;
@@ -205,7 +213,7 @@
       const p = P.PAPERS[pr.cardPaper] || P.PAPERS.A4;
       const g = Math.max(6, 2 * b + 4);
       let best = null;
-      for (const [pw, ph] of [[p.w, p.h], [p.h, p.w]]) {
+      for (const [pw, ph] of orientations(p, pr.cardOrient)) {
         for (const rot of [false, true]) {
           const w = rot ? ch : cw, h = rot ? cw : ch;
           const availW = pw - 2 * margin - 2 * zone, availH = ph - 2 * margin - 2 * zone - 6;

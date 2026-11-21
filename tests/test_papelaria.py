@@ -21,6 +21,7 @@ def test_papelaria_without_trailing_slash_redirects():
 def test_papelaria_assets_are_served():
     for path in (
         "/papelaria/assets/css/editor.css",
+        "/papelaria/assets/css/ui-fonts.css",
         "/papelaria/assets/js/app.js",
         "/papelaria/assets/js/vendor/jspdf.umd.min.js",
         "/papelaria/assets/fonts/fonts-data.js",

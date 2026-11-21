@@ -380,6 +380,19 @@
       out += topArt(ctx, geo) + frontArt(ctx, geo);
     }
     out += technical(ctx, geo, o);
+    // áreas clicáveis (só na prévia do editor)
+    if (ctx.art && ctx.hits) {
+      const { W, H } = geo;
+      const hit = (field, x, y, w, h) =>
+        `<rect class="hit" data-field="${field}" x="${P.n(x)}" y="${P.n(y)}" width="${P.n(w)}" height="${P.n(h)}" rx="1.5" fill="#2454A4" fill-opacity="0"/>`;
+      const lineW = Math.min(W * 0.5, 110);
+      out += hit("@envelope", W / 2 - 32, H * 0.3 - 7, 64, 14);
+      out += hit("envelope.recipient", W / 2 - lineW / 2 - 5, H * 0.4, lineW + 10, H * 0.31);
+      const sw = Math.max(40, W - 2 * geo.c - 24);
+      out += hit("envelope.sender", W / 2 - sw / 2, H + 5, sw, 12);
+      const sl = geo.seal;
+      out += `<circle class="hit" data-field="@selo" cx="${P.n(sl.x)}" cy="${P.n(sl.y)}" r="${P.n(sl.r + 1.5)}" fill="#2454A4" fill-opacity="0"/>`;
+    }
     return out;
   }
 

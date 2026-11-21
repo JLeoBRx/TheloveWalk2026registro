@@ -200,6 +200,10 @@
     return Promise.all(jobs);
   }
 
-  P.type = { font, shape, width, line, metrics, ink, wrap, ring, families, registerUiFonts };
+  /* Variantes que a família tem de fato e a que será usada para um pedido (com as substituições). */
+  const variants = (family) => ((FONTS.catalog[family] || {}).variants || []).slice();
+  const resolveVariant = (family, variant) => resolve(family, variant).split("/")[1];
+
+  P.type = { font, shape, width, line, metrics, ink, wrap, ring, families, variants, resolveVariant, registerUiFonts };
   P.pt = (v) => v * P.PT;
 })();

@@ -116,20 +116,38 @@
     const s = (key) => P.clamp(+sz[key] || 1, 0.5, 1.8);
     const blocks = [];
     const cx = cw / 2;
+    // estilo por texto (fonte, estilo da letra e cor); vazio = padrão do papel do texto
+    const tone = card.tone || {}, style = card.style || {}, fam = card.familyOf || {};
+    const align = card.align || {}, track = card.track || {}, lead = card.lead || {};
+    const fontFor = (key, role) => fam[key] || f[role];
+    const styleFor = (key, def) => style[key] || def;
+    // espaçamento entre letras somado ao do próprio texto (em frações do tamanho)
+    const trackFor = (key, base) => (base || 0) + P.clamp(+track[key] || 0, -0.1, 0.6);
+    const leadFor = (key, lh) => lh * P.clamp(+lead[key] || 1, 0.6, 2);
+    // alinhamento dentro da largura do bloco: centro (padrão), esquerda ou direita
+    const anchor = (key, width) =>
+      align[key] === "left" ? [cx - width / 2, "start"] : align[key] === "right" ? [cx + width / 2, "end"] : [cx, "middle"];
 
-    const paragraph = (text, sp, color, lh, width, gap, isGold) => {
+    const paragraph = (key, text, sp0, lh0, width, gap, defTone) => {
+      const t = tone[key] || defTone || "text";
+      const isGold = t === "gold";
+      const color = t === "accent" ? col.accent : col.text;
+      const sp = Object.assign({}, sp0, { tracking: trackFor(key, sp0.tracking) });
+      const lh = leadFor(key, lh0);
+      const [ax, al] = anchor(key, width);
       const lines = T().wrap(text, sp, width, true);
       const m = T().metrics(sp);
       const step = sp.size * lh;
       const h = m.cap + (lines.length - 1) * step + m.desc * 0.5;
       return {
+        field: "text." + key,
         gap,
         h,
         draw(y) {
           if (ctx.foil && !isGold) return "";
           let out = "";
           lines.forEach((ln, i) => {
-            const r = T().line(ln, cx, y + m.cap + i * step, sp, "middle");
+            const r = T().line(ln, ax, y + m.cap + i * step, sp, al);
             const paint = isGold ? ctx.gold(cx - width / 2, y, cx + width / 2, y + h) : color;
             out += `<path d="${r.d}" fill="${paint}"/>`;
           });
@@ -143,6 +161,7 @@
       const laurel = card.monogramStyle === "laurel";
       const D = (laurel ? 21 : 15) * k * s("monogram");
       blocks.push({
+        field: "@selo",
         gap: 0,
         h: D,
         draw(y) {
@@ -152,12 +171,12 @@
     }
 
     if (String(tx.eyebrow || "").trim())
-      blocks.push(paragraph(tx.eyebrow, { font: f.caps, variant: "regular", size: P.pt(7.4) * ts * s("eyebrow"), tracking: 0.2, upper: true }, col.accent, 1.7, maxW * 0.92, 5.5 * gs));
+      blocks.push(paragraph("eyebrow", tx.eyebrow, { font: fontFor("eyebrow", "caps"), variant: styleFor("eyebrow", "regular"), size: P.pt(7.4) * ts * s("eyebrow"), tracking: 0.2, upper: true }, 1.7, maxW * 0.92, 5.5 * gs, "accent"));
 
     // título caligráfico (ajusta para caber na largura)
     if (String(tx.title || "").trim()) {
       const lines = String(tx.title).split(/\r?\n/).filter((l) => l.trim());
-      const base = { font: f.title, variant: "regular", size: P.pt(40) * tts * s("title") };
+      const base = { font: fontFor("title", "title"), variant: styleFor("title", "regular"), size: P.pt(40) * tts * s("title"), tracking: trackFor("title", 0) };
       let size = base.size;
       for (const ln of lines) {
         const w = T().width(ln, Object.assign({}, base, { size }));
@@ -165,30 +184,33 @@
       }
       const sp = Object.assign({}, base, { size });
       const inks = lines.map((ln) => T().ink(ln, sp));
-      const step = size * 1.05;
+      const step = size * leadFor("title", 1.05);
+      const [tx0, tal] = anchor("title", maxW);
       const top = Math.min(...inks.map((b, i) => b.y1 + i * step));
       const bottom = Math.max(...inks.map((b, i) => b.y2 + i * step));
       const capT = T().metrics(sp).cap;
       const asc = Math.max(-top, capT);
       const h = asc + bottom;
       blocks.push({
+        field: "text.title",
         gap: 3.2 * gs,
         h,
         draw(y) {
           if (ctx.foil && !card.titleGold) return "";
           const paint = card.titleGold ? ctx.gold(cx - maxW / 2, y, cx + maxW / 2, y + h) : col.text;
-          return lines.map((ln, i) => `<path d="${T().line(ln, cx, y + asc + i * step, sp, "middle").d}" fill="${paint}"/>`).join("");
+          return lines.map((ln, i) => `<path d="${T().line(ln, tx0, y + asc + i * step, sp, tal).d}" fill="${paint}"/>`).join("");
         },
       });
     }
 
     if (String(tx.subtitle || "").trim())
-      blocks.push(paragraph(tx.subtitle, { font: f.text, variant: "italic", size: P.pt(12.5) * ts * s("subtitle") }, col.text, 1.3, maxW * 0.9, 2.6 * gs));
+      blocks.push(paragraph("subtitle", tx.subtitle, { font: fontFor("subtitle", "text"), variant: styleFor("subtitle", "italic"), size: P.pt(12.5) * ts * s("subtitle") }, 1.3, maxW * 0.9, 2.6 * gs, "text"));
 
     if (card.divider && card.divider !== "none") {
       const tall = card.divider === "flourish" || card.divider === "symbol";
       const dh = tall ? 6.2 : 3;
       blocks.push({
+        field: "@cartoes",
         gap: 5 * gs,
         h: dh,
         draw(y) {
@@ -198,7 +220,7 @@
     }
 
     if (String(tx.message || "").trim())
-      blocks.push(paragraph(tx.message, { font: f.text, variant: "regular", size: P.pt(11.8) * ts * s("message") }, col.text, 1.36, Math.min(maxW, 104 * k), 5 * gs));
+      blocks.push(paragraph("message", tx.message, { font: fontFor("message", "text"), variant: styleFor("message", "regular"), size: P.pt(11.8) * ts * s("message") }, 1.36, Math.min(maxW, 104 * k), 5 * gs, "text"));
 
     // data
     const dp = dateParts(tx);
@@ -213,6 +235,7 @@
       const h = mSmall.cap + 2.6 * k * ds + dayH + 2.8 * k * ds + mSmall.cap;
       const colW = Math.min(36 * k * ds, maxW * 0.3);
       blocks.push({
+        field: "text.date",
         gap: 7 * gs,
         h,
         draw(y) {
@@ -241,23 +264,27 @@
       });
     } else {
       const line = P.dateLine(tx);
-      if (line)
-        blocks.push(paragraph(line, { font: f.caps, variant: "regular", size: P.pt(8.6) * ts * ds, tracking: 0.16, upper: true }, col.text, 1.7, maxW, 7 * gs));
+      if (line) {
+        const bl = paragraph("dateText", line, { font: f.caps, variant: "regular", size: P.pt(8.6) * ts * ds, tracking: 0.16, upper: true }, 1.7, maxW, 7 * gs, "text");
+        bl.field = "text.date";
+        blocks.push(bl);
+      }
     }
 
     // local
     if (String(tx.venue || "").trim())
-      blocks.push(paragraph(tx.venue, { font: f.caps, variant: "semibold", size: P.pt(8.8) * ts * s("venue"), tracking: 0.16, upper: true }, col.text, 1.6, maxW, 7 * gs));
+      blocks.push(paragraph("venue", tx.venue, { font: fontFor("venue", "caps"), variant: styleFor("venue", "semibold"), size: P.pt(8.8) * ts * s("venue"), tracking: 0.16, upper: true }, 1.6, maxW, 7 * gs, "text"));
     if (String(tx.address || "").trim())
-      blocks.push(paragraph(tx.address, { font: f.text, variant: "italic", size: P.pt(10.8) * ts * s("venue") }, col.text, 1.3, maxW, 2.2 * gs));
+      blocks.push(paragraph("address", tx.address, { font: fontFor("address", "text"), variant: styleFor("address", "italic"), size: P.pt(10.8) * ts * s("venue") }, 1.3, maxW, 2.2 * gs, "text"));
 
     if (String(tx.info || "").trim())
-      blocks.push(paragraph(tx.info, { font: f.caps, variant: "regular", size: P.pt(6.9) * ts * s("info"), tracking: 0.14, upper: true }, col.accent, 1.85, maxW, 6 * gs));
+      blocks.push(paragraph("info", tx.info, { font: fontFor("info", "caps"), variant: styleFor("info", "regular"), size: P.pt(6.9) * ts * s("info"), tracking: 0.14, upper: true }, 1.85, maxW, 6 * gs, "accent"));
 
     if (String(tx.signatureLead || "").trim())
-      blocks.push(paragraph(tx.signatureLead, { font: f.text, variant: "italic", size: P.pt(10.5) * ts * s("signature") }, col.text, 1.3, maxW, 7 * gs));
+      blocks.push(paragraph("signatureLead", tx.signatureLead, { font: fontFor("signatureLead", "text"), variant: styleFor("signatureLead", "italic"), size: P.pt(10.5) * ts * s("signature") }, 1.3, maxW, 7 * gs, "text"));
     if (String(tx.signature || "").trim()) {
-      const sp0 = { font: f.signature, variant: "regular", size: P.pt(23) * tts * s("signature") };
+      const sp0 = { font: fontFor("signature", "signature"), variant: styleFor("signature", "regular"), size: P.pt(23) * tts * s("signature"), tracking: trackFor("signature", 0) };
+      const [sx0, sal] = anchor("signature", maxW * 0.9);
       let sp = sp0;
       const w = T().width(tx.signature, sp0);
       if (w > maxW * 0.9) sp = Object.assign({}, sp0, { size: (sp0.size * maxW * 0.9) / w });
@@ -265,12 +292,13 @@
       const asc = Math.max(-ink.y1, T().metrics(sp).cap);
       const h = asc + Math.max(0, ink.y2);
       blocks.push({
+        field: "text.signature",
         gap: String(tx.signatureLead || "").trim() ? 1.6 * gs : 7 * gs,
         h,
         draw(y) {
           if (ctx.foil && !card.signatureGold) return "";
           const paint = card.signatureGold ? ctx.gold(cx - maxW / 2, y, cx + maxW / 2, y + h) : col.text;
-          return `<path d="${T().line(tx.signature, cx, y + asc, sp, "middle").d}" fill="${paint}"/>`;
+          return `<path d="${T().line(tx.signature, sx0, y + asc, sp, sal).d}" fill="${paint}"/>`;
         },
       });
     }
@@ -324,11 +352,16 @@
     const grow = Math.min(extra * 0.5, gapsTotal * 0.55);
     const factor = 1 + grow / gapsTotal;
     let y = padY + (extra - grow) / 2;
+    let hits = "";
     blocks.forEach((bl, i) => {
       if (i) y += bl.gap * factor;
       out += bl.draw(y);
+      // áreas clicáveis (só na prévia do editor): clicar num texto abre a edição dele
+      if (o && o.hits && bl.field)
+        hits += `<rect class="hit" data-field="${bl.field}" x="${P.n(padX - 2.5)}" y="${P.n(y - 1.4)}" width="${P.n(maxW + 5)}" height="${P.n(bl.h + 2.8)}" rx="1.2" fill="#2454A4" fill-opacity="0"/>`;
       y += bl.h;
     });
+    out += hits;
 
     if (o && o.guides) {
       out += `<rect x="5" y="5" width="${P.n(cw - 10)}" height="${P.n(ch - 10)}" fill="none" stroke="#19B5E8" stroke-width="0.18" stroke-dasharray="0.5 0.9"/>`;

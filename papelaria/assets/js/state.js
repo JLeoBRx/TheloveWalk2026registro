@@ -150,6 +150,37 @@
     },
   };
 
+  /* Categorias da galeria de modelos. */
+  P.TEMPLATE_GROUPS = [
+    ["amor", "Casamento e amor", ["casamento", "noivado", "bodas"]],
+    ["festa", "Aniversários", ["quinze", "aniversario", "cha"]],
+    ["fe", "Religiosos", ["batizado", "especial"]],
+    ["formal", "Formais", ["formatura", "corporativo"]],
+  ];
+
+  /*
+   * Textos editáveis do convite. role = papel tipográfico (Fontes);
+   * size = chave do ajuste de tamanho; tone/style = aceita cor e estilo próprios.
+   */
+  P.TEXT_ITEMS = [
+    { key: "eyebrow", label: "Pré-título", role: "caps", size: "eyebrow", tone: true, style: true },
+    { key: "title", label: "Título", role: "title", size: "title", multiline: true, gold: "card.titleGold", hint: "Enter quebra em duas linhas" },
+    { key: "subtitle", label: "Subtítulo", role: "text", size: "subtitle", tone: true, style: true },
+    { key: "message", label: "Mensagem", role: "text", size: "message", multiline: true, rows: 4, tone: true, style: true },
+    { key: "venue", label: "Local", role: "caps", size: "venue", tone: true, style: true },
+    { key: "address", label: "Endereço", role: "text", size: "venue", multiline: true, tone: true, style: true },
+    { key: "info", label: "Informações", role: "caps", size: "info", multiline: true, rows: 3, tone: true, style: true },
+    { key: "signatureLead", label: "Frase da assinatura", role: "text", size: "signature", tone: true, style: true },
+    { key: "signature", label: "Assinatura", role: "signature", size: "signature", gold: "card.signatureGold" },
+  ];
+  P.FONT_ROLES = [
+    ["title", "Título", "script,serif", "Helena"],
+    ["caps", "Destaques em maiúsculas", "caps,serif,sans", "Convite"],
+    ["text", "Texto corrido", "serif,sans", "Convite"],
+    ["signature", "Assinatura", "script", "Rafael"],
+    ["monogram", "Iniciais do monograma", "caps,serif", "H R"],
+  ];
+
   P.SIZE_KEYS = [
     ["monogram", "Monograma"],
     ["eyebrow", "Pré-título"],
@@ -183,6 +214,14 @@
         textScale: 1,
         spacing: 1,
         sizes,
+        // estilo por texto: cor (text | accent | gold), estilo da letra e fonte ("" = padrão)
+        tone: { eyebrow: "accent", subtitle: "text", message: "text", venue: "text", address: "text", info: "accent", signatureLead: "text" },
+        style: { eyebrow: "regular", title: "regular", subtitle: "italic", message: "regular", venue: "semibold", address: "italic", info: "regular", signatureLead: "italic", signature: "regular" },
+        familyOf: { eyebrow: "", title: "", subtitle: "", message: "", venue: "", address: "", info: "", signatureLead: "", signature: "" },
+        // alinhamento (center | left | right), espaçamento entre letras (somado) e entrelinha (fator)
+        align: { eyebrow: "center", title: "center", subtitle: "center", message: "center", venue: "center", address: "center", info: "center", signatureLead: "center", signature: "center" },
+        track: { eyebrow: 0, title: 0, subtitle: 0, message: 0, venue: 0, address: 0, info: 0, signatureLead: 0, signature: 0 },
+        lead: { title: 1, message: 1, address: 1, info: 1 },
       },
       text: {
         eyebrow: P.TEMPLATES.casamento.eyebrow,
@@ -261,7 +300,9 @@
       },
       print: {
         envPaper: "auto",
+        envOrient: "auto", // auto | portrait | landscape
         cardPaper: "fit",
+        cardOrient: "auto",
         cardUp: "max",
         bleed: 3,
         minMargin: 5,
